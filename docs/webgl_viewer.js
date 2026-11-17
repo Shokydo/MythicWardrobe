@@ -256,6 +256,9 @@
     precision mediump float;
     uniform sampler2D uTex;
     uniform float uAlphaCutoff;
+    uniform float uAmbient;
+    uniform float uDiffuse;
+    uniform float uEmissiveBoost;
     varying vec3 vNorm;
     varying vec2 vUv;
     varying float vEmis;
@@ -265,8 +268,8 @@
       vec3 n = normalize(vNorm);
       float light1 = max(dot(n, normalize(vec3(0.45, 0.78, -0.52))), 0.0);
       float light2 = max(dot(n, normalize(vec3(-0.55, 0.35, 0.72))), 0.0);
-      float shade = clamp(0.56 + light1 * 0.44 + light2 * 0.18, 0.48, 1.08);
-      vec3 rgb = mix(col.rgb * shade, col.rgb * 1.15, vEmis);
+      float shade = clamp(uAmbient + light1 * uDiffuse + light2 * (uDiffuse * 0.42), 0.14, 1.16);
+      vec3 rgb = mix(col.rgb * shade, col.rgb * uEmissiveBoost, vEmis);
       gl_FragColor = vec4(rgb, col.a);
     }
   `;
@@ -298,7 +301,8 @@
       this.dist = 56;
       this.targetY = 17;
       this.autoSpin = false;
-      this.walkAnim = false;
+      this.poseMode = "idle"; // "idle" | "walk" | "run" | "sneak" | "apose"
+      this.lightMode = "studio"; // "studio" | "day" | "night"
       this.showPlayer = true;
       this.showArmor = true;
       this.showOuterSkin = true;
@@ -354,6 +358,9 @@
         uModel: gl.getUniformLocation(this.prog, "uModel"),
         uTex: gl.getUniformLocation(this.prog, "uTex"),
         uAlphaCutoff: gl.getUniformLocation(this.prog, "uAlphaCutoff"),
+        uAmbient: gl.getUniformLocation(this.prog, "uAmbient"),
+        uDiffuse: gl.getUniformLocation(this.prog, "uDiffuse"),
+        uEmissiveBoost: gl.getUniformLocation(this.prog, "uEmissiveBoost"),
       };
       this.lineProg = this._createProg(LINE_VS, LINE_FS);
       this.lineLoc = {
@@ -449,13 +456,31 @@
     }
 
     setViewPreset(preset) {
-      if (preset === "front") { this.yaw = 0.0; this.pitch = 0.14; }
-      else if (preset === "back") { this.yaw = Math.PI; this.pitch = 0.16; }
-      else if (preset === "side") { this.yaw = Math.PI * 0.5; this.pitch = 0.14; }
-      else if (preset === "head") { this.yaw = -0.4; this.pitch = 0.12; this.dist = 28; this.targetY = 27.5; return; }
-      else { this.yaw = -0.52; this.pitch = 0.18; }
-      this.dist = 56;
-      this.targetY = 17;
+      if (preset === "front") {
+        this.yaw = 0.0; this.pitch = 0.12; this.dist = 56; this.targetY = 17;
+      } else if (preset === "back") {
+        this.yaw = Math.PI; this.pitch = 0.14; this.dist = 56; this.targetY = 17;
+      } else if (preset === "left") {
+        this.yaw = -Math.PI * 0.5; this.pitch = 0.12; this.dist = 56; this.targetY = 17;
+      } else if (preset === "right" || preset === "side") {
+        this.yaw = Math.PI * 0.5; this.pitch = 0.12; this.dist = 56; this.targetY = 17;
+      } else if (preset === "head") {
+        this.yaw = -0.35; this.pitch = 0.1; this.dist = 26; this.targetY = 27.5;
+      } else if (preset === "torso") {
+        this.yaw = -0.45; this.pitch = 0.12; this.dist = 34; this.targetY = 18;
+      } else if (preset === "feet") {
+        this.yaw = -0.4; this.pitch = 0.16; this.dist = 32; this.targetY = 7;
+      } else {
+        this.yaw = -0.52; this.pitch = 0.18; this.dist = 56; this.targetY = 17;
+      }
+    }
+
+    setPoseMode(mode) {
+      this.poseMode = mode || "idle";
+    }
+
+    setLightMode(mode) {
+      this.lightMode = mode || "studio";
     }
 
     /**
@@ -635,26 +660,79 @@
     }
 
     _boneMatrix(bone) {
-      if (!this.walkAnim) return mat4Identity();
+      const mode = this.poseMode || "idle";
       const pv = BONE_PIVOTS[bone] || [0, 24, 0];
-      let rx = 0, ry = 0;
-      const swing = Math.sin(this.t * 3.4) * 0.58;
-      if (bone === "right_arm") rx = -swing;
-      else if (bone === "left_arm") rx = swing;
-      else if (bone === "right_leg" || bone === "right_foot") rx = swing * 0.85;
-      else if (bone === "left_leg" || bone === "left_foot") rx = -swing * 0.85;
-      else if (bone === "head") ry = Math.sin(this.t * 1.4) * 0.16;
-      else return mat4Identity();
+      let rx = 0, ry = 0, rz = 0;
+      let tx = 0, ty = 0, tz = 0;
 
-      let m = mat4Translate(pv[0], pv[1], pv[2]);
+      if (mode === "idle") {
+        // Subtle natural breathing & idle sway so character feels alive
+        const breath = Math.sin(this.t * 2.1);
+        if (bone === "right_arm") { rz = 0.045 + breath * 0.025; rx = breath * 0.03; }
+        else if (bone === "left_arm") { rz = -(0.045 + breath * 0.025); rx = -breath * 0.03; }
+        else if (bone === "head") { ry = Math.sin(this.t * 0.9) * 0.09; rx = Math.sin(this.t * 1.4) * 0.03; }
+        else return mat4Identity();
+      } else if (mode === "walk") {
+        const swing = Math.sin(this.t * 3.8) * 0.56;
+        if (bone === "right_arm") rx = -swing;
+        else if (bone === "left_arm") rx = swing;
+        else if (bone === "right_leg" || bone === "right_foot") rx = swing * 0.85;
+        else if (bone === "left_leg" || bone === "left_foot") rx = -swing * 0.85;
+        else if (bone === "head") ry = Math.sin(this.t * 1.5) * 0.14;
+        else return mat4Identity();
+      } else if (mode === "run") {
+        const swing = Math.sin(this.t * 6.8) * 0.92;
+        const bob = Math.abs(Math.sin(this.t * 6.8)) * 0.75;
+        ty = bob;
+        if (bone === "body" || bone === "waist") { rx = -0.14; }
+        else if (bone === "head") { rx = 0.08; ry = Math.sin(this.t * 3.4) * 0.1; tz = -1.2; }
+        else if (bone === "right_arm") { rx = -swing - 0.15; rz = 0.08; }
+        else if (bone === "left_arm") { rx = swing - 0.15; rz = -0.08; }
+        else if (bone === "right_leg" || bone === "right_foot") { rx = swing * 0.98; }
+        else if (bone === "left_leg" || bone === "left_foot") { rx = -swing * 0.98; }
+      } else if (mode === "sneak") {
+        // Minecraft sneak crouch: torso leans forward around waist, head & arms follow cleanly
+        if (bone === "body") {
+          let m = mat4Translate(0, 11.2, 3.0);
+          m = mat4Mul(m, mat4RotX(-0.46));
+          m = mat4Mul(m, mat4Translate(0, -12, 0));
+          return m;
+        } else if (bone === "waist") {
+          let m = mat4Translate(0, 11.2, 3.0);
+          m = mat4Mul(m, mat4RotX(-0.46));
+          m = mat4Mul(m, mat4Translate(0, -12, 0));
+          return m;
+        } else if (bone === "head") {
+          ty = -3.4; tz = -2.2; rx = 0.08;
+        } else if (bone === "right_arm") {
+          ty = -3.0; tz = -1.8; rx = -0.35; rz = 0.08;
+        } else if (bone === "left_arm") {
+          ty = -3.0; tz = -1.8; rx = -0.35; rz = -0.08;
+        } else if (bone === "right_leg" || bone === "right_foot") {
+          tz = 3.0; ty = -0.6;
+        } else if (bone === "left_leg" || bone === "left_foot") {
+          tz = 3.0; ty = -0.6;
+        }
+      } else if (mode === "apose") {
+        // Inspection A-pose: arms angled out so torso sides, waist belts & sleeves are clearly visible
+        if (bone === "right_arm") rz = 0.58;
+        else if (bone === "left_arm") rz = -0.58;
+        else return mat4Identity();
+      } else {
+        return mat4Identity();
+      }
+
+      let m = mat4Translate(pv[0] + tx, pv[1] + ty, pv[2] + tz);
       if (ry) m = mat4Mul(m, mat4RotY(ry));
       if (rx) m = mat4Mul(m, mat4RotX(rx));
+      if (rz) m = mat4Mul(m, mat4RotZ(rz));
       m = mat4Mul(m, mat4Translate(-pv[0], -pv[1], -pv[2]));
       return m;
     }
 
     _bindPointer() {
       let dragging = false, rightDrag = false, lx = 0, ly = 0;
+      let pinchDist = 0;
       const c = this.canvas;
       c.addEventListener("contextmenu", e => e.preventDefault());
       c.addEventListener("mousedown", e => {
@@ -678,6 +756,41 @@
         e.preventDefault();
         this.dist = Math.max(18, Math.min(110, this.dist + e.deltaY * 0.05));
       }, { passive: false });
+
+      // Touch drag rotate & pinch zoom
+      c.addEventListener("touchstart", e => {
+        if (e.touches.length === 1) {
+          dragging = true;
+          lx = e.touches[0].clientX;
+          ly = e.touches[0].clientY;
+        } else if (e.touches.length === 2) {
+          dragging = false;
+          pinchDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+        }
+      }, { passive: true });
+      c.addEventListener("touchmove", e => {
+        if (e.touches.length === 1 && dragging) {
+          const dx = e.touches[0].clientX - lx;
+          const dy = e.touches[0].clientY - ly;
+          lx = e.touches[0].clientX;
+          ly = e.touches[0].clientY;
+          this.yaw += dx * 0.012;
+          this.pitch = Math.max(-1.2, Math.min(1.25, this.pitch + dy * 0.011));
+        } else if (e.touches.length === 2) {
+          const nd = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          if (pinchDist > 0) {
+            this.dist = Math.max(18, Math.min(110, this.dist + (pinchDist - nd) * 0.14));
+          }
+          pinchDist = nd;
+        }
+      }, { passive: true });
+      c.addEventListener("touchend", () => { dragging = false; pinchDist = 0; }, { passive: true });
     }
 
     _startLoop() {
@@ -697,11 +810,33 @@
     set showMannequin(v) { this.showPlayer = !!v; }
     get autoRotate() { return this.autoSpin; }
     set autoRotate(v) { this.autoSpin = !!v; }
+    get walkAnim() { return this.poseMode === "walk"; }
+    set walkAnim(v) { this.poseMode = v ? "walk" : "idle"; }
 
     resize() { this.render(); }
     setViewFront() { this.setViewPreset("front"); }
     setViewBack() { this.setViewPreset("back"); }
     resetView() { this.setViewPreset("default"); }
+
+    /**
+     * Captures a clean transparent PNG screenshot of the full combined 2D + 3D character!
+     */
+    captureFullCharacterPng(transparent = true) {
+      const gl = this.gl;
+      if (!gl) return null;
+      const prevGrid = this.showGrid;
+      const prevBones = this.showBones;
+      this.showGrid = false;
+      this.showBones = false;
+      this._transparentBg = Boolean(transparent);
+      this.render();
+      const url = this.canvas.toDataURL("image/png");
+      this._transparentBg = false;
+      this.showGrid = prevGrid;
+      this.showBones = prevBones;
+      this.render();
+      return url;
+    }
 
     setSkinDataUri(dataUri, slim) {
       if (typeof slim === "boolean") this.setSlim(slim);
@@ -795,8 +930,16 @@
         this.canvas.height = h;
       }
       gl.viewport(0, 0, w, h);
-      if (this._transparentBg) gl.clearColor(0.0, 0.0, 0.0, 0.0);
-      else gl.clearColor(0.032, 0.032, 0.032, 1.0);
+      const lm = this.lightMode || "studio";
+      if (this._transparentBg) {
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+      } else if (lm === "day") {
+        gl.clearColor(0.095, 0.100, 0.110, 1.0);
+      } else if (lm === "night") {
+        gl.clearColor(0.012, 0.013, 0.017, 1.0);
+      } else {
+        gl.clearColor(0.032, 0.032, 0.034, 1.0);
+      }
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       const proj = mat4Perspective(38 * DEG, w / h, 0.5, 400);
@@ -825,6 +968,19 @@
       gl.uniformMatrix4fv(this.loc.uView, false, view);
       gl.activeTexture(gl.TEXTURE0);
       gl.uniform1i(this.loc.uTex, 0);
+      if (lm === "day") {
+        gl.uniform1f(this.loc.uAmbient, 0.72);
+        gl.uniform1f(this.loc.uDiffuse, 0.44);
+        gl.uniform1f(this.loc.uEmissiveBoost, 1.12);
+      } else if (lm === "night") {
+        gl.uniform1f(this.loc.uAmbient, 0.22);
+        gl.uniform1f(this.loc.uDiffuse, 0.24);
+        gl.uniform1f(this.loc.uEmissiveBoost, 1.38);
+      } else {
+        gl.uniform1f(this.loc.uAmbient, 0.56);
+        gl.uniform1f(this.loc.uDiffuse, 0.44);
+        gl.uniform1f(this.loc.uEmissiveBoost, 1.16);
+      }
 
       const drawMesh = (buf, count, tex, bone, cutoff) => {
         gl.uniformMatrix4fv(this.loc.uModel, false, this._boneMatrix(bone));

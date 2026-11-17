@@ -1,5 +1,6 @@
 /**
- * MythicWardrobe Studio v2.4 - 100% Client-Side Application Controller
+ * MythicWardrobe Studio v2.5 - 100% Client-Side Application Controller
+ * Full 2D + 3D Character Inspector, .bbmodel Combiner, 2D Skins & GUI Editor
  * Zero server / Zero Python / Zero external network requests!
  */
 (() => {
@@ -39,11 +40,20 @@
   ];
 
   const state = {
-    activeTab: "bbmodel",
+    activeTab: "preview",
     models: [],          // { id, exportId, mythicId, filename, category, slot, wardrobeSlot, displayName, lore, colorRgb, offset, scale, boneMap, analysis, bbmodel, blocks, blockMode }
     selectedModelId: null,
     equippedIds: new Set(),
     activeComboPreview: null,
+    poseMode: "idle",    // "idle" | "walk" | "run" | "sneak" | "apose"
+    lightMode: "studio", // "studio" | "day" | "night"
+    camPreset: "default",// "default" | "front" | "back" | "left" | "right" | "head" | "torso" | "feet"
+    show2dSkin: true,
+    show2dOuter: true,
+    show3dArmor: true,
+    showGrid: true,
+    showBones: false,
+    autoRotate: false,
     links: [
       { id: "link1", name: "Шлемы × 3D-Маски",       slot: "HEAD",  categories: ["helmets", "mask_3d"],     secondarySlot: "mask_3d",     stripFrontStraps: false, enabled: true },
       { id: "link2", name: "Нагрудники × 3D-Рюкзаки", slot: "CHEST", categories: ["armor_chest", "backpack_3d"], secondarySlot: "backpack_3d", stripFrontStraps: true,  enabled: true },
@@ -128,10 +138,15 @@
     document.querySelectorAll(".workspace-tab").forEach(p => p.classList.toggle("active", p.dataset.tabPanel === tab));
 
     const ws = $("mainWorkspace");
+    ws.classList.toggle("preview-mode", tab === "preview");
     ws.classList.toggle("config-mode", tab === "configs");
     ws.classList.toggle("gui-mode", tab === "gui");
 
-    if (tab === "bbmodel") {
+    if (tab === "preview") {
+      mountSharedViewer("viewerMountPreview");
+      renderFullPreviewPanel();
+      syncViewerUiState();
+    } else if (tab === "bbmodel") {
       mountSharedViewer("viewerMount3d");
     } else if (tab === "skins") {
       mountSharedViewer("viewerMount2d");
@@ -265,7 +280,7 @@
         hair3d: item.hair3d || null,
       });
       // Equip showcase set right away including hair_ponytail_3d (demonstrates PARTIAL_MODEL under helmet!)
-      if (["gold_warden_chest", "tactical_backpack", "belt_tactical_3d", "gold_warden_legs", "hair_ponytail_3d"].includes(m.exportId)) {
+      if (["gold_warden_chest", "tactical_backpack", "belt_tactical_3d", "gold_warden_legs", "gold_warden_boots", "hair_ponytail_3d"].includes(m.exportId)) {
         state.equippedIds.add(m.id);
       }
     }
@@ -991,13 +1006,18 @@
     if (!viewer) return;
     const chips = $("equippedChips");
 
+    const active2dCount = Object.keys(state.skinSelected).filter(k => state.skinSelected[k]?.dataUri).length;
+    const bodyLbl = state.skinBodyType === "slim" ? "Slim" : "Wide";
+    const skinBadgeHtml = `<span class="tag" title="Активный 2D-скин на персонаже">${ico("palette", "ico-sm")} 2D ${bodyLbl} (${active2dCount} сл.)</span>`;
+
     if (state.activeComboPreview) {
       await viewer.setModels([{
         bbmodel: state.activeComboPreview.bbmodel,
         colorRgb: state.activeComboPreview.colorRgb,
       }]);
-      chips.innerHTML = `<span class="tag tag-emis">${ico("zap", "ico-sm")} Комбо 3D: ${escapeHtml(state.activeComboPreview.name)}</span>`;
-      $("viewerBadge").textContent = `Комбо: ${state.activeComboPreview.name} · ЛКМ: вращение · Колесо: зум`;
+      chips.innerHTML = `${skinBadgeHtml}<span class="tag tag-emis">${ico("zap", "ico-sm")} Комбо 3D: ${escapeHtml(state.activeComboPreview.name)}</span>`;
+      $("viewerBadge").innerHTML = `<span>2D (${active2dCount} сл.) + Комбо 3D: ${escapeHtml(state.activeComboPreview.name)}</span>`;
+      renderFullPreviewPanel();
       return;
     }
 
@@ -1006,7 +1026,7 @@
     const helmetActive = Boolean(state.testHelmetOn || hasEquippedHelmet);
 
     const renderList = [];
-    const chipHtml = [];
+    const chipHtml = [skinBadgeHtml];
 
     for (const m of eqModels) {
       const isHair = m.category === "hair_3d" || m.wardrobeSlot === "hair_3d";
@@ -1072,21 +1092,23 @@
 
     await viewer.setModels(renderList);
 
-    if (!chipHtml.length) {
-      chips.innerHTML = `<span class="hint">3D-модели сняты: показан 2D-манекен скина</span>`;
-      $("viewerBadge").textContent = "ЛКМ: вращение · Колесо: зум · ПКМ: панорама";
+    if (renderList.length === 0) {
+      chips.innerHTML = `${skinBadgeHtml}<span class="hint">3D-модели сняты — показан 2D-скин</span>`;
+      $("viewerBadge").textContent = `2D-скин (${bodyLbl} · ${active2dCount} сл.) · ЛКМ: вращение · Колесо: зум`;
     } else {
       chips.innerHTML = chipHtml.join("");
       $("viewerBadge").innerHTML = helmetActive
-        ? `${ico("hard-hat", "ico-sm")}<span>Шлем надет (проверка 3D-волос) · Моделей: ${renderList.length}</span>`
-        : `<span>Надето 3D-моделей: ${renderList.length} · ЛКМ: вращение · Колесо: зум</span>`;
+        ? `${ico("hard-hat", "ico-sm")}<span>2D (${active2dCount} сл.) + 3D (${renderList.length}) · Шлем надет (проверка 3D-волос)</span>`
+        : `<span>2D (${active2dCount} сл.) + 3D (${renderList.length}) · ЛКМ: вращение · Колесо: зум</span>`;
     }
+    renderFullPreviewPanel();
   }
 
   function renderAll3d() {
     renderModelList();
     renderInspector();
     renderLinksAndCombos();
+    renderFullPreviewPanel();
   }
 
   function syncAutoBound3dHairFrom2d() {
@@ -1219,21 +1241,24 @@
     state.skinLibrary = demo.overlays;
     if (autoEquip) {
       const bodyKey = state.skinBodyType;
+      state.skinSelected = {};
+      state.skinLayerBlocks = {};
       const defaults = {
-        body_skin:  "tone_light.png",
-        eyes:       "eyes_blue.png",
-        eyebrows:   "brows_dark.png",
-        hair:       "hair_brown.png",
-        undershirt: "shirt_white.png",
-        pants:      "jeans_blue.png",
-        belt_skin:  "leather_brown.png",
-        boots_skin: "sneakers_white.png",
-        jacket:     "hoodie_black.png",
+        body_skin:  "light.png",
+        eyes:       "blue.png",
+        eyebrows:   "dark_thick.png",
+        hair:       "blonde_swept.png",
+        undershirt: "white_tshirt.png",
+        pants:      "blue_jeans.png",
+        belt_skin:  "leather_belt.png",
+        boots_skin: "combat_boots.png",
+        jacket:     "black_hoodie.png",
       };
       for (const layer of state.skinLayers) {
         const list = (state.skinLibrary[layer.folder] && state.skinLibrary[layer.folder][bodyKey]) || [];
         const want = defaults[layer.id];
-        const found = want ? list.find(x => x.name === want) : null;
+        if (!want) continue;
+        const found = list.find(x => x.name === want) || list[0] || null;
         if (found) state.skinSelected[layer.id] = { name: found.name, dataUri: found.dataUri, isCustom: false };
       }
     }
@@ -1468,6 +1493,7 @@
       ctx.fillRect(0, 0, 64, 64);
       state.skinCompositeDataUri = canvas.toDataURL("image/png");
       if (viewer) viewer.setSkinDataUri(state.skinCompositeDataUri, state.skinBodyType === "slim");
+      renderFullPreviewPanel();
       return;
     }
 
@@ -1497,6 +1523,13 @@
 
     state.skinCompositeDataUri = canvas.toDataURL("image/png");
     if (viewer) viewer.setSkinDataUri(state.skinCompositeDataUri, state.skinBodyType === "slim");
+    renderFullPreviewPanel();
+    const firstChip = $("equippedChips")?.querySelector(".tag");
+    if (firstChip && firstChip.title === "Активный 2D-скин на персонаже") {
+      const active2dCount = Object.keys(state.skinSelected).filter(k => state.skinSelected[k]?.dataUri).length;
+      const bodyLbl = state.skinBodyType === "slim" ? "Slim" : "Wide";
+      firstChip.innerHTML = `${ico("palette", "ico-sm")} 2D ${bodyLbl} (${active2dCount} сл.)`;
+    }
   }
 
   async function processAndApplyUploadedSkin() {
@@ -2183,6 +2216,439 @@
     ta.remove();
   }
 
+  // ==================== TAB 0: FULL 2D + 3D MODEL INSPECTOR ====================
+  const PREVIEW_SLOT_ZONES = [
+    { key: "HEAD",  title: "Голова · Шлемы · 3D-Маски · 3D-Причёски", cats: ["helmets", "mask_3d", "hair_3d"] },
+    { key: "CHEST", title: "Торс · Нагрудники · 3D-Рюкзаки",          cats: ["armor_chest", "backpack_3d"] },
+    { key: "LEGS",  title: "Ноги · Поножи · 3D-Пояса",                cats: ["armor_legs", "belt_3d"] },
+    { key: "FEET",  title: "Обувь · Ботинки",                         cats: ["armor_feet"] },
+  ];
+
+  function syncViewerUiState() {
+    if (viewer) {
+      viewer.showMannequin = state.show2dSkin;
+      viewer.setShowOuterSkin(state.show2dOuter);
+      viewer.showArmor = state.show3dArmor;
+      viewer.showGrid = state.showGrid;
+      viewer.showBones = state.showBones;
+      viewer.autoRotate = state.autoRotate;
+      viewer.setPoseMode(state.poseMode);
+      viewer.setLightMode(state.lightMode);
+    }
+    const setChk = (id, val) => { const el = $(id); if (el) el.checked = !!val; };
+    setChk("chkShowMannequin", state.show2dSkin);
+    setChk("pvShow2dSkin", state.show2dSkin);
+    setChk("chkShowOuterSkin", state.show2dOuter);
+    setChk("pvShow2dOuter", state.show2dOuter);
+    setChk("chkShowArmor", state.show3dArmor);
+    setChk("pvShow3dArmor", state.show3dArmor);
+    setChk("chkWalkAnim", state.poseMode === "walk");
+    setChk("chkAutoRotate", state.autoRotate);
+    setChk("pvAutoRotate", state.autoRotate);
+    setChk("pvShowGrid", state.showGrid);
+    setChk("pvShowBones", state.showBones);
+
+    document.querySelectorAll("#previewPoseGroup [data-pose]").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.pose === state.poseMode);
+    });
+    document.querySelectorAll("#previewCamGroup [data-cam]").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.cam === state.camPreset);
+    });
+    document.querySelectorAll("#previewLightGroup [data-light]").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.light === state.lightMode);
+    });
+
+    const syncHelmetBtn = (id, smallIco) => {
+      const btn = $(id);
+      if (!btn) return;
+      btn.classList.toggle("active", state.testHelmetOn);
+      btn.innerHTML = state.testHelmetOn
+        ? `${ico("hard-hat", smallIco ? "ico-sm" : "")}<span>Шлем надет</span>`
+        : `${ico("hard-hat", smallIco ? "ico-sm" : "")}<span>Тест шлема</span>`;
+    };
+    syncHelmetBtn("btnToggleTestHelmet", false);
+    syncHelmetBtn("btnPreviewTestHelmet", true);
+
+    if ($("pvBodyType")) $("pvBodyType").value = state.skinBodyType;
+    if ($("skinBodyType")) $("skinBodyType").value = state.skinBodyType;
+  }
+
+  function setViewerPose(pose) {
+    state.poseMode = pose || "idle";
+    syncViewerUiState();
+  }
+
+  function setViewerCam(cam) {
+    state.camPreset = cam || "default";
+    if (viewer) viewer.setViewPreset(state.camPreset);
+    syncViewerUiState();
+  }
+
+  function setViewerLight(light) {
+    state.lightMode = light || "studio";
+    syncViewerUiState();
+  }
+
+  function setTestHelmetState(on) {
+    state.testHelmetOn = Boolean(on);
+    syncViewerUiState();
+    refresh3dViewport();
+  }
+
+  function setBodyTypeEverywhere(bodyType) {
+    state.skinBodyType = bodyType === "slim" ? "slim" : "wide";
+    const bodyKey = state.skinBodyType;
+    for (const layer of state.skinLayers) {
+      const sel = state.skinSelected[layer.id];
+      if (!sel || sel.isCustom) continue;
+      const list = (state.skinLibrary[layer.folder] && state.skinLibrary[layer.folder][bodyKey]) || [];
+      const match = list.find(x => x.name === sel.name);
+      if (match) state.skinSelected[layer.id] = { name: match.name, dataUri: match.dataUri, isCustom: false };
+    }
+    syncViewerUiState();
+    renderSkinLayersList();
+    renderFullPreviewPanel();
+    renderSkinComposite();
+  }
+
+  function equipBalanced3dSet() {
+    if (!state.models.length) {
+      showToast("Сначала загрузите .bbmodel или нажмите «Загрузить демо»");
+      return;
+    }
+    state.activeComboPreview = null;
+    state.equippedIds.clear();
+    const demoSet = ["gold_warden_chest", "tactical_backpack", "belt_tactical_3d", "gold_warden_legs", "hair_ponytail_3d", "gold_warden_boots"];
+    let matched = 0;
+    for (const expId of demoSet) {
+      const found = state.models.find(m => m.exportId === expId);
+      if (found) { state.equippedIds.add(found.id); matched++; }
+    }
+    if (matched === 0) {
+      const seenCats = new Set();
+      for (const m of state.models) {
+        if (!seenCats.has(m.category)) {
+          seenCats.add(m.category);
+          state.equippedIds.add(m.id);
+        }
+      }
+    }
+    renderModelList();
+    renderLinksAndCombos();
+    refresh3dViewport();
+    showToast(`Надет полный 3D-комплект (${state.equippedIds.size} моделей)`);
+  }
+
+  function randomize2dSkin() {
+    const bodyKey = state.skinBodyType;
+    state.skinSelected = {};
+    state.skinLayerBlocks = {};
+    const mustPick = ["body_skin", "eyes", "eyebrows", "hair", "undershirt", "pants", "boots_skin"];
+    const optionalPick = ["jacket", "belt_skin", "gloves", "hat", "mask_skin", "beard", "scars", "socks"];
+    const pickRandom = (layer, allowHazmat = false) => {
+      const lib = (state.skinLibrary[layer.folder] && state.skinLibrary[layer.folder][bodyKey]) || [];
+      const pool = allowHazmat ? lib : lib.filter(x => x.name !== "hazmat_suit.png");
+      if (!pool.length) return;
+      const item = pool[Math.floor(Math.random() * pool.length)];
+      state.skinSelected[layer.id] = { name: item.name, dataUri: item.dataUri, isCustom: false };
+    };
+    for (const lid of mustPick) {
+      const layer = state.skinLayers.find(l => l.id === lid);
+      if (layer) pickRandom(layer, false);
+    }
+    for (const lid of optionalPick) {
+      if (Math.random() < 0.38) {
+        const layer = state.skinLayers.find(l => l.id === lid);
+        if (layer) pickRandom(layer, false);
+      }
+    }
+    renderSkinLayersList();
+    renderSkinItemMetaEditor();
+    renderSkinBlockingEditor();
+    renderSkinComposite();
+    syncAutoBound3dHairFrom2d();
+    showToast("Собрана случайная комбинация 2D-слоёв");
+  }
+
+  function renderFullPreviewPanel() {
+    const groupsEl = $("preview3dSlotGroups");
+    const list2dEl = $("preview2dQuickList");
+    if (!groupsEl || !list2dEl) return;
+
+    // ---- 1. 3D Equipment grouped by body zone ----
+    const eqCount = state.activeComboPreview ? 1 : state.equippedIds.size;
+    $("pv3dCountTag").textContent = state.activeComboPreview ? "Комбо 3D" : `${eqCount} надето`;
+
+    if (!state.models.length) {
+      groupsEl.innerHTML = `<div class="hint">3D-модели не загружены. Перейдите в «3D Модели» или нажмите «Загрузить демо».</div>`;
+    } else {
+      groupsEl.innerHTML = "";
+      for (const zone of PREVIEW_SLOT_ZONES) {
+        const modelsInZone = state.models.filter(m => zone.cats.includes(m.category));
+        if (!modelsInZone.length) continue;
+
+        const grp = document.createElement("div");
+        grp.className = "preview-slot-group";
+        const zoneEqCount = modelsInZone.filter(m => state.equippedIds.has(m.id)).length;
+        grp.innerHTML = `
+          <div class="preview-slot-head">
+            <span>${escapeHtml(zone.title)}</span>
+            <span>${zoneEqCount}/${modelsInZone.length}</span>
+          </div>
+          <div class="preview-3d-list"></div>
+        `;
+        const listEl = grp.querySelector(".preview-3d-list");
+        for (const m of modelsInZone) {
+          const isEq = !state.activeComboPreview && state.equippedIds.has(m.id);
+          const cmeta = CATEGORY_META[m.category] || CATEGORY_META.armor_chest;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "preview-3d-item" + (isEq ? " equipped" : "");
+          btn.innerHTML = `
+            <span class="preview-3d-item-main">
+              ${isEq ? ico("check", "ico-sm") : ico("cube", "ico-sm")}
+              <span class="preview-3d-item-name" title="${escapeHtml(m.filename)}">${escapeHtml(m.exportId)}</span>
+            </span>
+            <span class="preview-3d-item-meta">
+              <span class="tag">${escapeHtml(cmeta.label)}</span>
+              ${m.analysis.hasEmissive ? `<span class="tag">_e</span>` : ""}
+            </span>
+          `;
+          btn.addEventListener("click", () => {
+            state.activeComboPreview = null;
+            if (state.equippedIds.has(m.id)) state.equippedIds.delete(m.id);
+            else state.equippedIds.add(m.id);
+            renderModelList();
+            renderLinksAndCombos();
+            refresh3dViewport();
+          });
+          listEl.appendChild(btn);
+        }
+        groupsEl.appendChild(grp);
+      }
+    }
+
+    // ---- 1b. Live Combos inside Inspector ----
+    const comboSec = $("previewComboSection");
+    const comboList = $("previewComboList");
+    if (comboSec && comboList) {
+      const allCombos = [];
+      for (const link of state.links) {
+        if (!link.enabled) continue;
+        for (const pair of computeLinkCombos(link)) allCombos.push({ link, pair });
+      }
+      if (!allCombos.length) {
+        comboSec.style.display = "none";
+      } else {
+        comboSec.style.display = "flex";
+        comboList.innerHTML = "";
+        for (const { link, pair } of allCombos.slice(0, 6)) {
+          const label = pair.map(m => m.exportId).join(" + ");
+          const key = `${link.slot}:${pair.map(m => m.id).join("+")}`;
+          const isActive = state.activeComboPreview && state.activeComboPreview.key === key;
+          const row = document.createElement("div");
+          row.className = "combo-preview-row" + (isActive ? " active-preview" : "");
+          row.innerHTML = `
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(label)}">
+              <span class="tag">${escapeHtml(link.slot)}</span> ${escapeHtml(label)}
+            </span>
+            <button type="button" class="btn btn-sm ${isActive ? "btn-green" : ""}">${isActive ? "Сбросить" : "Сшить"}</button>
+          `;
+          row.querySelector("button").addEventListener("click", () => {
+            if (isActive) {
+              state.activeComboPreview = null;
+              renderLinksAndCombos();
+              refresh3dViewport();
+            } else {
+              previewCombinedPair(key, link, pair);
+            }
+          });
+          comboList.appendChild(row);
+        }
+      }
+    }
+
+    // ---- 2. 2D Skin Layers (15 layers) ----
+    const bodyKey = state.skinBodyType;
+    const blockMap = computeActive2dBlockMap();
+    let active2dVisible = 0;
+
+    list2dEl.innerHTML = "";
+    for (const layer of state.skinLayers) {
+      const sel = state.skinSelected[layer.id];
+      const lockedBy = blockMap.get(layer.id);
+      const hasVal = Boolean(sel && sel.dataUri);
+      if (hasVal && !lockedBy) active2dVisible++;
+
+      const libList = (state.skinLibrary[layer.folder] && state.skinLibrary[layer.folder][bodyKey]) || [];
+      const row = document.createElement("div");
+      row.className = "preview-2d-row" + (lockedBy ? " is-locked" : (hasVal ? " has-value" : ""));
+
+      const opts = [`<option value="">— нет —</option>`];
+      if (sel && sel.isCustom) {
+        opts.push(`<option value="__custom__" selected>${escapeHtml(sel.name)} (свой)</option>`);
+      }
+      for (const item of libList) {
+        const selectedAttr = (sel && !sel.isCustom && sel.name === item.name) ? "selected" : "";
+        opts.push(`<option value="${escapeHtml(item.name)}" ${selectedAttr}>${escapeHtml(item.name.replace(/\.png$/i, ""))}</option>`);
+      }
+
+      const subText = lockedBy
+        ? `${ico("lock", "ico-sm")}<span>Заблок. (${escapeHtml(lockedBy.byLabel)})</span>`
+        : hasVal
+          ? `<span>${escapeHtml(sel.name.replace(/\.png$/i, ""))}</span>`
+          : `<span>${escapeHtml(layer.alias)}</span>`;
+
+      row.innerHTML = `
+        <div class="preview-2d-label">
+          <span class="preview-2d-name">${escapeHtml(layer.label)}</span>
+          <span class="preview-2d-sub">${subText}</span>
+        </div>
+        <select ${lockedBy ? "disabled" : ""} aria-label="Слой ${escapeHtml(layer.label)}">${opts.join("")}</select>
+      `;
+
+      row.querySelector("select").addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (!val) {
+          delete state.skinSelected[layer.id];
+          if (layer.id === "jacket" && state.skinLayerBlocks.jacket?._autoHazmat) {
+            delete state.skinLayerBlocks.jacket;
+          }
+        } else if (val !== "__custom__") {
+          const found = libList.find(x => x.name === val);
+          if (found) {
+            state.skinSelected[layer.id] = { name: found.name, dataUri: found.dataUri, isCustom: false };
+            if (layer.id === "jacket" && found.name === "hazmat_suit.png") {
+              state.skinLayerBlocks.jacket = { blocks: [...HAZMAT_DEFAULT_BLOCKS], blockMode: "UNEQUIP", _autoHazmat: true };
+            } else if (layer.id === "jacket" && state.skinLayerBlocks.jacket?._autoHazmat) {
+              delete state.skinLayerBlocks.jacket;
+            }
+          }
+        }
+        state.activeSkinLayerId = layer.id;
+        renderSkinLayersList();
+        renderSkinItemMetaEditor();
+        renderSkinBlockingEditor();
+        renderSkinComposite();
+        if (layer.id === "hair") syncAutoBound3dHairFrom2d();
+      });
+
+      list2dEl.appendChild(row);
+    }
+
+    $("pv2dCountTag").textContent = `${active2dVisible} / ${state.skinLayers.length}`;
+    if ($("pvBodyType")) $("pvBodyType").value = state.skinBodyType;
+
+    // ---- 3. Full Combined 2D + 3D Summary ----
+    const eqModels = state.models.filter(m => state.equippedIds.has(m.id));
+    const activeBones = new Set();
+    let totalCubes = 0;
+    if (state.activeComboPreview) {
+      totalCubes = (state.activeComboPreview.bbmodel.elements || []).length;
+      for (const grp of (state.activeComboPreview.bbmodel.outliner || [])) {
+        if (grp && typeof grp === "object" && grp.name) activeBones.add(grp.name);
+      }
+    } else {
+      for (const m of eqModels) {
+        totalCubes += m.analysis.cubeCount || 0;
+        for (const b of Object.values(m.boneMap || {})) {
+          if (b && b !== "ignore") activeBones.add(b);
+        }
+        for (const b of (m.analysis.bones || [])) activeBones.add(b);
+      }
+    }
+
+    $("pvBodyBadge").textContent = state.skinBodyType === "slim" ? "Slim (3px)" : "Wide (4px)";
+    $("pvMetric2d").textContent = String(active2dVisible);
+    $("pvMetric3d").textContent = String(state.activeComboPreview ? 1 : eqModels.length);
+    $("pvMetricCubes").textContent = String(totalCubes);
+    $("pvMetricBlocked").textContent = String(blockMap.size);
+
+    const detailsEl = $("previewSummaryDetails");
+    if (detailsEl) {
+      const detailParts = [];
+      const hair3dEq = eqModels.find(m => m.category === "hair_3d" || m.wardrobeSlot === "hair_3d");
+      if (hair3dEq && hair3dEq.hair3d) {
+        const modeMap = { HIDE_ALL: "Скрыть всё", PARTIAL_MODEL: "Скрыть часть", SWAP_MODEL: "Подмена модели", KEEP: "Оставить" };
+        detailParts.push(`<div>3D-причёска: <strong>${escapeHtml(hair3dEq.exportId)}</strong> · при шлеме: <span class="tag">${escapeHtml(modeMap[hair3dEq.hair3d.helmetMode] || hair3dEq.hair3d.helmetMode)}</span></div>`);
+      }
+      if (activeBones.size > 0) {
+        const chips = [...activeBones].slice(0, 10).map(b => `<span class="tag">${escapeHtml(b)}</span>`).join("");
+        detailParts.push(`<div>Задействованные кости 3D:</div><div class="preview-bone-chips">${chips}</div>`);
+      } else {
+        detailParts.push(`<div class="hint">Сейчас отображается только 2D-скин. Включите любую 3D-модель выше, чтобы совместить 2D + 3D.</div>`);
+      }
+      detailsEl.innerHTML = detailParts.join("");
+    }
+  }
+
+  function bindFullPreviewControls() {
+    document.querySelectorAll("#previewPoseGroup [data-pose]").forEach(btn => {
+      btn.addEventListener("click", () => setViewerPose(btn.dataset.pose));
+    });
+    document.querySelectorAll("#previewCamGroup [data-cam]").forEach(btn => {
+      btn.addEventListener("click", () => setViewerCam(btn.dataset.cam));
+    });
+    document.querySelectorAll("#previewLightGroup [data-light]").forEach(btn => {
+      btn.addEventListener("click", () => setViewerLight(btn.dataset.light));
+    });
+
+    const wireToggle = (id, key) => {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener("change", (e) => {
+        state[key] = e.target.checked;
+        syncViewerUiState();
+      });
+    };
+    wireToggle("pvShow2dSkin", "show2dSkin");
+    wireToggle("pvShow2dOuter", "show2dOuter");
+    wireToggle("pvShow3dArmor", "show3dArmor");
+    wireToggle("pvShowGrid", "showGrid");
+    wireToggle("pvShowBones", "showBones");
+    wireToggle("pvAutoRotate", "autoRotate");
+
+    $("btnCaptureFullPng").addEventListener("click", () => {
+      if (!viewer || !viewer.captureFullCharacterPng) {
+        showToast("WebGL-сцена недоступна");
+        return;
+      }
+      const dataUrl = viewer.captureFullCharacterPng(true);
+      if (!dataUrl) {
+        showToast("Не удалось снять скриншот");
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = `mythicwardrobe_character_2d_3d_${state.skinBodyType}.png`;
+      a.click();
+      showToast("Прозрачный PNG-скриншот полной модели (2D + 3D) сохранён!");
+    });
+
+    $("btnPreviewTestHelmet").addEventListener("click", () => setTestHelmetState(!state.testHelmetOn));
+    $("btnPreviewEquipSet").addEventListener("click", equipBalanced3dSet);
+    $("btnPreviewClear3d").addEventListener("click", () => {
+      state.equippedIds.clear();
+      state.activeComboPreview = null;
+      setTestHelmetState(false);
+      renderModelList();
+      renderLinksAndCombos();
+      refresh3dViewport();
+    });
+
+    $("pvBodyType").addEventListener("change", (e) => setBodyTypeEverywhere(e.target.value));
+    $("btnPreviewRand2d").addEventListener("click", randomize2dSkin);
+    $("btnPreviewHazmat").addEventListener("click", tryHazmatSuitDemo);
+    $("btnPreviewDl2dPng").addEventListener("click", () => {
+      if (!state.skinCompositeDataUri) return;
+      const a = document.createElement("a");
+      a.href = state.skinCompositeDataUri;
+      a.download = `wardrobe_skin_${state.skinBodyType}.png`;
+      a.click();
+    });
+    $("btnPreviewDlZip").addEventListener("click", exportFullZip);
+  }
+
   // ==================== DROPZONE & EVENT WIRING ====================
   function setupDropzone(zoneEl, inputEl, onFiles) {
     zoneEl.addEventListener("click", () => inputEl.click());
@@ -2200,7 +2666,7 @@
   }
 
   function init() {
-    mountSharedViewer("viewerMount3d");
+    mountSharedViewer("viewerMountPreview");
     try {
       viewer = new window.StudioWebGLViewer($("viewport3d"));
     } catch (err) {
@@ -2247,36 +2713,27 @@
     $("btnExportFullZip").addEventListener("click", exportFullZip);
     bindInspectorEvents();
 
-    // Viewer controls
-    $("chkShowMannequin").addEventListener("change", e => { if (viewer) viewer.showMannequin = e.target.checked; });
-    $("chkShowArmor").addEventListener("change", e => { if (viewer) viewer.showArmor = e.target.checked; });
-    $("chkWalkAnim").addEventListener("change", e => { if (viewer) viewer.walkAnim = e.target.checked; });
-    $("chkAutoRotate").addEventListener("change", e => { if (viewer) viewer.autoRotate = e.target.checked; });
-    $("btnToggleTestHelmet").addEventListener("click", () => {
-      state.testHelmetOn = !state.testHelmetOn;
-      const btn = $("btnToggleTestHelmet");
-      btn.classList.toggle("active", state.testHelmetOn);
-      btn.innerHTML = state.testHelmetOn
-        ? `${ico("hard-hat")}<span>Шлем надет</span>`
-        : `${ico("hard-hat")}<span>Тест шлема</span>`;
-      refresh3dViewport();
-    });
-    $("btnViewFront").addEventListener("click", () => { if (viewer) viewer.setViewFront(); });
-    $("btnViewBack").addEventListener("click", () => { if (viewer) viewer.setViewBack(); });
-    $("btnViewReset").addEventListener("click", () => { if (viewer) viewer.resetView(); });
+    // Shared Viewer header controls (bidirectionally synced with Tab 0 Inspector)
+    $("chkShowMannequin").addEventListener("change", e => { state.show2dSkin = e.target.checked; syncViewerUiState(); });
+    $("chkShowOuterSkin").addEventListener("change", e => { state.show2dOuter = e.target.checked; syncViewerUiState(); });
+    $("chkShowArmor").addEventListener("change", e => { state.show3dArmor = e.target.checked; syncViewerUiState(); });
+    $("chkWalkAnim").addEventListener("change", e => { setViewerPose(e.target.checked ? "walk" : "idle"); });
+    $("chkAutoRotate").addEventListener("change", e => { state.autoRotate = e.target.checked; syncViewerUiState(); });
+    $("btnToggleTestHelmet").addEventListener("click", () => setTestHelmetState(!state.testHelmetOn));
+    $("btnViewFront").addEventListener("click", () => setViewerCam("front"));
+    $("btnViewBack").addEventListener("click", () => setViewerCam("back"));
+    $("btnViewReset").addEventListener("click", () => setViewerCam("default"));
     $("btnClearEquipped").addEventListener("click", () => {
       state.equippedIds.clear();
       state.activeComboPreview = null;
-      state.testHelmetOn = false;
-      const btn = $("btnToggleTestHelmet");
-      if (btn) {
-        btn.classList.remove("active");
-        btn.innerHTML = `${ico("hard-hat")}<span>Тест шлема</span>`;
-      }
+      setTestHelmetState(false);
       renderModelList();
       renderLinksAndCombos();
       refresh3dViewport();
     });
+
+    // Tab 0 Full 2D+3D Inspector controls
+    bindFullPreviewControls();
 
     // 2D Skin Tab controls
     setupDropzone($("skinDropzone"), $("skinFileInput"), files => handleSkinFileUpload(files[0]));
@@ -2291,19 +2748,7 @@
       showToast("Все 2D-слои и блокировки сброшены");
     });
 
-    $("skinBodyType").addEventListener("change", e => {
-      state.skinBodyType = e.target.value;
-      const bodyKey = state.skinBodyType;
-      for (const layer of state.skinLayers) {
-        const sel = state.skinSelected[layer.id];
-        if (!sel || sel.isCustom) continue;
-        const list = (state.skinLibrary[layer.folder] && state.skinLibrary[layer.folder][bodyKey]) || [];
-        const match = list.find(x => x.name === sel.name);
-        if (match) state.skinSelected[layer.id] = { name: match.name, dataUri: match.dataUri, isCustom: false };
-      }
-      renderSkinLayersList();
-      renderSkinComposite();
-    });
+    $("skinBodyType").addEventListener("change", e => setBodyTypeEverywhere(e.target.value));
 
     const updateSliderLabels = () => {
       $("lblHue").textContent = `${$("skinHue").value}°`;
@@ -2388,7 +2833,7 @@
       });
     });
 
-    // Initial render + auto-load embedded demos right on startup so user immediately sees 3D & 2D!
+    // Initial render + auto-load embedded demos right on startup so user immediately sees 2D + 3D together!
     renderAll3d();
     renderSkinLayersList();
     renderSkinItemMetaEditor();
@@ -2401,6 +2846,9 @@
       renderSkinItemMetaEditor();
       renderConfigOutputs();
     }
+    syncViewerUiState();
+    renderFullPreviewPanel();
+    if (viewer) setTimeout(() => viewer.resize(), 60);
   }
 
   window.addEventListener("DOMContentLoaded", init);

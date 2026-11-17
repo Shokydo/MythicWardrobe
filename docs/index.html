@@ -4,13 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#09090b">
-  <title>MythicWardrobe Studio v2.4 : 3D .bbmodel, 3D-волосы, 2D-скины и GUI-редактор</title>
+  <title>MythicWardrobe Studio v2.5 : Полный осмотр 2D+3D, .bbmodel, 3D-волосы, 2D-скины и GUI</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <!-- INLINE MONOCHROME SVG ICON SPRITE (100% OFFLINE, ZERO EMOJI) -->
   <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
     <defs>
+      <symbol id="ico-eye" viewBox="0 0 24 24">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </symbol>
+      <symbol id="ico-sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4"></circle>
+        <line x1="12" y1="2" x2="12" y2="5"></line>
+        <line x1="12" y1="19" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line>
+        <line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line>
+        <line x1="2" y1="12" x2="5" y2="12"></line>
+        <line x1="19" y1="12" x2="22" y2="12"></line>
+        <line x1="4.93" y1="19.07" x2="7.05" y2="16.95"></line>
+        <line x1="16.95" y1="7.05" x2="19.07" y2="4.93"></line>
+      </symbol>
+      <symbol id="ico-moon" viewBox="0 0 24 24">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </symbol>
+      <symbol id="ico-aperture" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="14.31" y1="8" x2="20.05" y2="17.94"></line>
+        <line x1="9.69" y1="8" x2="21.17" y2="8"></line>
+        <line x1="7.38" y1="12" x2="13.12" y2="2.06"></line>
+        <line x1="9.69" y1="16" x2="3.95" y2="6.06"></line>
+        <line x1="14.31" y1="16" x2="2.83" y2="16"></line>
+        <line x1="16.62" y1="12" x2="10.88" y2="21.94"></line>
+      </symbol>
+      <symbol id="ico-user" viewBox="0 0 24 24">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </symbol>
+      <symbol id="ico-shuffle" viewBox="0 0 24 24">
+        <polyline points="16 3 21 3 21 8"></polyline>
+        <line x1="4" y1="20" x2="21" y2="3"></line>
+        <polyline points="21 16 21 21 16 21"></polyline>
+        <line x1="15" y1="15" x2="21" y2="21"></line>
+        <line x1="4" y1="4" x2="9" y2="9"></line>
+      </symbol>
       <symbol id="ico-brand" viewBox="0 0 24 24">
         <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"></path>
         <path d="M3 7l9 5 9-5"></path>
@@ -201,12 +239,16 @@
         <svg class="ico ico-md"><use href="#ico-brand"></use></svg>
       </span>
       <span>MythicWardrobe Studio</span>
-      <span class="brand-badge">v1.9.1</span>
+      <span class="brand-badge">v1.9.2</span>
       <span class="brand-offline" title="Работает полностью в браузере без Python и без сервера">Offline HTML</span>
     </div>
 
     <nav class="tabs" aria-label="Разделы студии">
-      <button class="tab-btn active" data-tab="bbmodel">
+      <button class="tab-btn active" data-tab="preview">
+        <svg class="ico" aria-hidden="true"><use href="#ico-eye"></use></svg>
+        <span>Осмотр 2D+3D</span>
+      </button>
+      <button class="tab-btn" data-tab="bbmodel">
         <svg class="ico" aria-hidden="true"><use href="#ico-cube"></use></svg>
         <span>3D Модели</span>
       </button>
@@ -225,7 +267,7 @@
     </nav>
 
     <div class="topbar-actions">
-      <button class="btn btn-sm" id="btnLoadDemo" title="Загрузить все 10 демо .bbmodel (включая 3D-пояса) и 68 стартовых 2D-скинов">
+      <button class="btn btn-sm" id="btnLoadDemo" title="Загрузить все 14 демо .bbmodel (включая 3D-пояса, ботинки и 3D-причёски) и 68 стартовых 2D-скинов">
         <svg class="ico" aria-hidden="true"><use href="#ico-sparkles"></use></svg>
         <span>Загрузить демо</span>
       </button>
@@ -237,10 +279,207 @@
   </header>
 
   <!-- MAIN WORKSPACE -->
-  <main class="workspace" id="mainWorkspace">
+  <main class="workspace preview-mode" id="mainWorkspace">
+
+    <!-- ==================== TAB 0: FULL 2D + 3D MODEL INSPECTOR ==================== -->
+    <div class="workspace-tab active" data-tab-panel="preview">
+
+      <!-- WIDE SHOWCASE 3D VIEWPORT -->
+      <section class="pane pane-viewer preview-stage-pane" id="viewerMountPreview"></section>
+
+      <!-- RIGHT CONTROL RAIL: FULL 2D + 3D INSPECTOR -->
+      <aside class="pane pane-preview-rail">
+
+        <!-- CARD 1: SCENE, POSE, CAMERA & LIGHTING -->
+        <div class="card">
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-camera"></use></svg>
+              <span>Сцена, поза и камера</span>
+            </span>
+            <span class="tag">2D + 3D</span>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Поза и анимация скелета</span>
+            <div class="preview-pose-grid" id="previewPoseGroup" role="group" aria-label="Поза персонажа">
+              <button type="button" class="btn btn-sm active" data-pose="idle">Стойка</button>
+              <button type="button" class="btn btn-sm" data-pose="walk">Ходьба</button>
+              <button type="button" class="btn btn-sm" data-pose="run">Бег</button>
+              <button type="button" class="btn btn-sm" data-pose="sneak">Присяд</button>
+              <button type="button" class="btn btn-sm" data-pose="apose">A-Поза</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Ракурс камеры</span>
+            <div class="preview-cam-grid" id="previewCamGroup" role="group" aria-label="Ракурсы камеры">
+              <button type="button" class="btn btn-sm active" data-cam="default">3/4</button>
+              <button type="button" class="btn btn-sm" data-cam="front">Спереди</button>
+              <button type="button" class="btn btn-sm" data-cam="back">Сзади</button>
+              <button type="button" class="btn btn-sm" data-cam="left">Слева</button>
+              <button type="button" class="btn btn-sm" data-cam="right">Справа</button>
+              <button type="button" class="btn btn-sm" data-cam="head">Голова</button>
+              <button type="button" class="btn btn-sm" data-cam="torso">Торс</button>
+              <button type="button" class="btn btn-sm" data-cam="feet">Ноги</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Освещение (проверка свечения _e.png)</span>
+            <div class="preview-light-grid" id="previewLightGroup" role="group" aria-label="Освещение сцены">
+              <button type="button" class="btn btn-sm active" data-light="studio">
+                <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-aperture"></use></svg>
+                <span>Студия</span>
+              </button>
+              <button type="button" class="btn btn-sm" data-light="day">
+                <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-sun"></use></svg>
+                <span>День</span>
+              </button>
+              <button type="button" class="btn btn-sm" data-light="night">
+                <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-moon"></use></svg>
+                <span>Ночь (_e)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Видимость слоёв</span>
+            <div class="preview-toggle-grid">
+              <label class="toggle-chip"><input type="checkbox" id="pvShow2dSkin" checked> <span>2D-скин</span></label>
+              <label class="toggle-chip"><input type="checkbox" id="pvShow2dOuter" checked> <span>2-й слой 2D</span></label>
+              <label class="toggle-chip"><input type="checkbox" id="pvShow3dArmor" checked> <span>3D-модели</span></label>
+              <label class="toggle-chip"><input type="checkbox" id="pvShowGrid" checked> <span>Сетка пола</span></label>
+              <label class="toggle-chip"><input type="checkbox" id="pvShowBones"> <span>Кости</span></label>
+              <label class="toggle-chip"><input type="checkbox" id="pvAutoRotate"> <span>Вращать</span></label>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-sm btn-block" id="btnCaptureFullPng">
+            <svg class="ico" aria-hidden="true"><use href="#ico-camera"></use></svg>
+            <span>Скриншот 2D+3D (прозрачный PNG)</span>
+          </button>
+        </div>
+
+        <!-- CARD 2: 3D EQUIPMENT QUICK CONTROLS -->
+        <div class="card">
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-cube"></use></svg>
+              <span>3D-Экипировка на персонаже</span>
+            </span>
+            <span id="pv3dCountTag" class="tag">0 надето</span>
+          </div>
+
+          <div class="preview-action-row">
+            <button type="button" class="btn btn-sm helmet-test-toggle" id="btnPreviewTestHelmet" title="Примерить шлем поверх 3D-причёски (проверка SWAP_MODEL / PARTIAL_MODEL / HIDE_ALL)">
+              <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-hard-hat"></use></svg>
+              <span>Тест шлема</span>
+            </button>
+            <button type="button" class="btn btn-sm" id="btnPreviewEquipSet" title="Надеть сбалансированный 3D-набор на персонажа">
+              <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-sparkles"></use></svg>
+              <span>Комплект</span>
+            </button>
+            <button type="button" class="btn btn-sm" id="btnPreviewClear3d" title="Снять все 3D-модели и оставить чистый 2D-скин">
+              <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-x"></use></svg>
+              <span>Снять 3D</span>
+            </button>
+          </div>
+
+          <div id="preview3dSlotGroups" class="preview-3d-groups">
+            <div class="hint">Загрузите .bbmodel во вкладке «3D Модели» или нажмите «Загрузить демо» вверху.</div>
+          </div>
+
+          <div id="previewComboSection" class="preview-combo-section" style="display:none">
+            <span class="field-label">Комбо-связки (сшивка прямо в 3D)</span>
+            <div id="previewComboList" class="preview-combo-list"></div>
+          </div>
+        </div>
+
+        <!-- CARD 3: 2D SKIN & CLOTHING QUICK CONTROLS -->
+        <div class="card">
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-palette"></use></svg>
+              <span>2D-Скин и одежда (15 слоёв)</span>
+            </span>
+            <span id="pv2dCountTag" class="tag">0 / 15</span>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label class="field-label" for="pvBodyType">Телосложение</label>
+              <select id="pvBodyType">
+                <option value="wide">Wide (4px — Steve)</option>
+                <option value="slim">Slim (3px — Alex)</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="field-label">Быстрые пресеты</span>
+              <div class="btn-split-2">
+                <button type="button" class="btn btn-sm" id="btnPreviewRand2d" title="Случайная комбинация 2D-слоёв">
+                  <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-shuffle"></use></svg>
+                  <span>Случайно</span>
+                </button>
+                <button type="button" class="btn btn-sm" id="btnPreviewHazmat" title="Примерить костюм химзащиты с блокировкой слоёв (Blocks)">
+                  <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-shield"></use></svg>
+                  <span>Химзащита</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="preview2dQuickList" class="preview-2d-list"></div>
+        </div>
+
+        <!-- CARD 4: FULL 2D + 3D MODEL SUMMARY -->
+        <div class="card">
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-layers"></use></svg>
+              <span>Сводка полной модели</span>
+            </span>
+            <span id="pvBodyBadge" class="tag">Wide</span>
+          </div>
+
+          <div class="summary-metrics-grid" id="previewSummaryMetrics">
+            <div class="summary-metric">
+              <span class="summary-metric-val" id="pvMetric2d">0</span>
+              <span class="summary-metric-lbl">2D-слоёв</span>
+            </div>
+            <div class="summary-metric">
+              <span class="summary-metric-val" id="pvMetric3d">0</span>
+              <span class="summary-metric-lbl">3D-моделей</span>
+            </div>
+            <div class="summary-metric">
+              <span class="summary-metric-val" id="pvMetricCubes">0</span>
+              <span class="summary-metric-lbl">3D-кубов</span>
+            </div>
+            <div class="summary-metric">
+              <span class="summary-metric-val" id="pvMetricBlocked">0</span>
+              <span class="summary-metric-lbl">Blocks</span>
+            </div>
+          </div>
+
+          <div id="previewSummaryDetails" class="preview-summary-details"></div>
+
+          <div class="btn-split-2">
+            <button type="button" class="btn btn-sm btn-block" id="btnPreviewDl2dPng">
+              <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-download"></use></svg>
+              <span>2D PNG (64×64)</span>
+            </button>
+            <button type="button" class="btn btn-primary btn-sm btn-block" id="btnPreviewDlZip">
+              <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-package"></use></svg>
+              <span>Скачать ZIP</span>
+            </button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
 
     <!-- ==================== TAB 1: 3D BBMODEL COMBINER ==================== -->
-    <div class="workspace-tab active" data-tab-panel="bbmodel">
+    <div class="workspace-tab" data-tab-panel="bbmodel">
 
       <!-- LEFT PANE: UPLOAD + MODEL LIBRARY -->
       <aside class="pane">
@@ -1351,9 +1590,10 @@
       <div class="row-wrap">
         <span class="viewer-title">
           <svg class="ico" aria-hidden="true"><use href="#ico-box"></use></svg>
-          <span>3D Предпросмотр</span>
+          <span>Модель 2D + 3D</span>
         </span>
-        <label class="toggle-chip"><input type="checkbox" id="chkShowMannequin" checked> <span>Скин</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowMannequin" checked> <span>2D-скин</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowOuterSkin" checked> <span>2-й слой</span></label>
         <label class="toggle-chip"><input type="checkbox" id="chkShowArmor" checked> <span>3D-модели</span></label>
         <label class="toggle-chip"><input type="checkbox" id="chkWalkAnim"> <span>Ходьба</span></label>
         <label class="toggle-chip"><input type="checkbox" id="chkAutoRotate"> <span>Вращать</span></label>
@@ -1377,7 +1617,7 @@
     <div class="viewer-controls">
       <div class="row-between">
         <div class="row-wrap" id="equippedChips">
-          <span class="hint">Выберите модель или комбо-связку для примерки на 3D-манекене</span>
+          <span class="hint">Выберите 2D-слои и 3D-модели для примерки на одном персонаже</span>
         </div>
         <button class="btn btn-sm" id="btnClearEquipped">
           <svg class="ico" aria-hidden="true"><use href="#ico-x"></use></svg>
