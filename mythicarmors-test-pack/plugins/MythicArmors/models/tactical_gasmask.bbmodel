@@ -1,0 +1,891 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "tactical_gasmask",
+  "model_identifier": "",
+  "visible_box": [
+    1,
+    1,
+    0
+  ],
+  "variable_placeholders": "",
+  "variable_placeholder_buttons": [],
+  "timeline_setups": [],
+  "unhandled_root_fields": {},
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "elements": [
+    {
+      "name": "mask_chin_wrap",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.4,
+        23.85,
+        -5.05
+      ],
+      "to": [
+        4.4,
+        26.85,
+        -3.75
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "95ebc709-f8ae-5aa6-ad71-91579f95af21"
+    },
+    {
+      "name": "mask_nose_bridge",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.6,
+        26.4,
+        -5.25
+      ],
+      "to": [
+        1.6,
+        27.6,
+        -4.15
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "4399bf72-1aef-544b-9f64-6690aad31125"
+    },
+    {
+      "name": "mask_snout",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.95,
+        24.0,
+        -6.25
+      ],
+      "to": [
+        1.95,
+        26.7,
+        -4.7
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "47e3b90d-3e1d-5de8-a9d0-9f2abc69d85b"
+    },
+    {
+      "name": "mask_filter_r",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.15,
+        23.95,
+        -6.0
+      ],
+      "to": [
+        4.7,
+        26.35,
+        -4.15
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        3.35,
+        25.1,
+        -5.0
+      ],
+      "rotation": [
+        0,
+        -22,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "dda0a816-7d74-5a5d-9a8b-1e6167202fc2"
+    },
+    {
+      "name": "mask_filter_l",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.7,
+        23.95,
+        -6.0
+      ],
+      "to": [
+        -2.15,
+        26.35,
+        -4.15
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        -3.35,
+        25.1,
+        -5.0
+      ],
+      "rotation": [
+        0,
+        22,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            48,
+            16,
+            64,
+            32
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "ee0219b0-6a0c-54b7-8ad5-a72b6a1f1afb"
+    },
+    {
+      "name": "mask_strap_r",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        4.25,
+        24.75,
+        -3.8
+      ],
+      "to": [
+        4.95,
+        26.0,
+        4.55
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "6415e1d6-242e-5f20-82a1-031675fa3958"
+    },
+    {
+      "name": "mask_strap_l",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.95,
+        24.75,
+        -3.8
+      ],
+      "to": [
+        -4.25,
+        26.0,
+        4.55
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "97b314d7-5813-5957-bd78-97a2bad358b4"
+    },
+    {
+      "name": "mask_strap_back",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.6,
+        24.75,
+        4.1
+      ],
+      "to": [
+        4.6,
+        26.0,
+        4.85
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "0a0e587c-1838-5d2d-b578-a39036249c45"
+    }
+  ],
+  "outliner": [
+    {
+      "name": "head",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "color": 0,
+      "uuid": "8219ee48-bfae-5fba-84d2-e451697720fe",
+      "export": true,
+      "mirror_uv": false,
+      "isOpen": true,
+      "locked": false,
+      "visibility": true,
+      "autouv": 0,
+      "children": [
+        "95ebc709-f8ae-5aa6-ad71-91579f95af21",
+        "4399bf72-1aef-544b-9f64-6690aad31125",
+        "47e3b90d-3e1d-5de8-a9d0-9f2abc69d85b",
+        "dda0a816-7d74-5a5d-9a8b-1e6167202fc2",
+        "ee0219b0-6a0c-54b7-8ad5-a72b6a1f1afb",
+        "6415e1d6-242e-5f20-82a1-031675fa3958",
+        "97b314d7-5813-5957-bd78-97a2bad358b4",
+        "0a0e587c-1838-5d2d-b578-a39036249c45"
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "path": "",
+      "name": "tactical_gasmask_main.png",
+      "folder": "armor",
+      "namespace": "tactical_gasmask",
+      "id": "0",
+      "width": 64,
+      "height": 64,
+      "uv_width": 64,
+      "uv_height": 64,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "367c9f7c-a4f9-5762-af05-2df2aad5b57c",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAACTElEQVR4nO3YsWtTQRwH8G/LA4NIeDg8HAJC/oSHIDiGUkro0D9AOnWQItJBHEU6lU4iIkUe0sHJwakEB3EUXDpkyBjSpYQSHkd4PKKD7RCSvsS+5u5+p3mp38/Se+R+7+5+3C936dLG5s45AJRKJZhoNpvDRtpDkiRI0xRBEBi3X+2/Mxp32vPtTVG8J4oGRItPkkQ6PADA/3ZsFadq4WUCwvABGo0jrcB6fX28AySLT9PUauIujRPQaByh3+9rBWUTJVl8EATodDpOFvLw/i2j/j9OfgK4ogTK5fK1gdNJclUCSin4vq/ddmVZ+oJFLwFxAqQlMG834hQALmvaFEtA+oJFLwFxAopSArb++xL440tQ9zI04qoEsue7TtuVcQLq9XWjq/Dh4QcA8hJwdRO05bVaLQDA6K+OKHoPzxvm7saVgKkinAKqFlrHLq1u1M4lg/fPfkvCcdo9E8UPBgNRvHgHFMG94y2ruG4YFScBT1/sGvV/u//SybjiBMRx7GIeAGB0Cl1FPfqoFe9/fzxu5yZgZW174vnrF9n/7v6VarV67eftdnvi2cs7/lbWJp/z+t1env99Pmt6gbN4lUpFq2Nev/j0FwBga2dYk9HrXa32LPGbg4nnu8+eaM3TeAdovXWBGO+AvA8+f9oTT2YerHaAUspqsL/x40TKage4WEi2rnXas+jW/DR+B9jsAEkJ9Ho9q9iRO2VfFC/lrARcyLvh6cre8HQVpgRc3e1NFSYBEt0wmvcUiIiIiIiIiIiIiIiIiIiIqMAuAHqzpnS4qs0kAAAAAElFTkSuQmCC"
+    },
+    {
+      "path": "",
+      "name": "tactical_gasmask_main_e.png",
+      "folder": "armor",
+      "namespace": "tactical_gasmask",
+      "id": "1",
+      "width": 64,
+      "height": 64,
+      "uv_width": 64,
+      "uv_height": 64,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "7335aced-7160-5913-aa52-f784b90cf125",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAx0lEQVR4nO3YwQnCQBCF4YkISQneTAWpwMoswMqsIBXozRL0ZA4SkJzMsuGt+/7vvIHHZGZhJ8Jcow6Qw3B7vlO+G/uu2eUO82/26gC5nI7tqvPX+ysiIuw7gAKoA6hVcwfMM72WfQdQAHUANQqgDqBGAdQBAK069gGPS9o+4HBmH1DNWyDi80d/OffdMfYdYF+AYkdguegc+26TC9u+AyiAOoBasXfAVjO/ZN8B9gUodgRSpLwJ7DsAAAAAAAAAAAAAAACgehP+fxl31wa46AAAAABJRU5ErkJggg=="
+    },
+    {
+      "path": "",
+      "name": "tactical_gasmask_layer_1.png",
+      "folder": "armor",
+      "namespace": "tactical_gasmask",
+      "id": "2",
+      "width": 64,
+      "height": 32,
+      "uv_width": 64,
+      "uv_height": 32,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "bbfa2e25-e2ca-59f9-99e2-fd3c8896022e",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAABDElEQVR4nGNkIAAc/BL+45M/sGkBIyEzBjNgGmgHDDQYDYCBdsBAg9EAGGgHDDQYDYCBdsBAAxZC9byXlw8hM/DqJwQGuh0xmgIIKdi2bQvDu0kzsMoJ5WVQ3UH0BiM+BYz4ACCYBRgYhkdSxwVGfAoY8QFA9Tq4a8YaitoFZRkheN1EyHxC+tHBiE8BowEw0A4YaEBxGUCoL0EpIKIvghcQKhNGfAogqiFEKsAVa9u2baGFdRQBmgQAAwMDw5SuOgaBfecYGBgYGD44GTHklDXRyiqKwGgWoKXhH5yMKDaD1tmGhdKW22DM16SA0SwwpauOIgOUdMywig/WQg8d0KQMGErZYsRngREfAAA7zjNMnRq+4gAAAABJRU5ErkJggg=="
+    },
+    {
+      "path": "",
+      "name": "tactical_gasmask_layer_2.png",
+      "folder": "armor",
+      "namespace": "tactical_gasmask",
+      "id": "3",
+      "width": 64,
+      "height": 32,
+      "uv_width": 64,
+      "uv_height": 32,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "a1ea27eb-3e93-5aeb-b7f0-b9c51b978a89",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAApElEQVR4nGNgGAWjYBSMglEwCkbBKBgFo2AUjIJRMApGwUgDjOgCckpa//FpeHTvGoaeoQyYBtoBAw1GA2CgHTDQgNHBLwFvnicEDmxaMKTLhBGfAkYDYKAdMNCABV3Ay8sHhb9t2xa6OWYgwGgKoNQAQi1HSgGtW54YATDckzw6oDgF4AI5ZU0o/ClddbSyiiIwWgZQ2pKjdRlAa0BxATPUC0EAcN8bxMhm36QAAAAASUVORK5CYII="
+    },
+    {
+      "path": "",
+      "name": "tactical_gasmask_helmet.png",
+      "folder": "armor",
+      "namespace": "tactical_gasmask",
+      "id": "4",
+      "width": 16,
+      "height": 16,
+      "uv_width": 16,
+      "uv_height": 16,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "535a9943-7a84-5d1c-a6a0-0c8968b82099",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAwUlEQVR4nGNgGPKAEZkjICT+nxhNH969hOtjQZesapuKV3NbVTYKnwmbomMnzzAcO3kGJ5+gAaQADC8wMDAwWJmb4OUjA4xA5BMQZmBgYGDIKWtCUTilq46BgYGB4dOHt5iB2DVjzX9sirdt28LAwMDA4OXlg27ofwYGBoayjBBGuBeWBNxiYGBgYIjZoAY36N0sKHsDwnB0dVjDAAaE0iCKGbzUcKrBGgufPrwlSgzFBchOhwbSf5jfkcWQ1Q0OAADwJ0FmCwQAfAAAAABJRU5ErkJggg=="
+    }
+  ]
+}

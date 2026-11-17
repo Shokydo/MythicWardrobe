@@ -1,0 +1,613 @@
+# ==============================================================================
+# MythicWardrobe + MythicArmors — Тестовый набор 3D-брони и 2D-одежды
+# ==============================================================================
+# Положите этот файл в: plugins/MythicMobs/Items/MythicWardrobe_TestArmorPack.yml
+# А 3 файла .bbmodel в:  plugins/MythicArmors/models/
+# После этого выполните:
+#   /ma reload
+#   /mm reload
+#   /wardrobe reload
+# И выдайте игроку тестовый набор:
+#   /mm i give <ник> TacticalWardenHelmet
+#   /mm i give <ник> TacticalWardenVest
+#   /mm i give <ник> TacticalWardenLeggings
+#   /mm i give <ник> TacticalWardenBoots
+#   /mm i give <ник> GoldWardenHelmetCosmetic
+#   /mm i give <ник> GoldWardenChestCosmetic
+#   /mm i give <ник> TacticalGasMask3D
+#   /mm i give <ник> TacticalBackpack3D
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. ОСНОВНАЯ 3D-БРОНЯ (MythicArmors: tactical_warden.bbmodel)
+#    Подходит в слоты «Статы» И в слоты «Косметика»!
+#    ВАЖНО по документации MythicArmors:
+#    • У шлемов указывается Equippable.Slot: HEAD и Options.ItemModel (БЕЗ Equippable.Model!)
+#    • У нагрудника/поножей/ботинок указывается Equippable.Model + Slot + Options.ItemModel
+# ------------------------------------------------------------------------------
+TacticalWardenHelmet:
+  Material: LEATHER_HELMET
+  Display: '&bТактический шлем Стража &7[3D]'
+  Lore:
+    - '&7Настоящая 3D-броня MythicArmors'
+    - '&8Слот: &fШлем (Статы / Косметика)'
+    - '&bКомбо: &7+ Тактический противогаз 3D = совмещённая 3D-модель!'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:tactical_warden_head_piece
+    Unbreakable: true
+    HideFlags: true
+  Attributes:
+    Head:
+      Armor: 4
+      ArmorToughness: 2
+
+TacticalWardenVest:
+  Material: LEATHER_CHESTPLATE
+  Display: '&bТактический бронежилет Стража &7[3D]'
+  Lore:
+    - '&7Настоящая 3D-броня MythicArmors'
+    - '&8Слот: &fБронежилет (Статы / Косметика)'
+    - '&aСовместим с 3D-рюкзаком поверх бронежилета!'
+  Equippable:
+    Model: mythicarmor:tactical_warden_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:tactical_warden_chest_piece
+    Unbreakable: true
+    HideFlags: true
+  Attributes:
+    Chest:
+      Armor: 8
+      ArmorToughness: 3
+
+TacticalWardenLeggings:
+  Material: LEATHER_LEGGINGS
+  Display: '&bТактические поножи Стража &7[3D]'
+  Lore:
+    - '&7Настоящая 3D-броня MythicArmors'
+    - '&8Слот: &fПоножи (Статы / Косметика)'
+  Equippable:
+    Model: mythicarmor:tactical_warden_legs_piece
+    Slot: LEGS
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:tactical_warden_legs_piece
+    Unbreakable: true
+    HideFlags: true
+  Attributes:
+    Legs:
+      Armor: 6
+      ArmorToughness: 2
+
+TacticalWardenBoots:
+  Material: LEATHER_BOOTS
+  Display: '&bТактические ботинки Стража &7[3D]'
+  Lore:
+    - '&7Настоящая 3D-броня MythicArmors'
+    - '&8Слот: &fБотинки / Пояс (Статы / Косметика)'
+  Equippable:
+    Model: mythicarmor:tactical_warden_feet_piece
+    Slot: FEET
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:tactical_warden_feet_piece
+    Unbreakable: true
+    HideFlags: true
+  Attributes:
+    Feet:
+      Armor: 3
+      ArmorToughness: 2
+
+# ------------------------------------------------------------------------------
+# 2. КОСМЕТИЧЕСКАЯ 3D-БРОНЯ (MythicArmors: gold_warden_cosmetic.bbmodel)
+#    Надевается в слоты «Косметика» — перекрывает вид реальной брони, сохраняя её статы!
+# ------------------------------------------------------------------------------
+GoldWardenHelmetCosmetic:
+  Material: LEATHER_HELMET
+  Display: '&6Золотой шлем Стража &d[3D]'
+  Lore:
+    - '&dСамостоятельный 3D-шлем (Статы / Косметика / Маска 3D)'
+    - '&7Можно носить отдельно ИЛИ вместе с другой 3D-моделью!'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_gold'
+  Options:
+    ItemModel: mythicarmor:gold_warden_cosmetic_head_piece
+    Unbreakable: true
+    HideFlags: true
+
+GoldWardenChestCosmetic:
+  Material: LEATHER_CHESTPLATE
+  Display: '&6Золотой бронежилет Стража &d[3D]'
+  Lore:
+    - '&dСамостоятельный 3D-нагрудник (Статы / Косметика / 3D-слой)'
+  Equippable:
+    Model: mythicarmor:gold_warden_cosmetic_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_gold'
+  Options:
+    ItemModel: mythicarmor:gold_warden_cosmetic_chest_piece
+    Unbreakable: true
+    HideFlags: true
+
+GoldWardenLegsCosmetic:
+  Material: LEATHER_LEGGINGS
+  Display: '&6Золотые поножи Стража &d[3D]'
+  Lore:
+    - '&dСамостоятельные 3D-поножи (Статы / Косметика)'
+  Equippable:
+    Model: mythicarmor:gold_warden_cosmetic_legs_piece
+    Slot: LEGS
+    EquipSound: 'item.armor.equip_gold'
+  Options:
+    ItemModel: mythicarmor:gold_warden_cosmetic_legs_piece
+    Unbreakable: true
+    HideFlags: true
+
+GoldWardenBootsCosmetic:
+  Material: LEATHER_BOOTS
+  Display: '&6Золотые ботинки Стража &d[3D]'
+  Lore:
+    - '&dСамостоятельные 3D-ботинки (Статы / Косметика)'
+  Equippable:
+    Model: mythicarmor:gold_warden_cosmetic_feet_piece
+    Slot: FEET
+    EquipSound: 'item.armor.equip_gold'
+  Options:
+    ItemModel: mythicarmor:gold_warden_cosmetic_feet_piece
+    Unbreakable: true
+    HideFlags: true
+
+# ------------------------------------------------------------------------------
+# 2B. 3D-РЮКЗАК MYTHICARMORS (tactical_backpack.bbmodel)
+#     100% самостоятельный! Надевается ОТДЕЛЬНО (Нагрудник / Косметика / Рюкзак 3D)
+#     ИЛИ ОДНОВРЕМЕННО поверх ЛЮБОГО бронежилета!
+# ------------------------------------------------------------------------------
+TacticalBackpackArmor:
+  Material: LEATHER_CHESTPLATE
+  Display: '&aТактический полевой рюкзак &7[3D]'
+  Lore:
+    - '&7Модель MythicArmors: &ftactical_backpack.bbmodel'
+    - '&aМожно надеть ОТДЕЛЬНО &7(в любой слот торса)'
+    - '&bИЛИ ОДНОВРЕМЕННО &7с любым бронежилетом!'
+    - '&8Лямки на груди + рюкзак, спальник и рация за спиной'
+  Attributes:
+    Chest:
+      Armor: 4
+      ArmorToughness: 1
+  Equippable:
+    Model: mythicarmor:tactical_backpack_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:tactical_backpack_chest_piece
+    Unbreakable: true
+    HideFlags: true
+
+# ------------------------------------------------------------------------------
+# 3. НУЛЕВОЙ ЛАГ: КОМБО-МОДЕЛИ (Бронежилет + Рюкзак / Шлем + Противогаз)
+#    Подставляются АВТОМАТИЧЕСКИ через combo-overrides.yml, когда надеты ОБА
+#    предмета одновременно — 0 сущностей, 0 лага, жёсткая привязка к кости тела!
+#    При этом маска и рюкзак по-прежнему работают 100% САМОСТОЯТЕЛЬНО без брони!
+# ------------------------------------------------------------------------------
+TacticalWardenHelmetMasked:
+  Material: LEATHER_HELMET
+  Display: '&bШлем Стража с противогазом &7[3D]'
+  Lore:
+    - '&7Цельная 3D-модель (Шлем Стража + Противогаз)'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:tactical_warden_masked_head_piece
+    Unbreakable: true
+    HideFlags: true
+
+GoldWardenHelmetMasked:
+  Material: LEATHER_HELMET
+  Display: '&6Золотой шлем Стража с противогазом &7[3D]'
+  Lore:
+    - '&7Цельная 3D-модель (Золотой шлем + Противогаз)'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_gold'
+  Options:
+    ItemModel: mythicarmor:gold_warden_masked_head_piece
+    Unbreakable: true
+    HideFlags: true
+
+TacticalWardenVestBackpack:
+  Material: LEATHER_CHESTPLATE
+  Display: '&bБронежилет Стража + Рюкзак &7[Combo 3D]'
+  Lore:
+    - '&7Цельная 3D-модель: Тактический жилет + 3D-рюкзак на одной кости body!'
+    - '&aНулевой лаг при беге и прыжках!'
+  Equippable:
+    Model: mythicarmor:tactical_warden_backpack_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:tactical_warden_backpack_chest_piece
+    Unbreakable: true
+    HideFlags: true
+
+GoldWardenChestBackpack:
+  Material: LEATHER_CHESTPLATE
+  Display: '&6Золотой бронежилет + Рюкзак &7[Combo 3D]'
+  Lore:
+    - '&7Цельная 3D-модель: Золотой жилет + 3D-рюкзак на одной кости body!'
+    - '&aНулевой лаг при беге и прыжках!'
+  Equippable:
+    Model: mythicarmor:gold_warden_backpack_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_gold'
+  Options:
+    ItemModel: mythicarmor:gold_warden_backpack_chest_piece
+    Unbreakable: true
+    HideFlags: true
+
+# ------------------------------------------------------------------------------
+# 4. САМОСТОЯТЕЛЬНАЯ 3D-МАСКА И РЮКЗАК (100% НЕЗАВИСИМЫЕ МОДЕЛИ!)
+#    Каждая модель надевается САМА ПО СЕБЕ (без шлема/бронежилета!)
+#    И ОДНОВРЕМЕННО с любой другой 3D-бронёй!
+# ------------------------------------------------------------------------------
+TacticalGasMask3D:
+  Material: LEATHER_HELMET
+  Display: '&aТактический противогаз &7[3D]'
+  Lore:
+    - '&7Модель MythicArmors: &ftactical_gasmask.bbmodel'
+    - '&aНадевается САМОСТОЯТЕЛЬНО &7(в Шлем, Косметику ИЛИ Маску 3D — БЕЗ шлема!)'
+    - '&bИЛИ ОДНОВРЕМЕННО &7поверх ЛЮБОГО шлема!'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:tactical_gasmask_head_piece
+    Unbreakable: true
+    HideFlags: true
+
+TacticalBackpack3D:
+  Material: LEATHER_CHESTPLATE
+  Display: '&6Полевой тактический рюкзак &7[Рюкзак 3D]'
+  Lore:
+    - '&7Модель MythicArmors: &ftactical_backpack.bbmodel'
+    - '&aНадевается САМОСТОЯТЕЛЬНО &7или &bОДНОВРЕМЕННО с бронежилетом!'
+  Equippable:
+    Model: mythicarmor:tactical_backpack_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:tactical_backpack_chest_piece
+    Unbreakable: true
+    HideFlags: true
+
+# ------------------------------------------------------------------------------
+# 4B. 3D ПРИЧЁСКИ (ПЕРЕКРАШИВАЕМЫЕ ЧЕРЕЗ Options.Color + _t.png!)
+#     Надеваются ОТДЕЛЬНО (в слот Шлема или Причёски 3D) ИЛИ ОДНОВРЕМЕННО
+#     с 3D-маской и 3D-шлемом (с /wardrobe buildheadpack — 0 лага!)
+# ------------------------------------------------------------------------------
+HairSpiky3D_Dark:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Взъерошенная» &8[Тёмная]'
+  Lore:
+    - '&7Модель MythicArmors: &fhair_spiky_3d.bbmodel'
+    - '&aНосится отдельно ИЛИ в слоте «Причёска (3D)» вместе с маской/шлемом!'
+    - '&dМеняйте Options.Color для любого цвета волос!'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_spiky_3d_head_piece
+    Color: 42,36,46
+    Unbreakable: true
+    HideFlags: true
+
+HairSpiky3D_Blonde:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Взъерошенная» &e[Блонд]'
+  Lore:
+    - '&7Модель MythicArmors: &fhair_spiky_3d.bbmodel'
+    - '&aНосится отдельно ИЛИ вместе с маской/шлемом!'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_spiky_3d_head_piece
+    Color: 235,198,96
+    Unbreakable: true
+    HideFlags: true
+
+HairSpiky3D_Crimson:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Взъерошенная» &c[Алая]'
+  Lore:
+    - '&7Модель MythicArmors: &fhair_spiky_3d.bbmodel'
+    - '&aНосится отдельно ИЛИ вместе с маской/шлемом!'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_spiky_3d_head_piece
+    Color: 196,46,56
+    Unbreakable: true
+    HideFlags: true
+
+HairPonytail3D_Chestnut:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Хвост» &6[Каштановая]'
+  Lore:
+    - '&7Модель MythicArmors: &fhair_ponytail_3d.bbmodel'
+    - '&aДлинный 3D-хвост с резинкой (перекрашивается Options.Color!)'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_ponytail_3d_head_piece
+    Color: 124,74,44
+    Unbreakable: true
+    HideFlags: true
+
+HairPonytail3D_Silver:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Хвост» &f[Серебристая]'
+  Lore:
+    - '&7Модель MythicArmors: &fhair_ponytail_3d.bbmodel'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_ponytail_3d_head_piece
+    Color: 222,228,242
+    Unbreakable: true
+    HideFlags: true
+
+HairPonytail3D_HelmetSafe:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Хвост» &7[Под шлемом — только пряди]'
+  Lore:
+    - '&7Служебный вариант (hair-3d.yml PARTIAL_MODEL):'
+    - '&7Высокий хвост скрыт под шлемом, передние пряди остаются!'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_ponytail_3d_under_helmet_head_piece
+    Color: 225,192,110
+    Unbreakable: true
+    HideFlags: true
+
+HairBob3D_Black:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Каре» &8[Чёрная]'
+  Lore:
+    - '&7Модель MythicArmors: &fhair_bob_3d.bbmodel'
+    - '&aОбъёмное 3D-каре с заколкой (перекрашивается Options.Color!)'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_bob_3d_head_piece
+    Color: 34,32,40
+    Unbreakable: true
+    HideFlags: true
+
+HairBob3D_Rose:
+  Material: LEATHER_HELMET
+  Display: '&d3D Причёска «Каре» &d[Розовая]'
+  Lore:
+    - '&7Модель MythicArmors: &fhair_bob_3d.bbmodel'
+  Equippable:
+    Slot: HEAD
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:hair_bob_3d_head_piece
+    Color: 236,132,178
+    Unbreakable: true
+    HideFlags: true
+
+# ------------------------------------------------------------------------------
+# 4C. 3D ПОЯСА, КОБУРЫ И ДЕКОР НА ТАЛИЮ (слот belt_3d или Поножи!)
+#     Носятся САМОСТОЯТЕЛЬНО (без поножей!) ИЛИ ОДНОВРЕМЕННО с поножами!
+# ------------------------------------------------------------------------------
+TacticalUtilityBelt3D:
+  Material: LEATHER_LEGGINGS
+  Display: '&6Тактический пояс с кобурой &7[Пояс 3D]'
+  Lore:
+    - '&7Модель MythicArmors: &fbelt_tactical_3d.bbmodel'
+    - '&a3D-подсумки, кобура на бедре и светящийся LED!'
+    - '&bКладётся в слот «Пояс / Декор (3D)» в разделе Штанов'
+  Equippable:
+    Model: mythicarmor:belt_tactical_3d_legs_piece
+    Slot: LEGS
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:belt_tactical_3d_legs_piece
+    Unbreakable: true
+    HideFlags: true
+
+AdventurerPouchBelt3D:
+  Material: LEATHER_LEGGINGS
+  Display: '&eПояс искателя с зельем и кинжалом &7[Пояс 3D]'
+  Lore:
+    - '&7Модель MythicArmors: &fbelt_adventurer_3d.bbmodel'
+    - '&aСумка, светящаяся колба маны, свиток и кинжал в ножнах!'
+    - '&bКладётся в слот «Пояс / Декор (3D)» в разделе Штанов'
+  Equippable:
+    Model: mythicarmor:belt_adventurer_3d_legs_piece
+    Slot: LEGS
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:belt_adventurer_3d_legs_piece
+    Unbreakable: true
+    HideFlags: true
+
+RoyalChainBelt3D:
+  Material: LEATHER_LEGGINGS
+  Display: '&cКоролевский пояс с золотыми цепями &7[Пояс 3D]'
+  Lore:
+    - '&7Модель MythicArmors: &fbelt_chains_3d.bbmodel'
+    - '&aЗолотые цепи, рубин и перекрашиваемый кушак (_t.png)!'
+    - '&dМеняйте Options.Color для любого цвета ткани!'
+  Equippable:
+    Model: mythicarmor:belt_chains_3d_legs_piece
+    Slot: LEGS
+    EquipSound: 'item.armor.equip_leather'
+  Options:
+    ItemModel: mythicarmor:belt_chains_3d_legs_piece
+    Color: 178,34,48
+    Unbreakable: true
+    HideFlags: true
+
+# Комбо-модели Поножи + 3D-Пояс (0 лага, автоподмена через combo-overrides.yml!)
+TacticalWardenLegsWithBelt:
+  Material: DIAMOND_LEGGINGS
+  Display: '&bТактические поножи «Стража» + Пояс &7[Комбо 3D]'
+  Lore:
+    - '&7Склеенная комбо-модель (0 лага): &ftactical_warden_belt.bbmodel'
+  Equippable:
+    Model: mythicarmor:tactical_warden_belt_legs_piece
+    Slot: LEGS
+    EquipSound: 'item.armor.equip_diamond'
+  Options:
+    ItemModel: mythicarmor:tactical_warden_belt_legs_piece
+    Unbreakable: true
+    HideFlags: true
+
+GoldWardenLegsWithBelt:
+  Material: LEATHER_LEGGINGS
+  Display: '&6Золотые поножи «Стража» + Цепи &7[Комбо 3D]'
+  Lore:
+    - '&7Склеенная комбо-модель (0 лага): &fgold_warden_belt.bbmodel'
+  Equippable:
+    Model: mythicarmor:gold_warden_belt_legs_piece
+    Slot: LEGS
+    EquipSound: 'item.armor.equip_gold'
+  Options:
+    ItemModel: mythicarmor:gold_warden_belt_legs_piece
+    Color: 178,34,48
+    Unbreakable: true
+    HideFlags: true
+
+# ------------------------------------------------------------------------------
+# 5. ПРИМЕРЫ 2D-ОДЕЖДЫ ИЗ СТАРТОВОГО ПАКА (носится ПОД 3D-бронёй!)
+# ------------------------------------------------------------------------------
+WardrobeLeatherJacket:
+  Material: LEATHER_CHESTPLATE
+  Display: '&eКожаная куртка &7[Слой скина 2D]'
+  Lore:
+    - '&7Слот: &fКуртка / Кофта (Скин)'
+    - '&7Рисуется прямо на 2D-скине под 3D-бронежилетом!'
+  Options:
+    Color: 96,60,38
+  Wardrobe:
+    Slot: jacket
+    Texture: leather_brown.png
+
+WardrobeBlueJeans:
+  Material: LEATHER_LEGGINGS
+  Display: '&9Синие джинсы &7[Слой скина 2D]'
+  Lore:
+    - '&7Слот: &fШтаны (Скин)'
+  Options:
+    Color: 58,92,148
+  Wardrobe:
+    Slot: pants
+    Texture: blue_jeans.png
+
+WardrobeCombatBoots:
+  Material: LEATHER_BOOTS
+  Display: '&8Армейские берцы &7[Слой скина 2D]'
+  Lore:
+    - '&7Слот: &fБотинки (Скин)'
+  Options:
+    Color: 38,36,38
+  Wardrobe:
+    Slot: boots_skin
+    Texture: combat_boots.png
+
+WardrobeRedBandana:
+  Material: RED_DYE
+  Display: '&cКрасная бандана &7[Маска 2D]'
+  Lore:
+    - '&7Слот: &fМаска (Скин)'
+  Wardrobe:
+    Slot: mask_skin
+    Texture: bandana_red.png
+
+# 2D-пояса и декоративные ремни (слот belt_skin — поверх штанов!)
+WardrobeLeatherBelt:
+  Material: LEATHER
+  Display: '&6Кожаный ремень с пряжкой &7[Пояс 2D]'
+  Lore:
+    - '&7Слот: &fПояс / Ремень (Скин)'
+    - '&7Рисуется поверх любых штанов!'
+  Wardrobe:
+    Slot: belt_skin
+    Texture: leather_belt.png
+
+WardrobeTacticalBelt:
+  Material: IRON_NUGGET
+  Display: '&aТактический ремень с подсумками &7[Пояс 2D]'
+  Lore:
+    - '&7Слот: &fПояс / Ремень (Скин)'
+  Wardrobe:
+    Slot: belt_skin
+    Texture: tactical_belt.png
+
+WardrobeGoldChainBelt:
+  Material: GOLD_NUGGET
+  Display: '&eПояс с золотой цепью и рубином &7[Пояс 2D]'
+  Lore:
+    - '&7Слот: &fПояс / Ремень (Скин)'
+  Wardrobe:
+    Slot: belt_skin
+    Texture: gold_chain_belt.png
+
+WardrobeHolsterBelt:
+  Material: TRIPWIRE_HOOK
+  Display: '&6Ремень охотника с кобурой и флягой &7[Пояс 2D]'
+  Lore:
+    - '&7Слот: &fПояс / Ремень (Скин)'
+  Wardrobe:
+    Slot: belt_skin
+    Texture: utility_holster_belt.png
+
+WardrobeCrimsonSash:
+  Material: RED_BANNER
+  Display: '&cАлый боевой кушак &7[Пояс 2D]'
+  Lore:
+    - '&7Слот: &fПояс / Ремень (Скин)'
+  Wardrobe:
+    Slot: belt_skin
+    Texture: crimson_sash.png
+
+# ------------------------------------------------------------------------------
+# 6. ПРИМЕР ЦЕЛЬНОГО КОСТЮМА С БЛОКИРОВКОЙ СЛОЁВ (v1.8.0)
+#    Надевается в слот `jacket`, автоматически снимает и блокирует штаны,
+#    футболку, пояс, перчатки, носки, ботинки, маску и шапку!
+# ------------------------------------------------------------------------------
+WardrobeHazmatSuit:
+  Material: YELLOW_DYE
+  Display: '&eКостюм химзащиты &7[Полный комплект 2D]'
+  Lore:
+    - '&7Слот: &fКуртка / Костюм (Скин)'
+    - '&cБлокирует слои: &7футболка, штаны, пояс,'
+    - '&7перчатки, носки, ботинки, маска, шапка'
+    - '&eПри надевании мешающая одежда вернётся в инвентарь!'
+  Wardrobe:
+    Slot: jacket
+    Texture: hazmat_suit.png
+    Blocks:
+      - undershirt
+      - pants
+      - belt_skin
+      - gloves
+      - socks
+      - boots_skin
+      - mask_skin
+      - hat
+    BlockMode: UNEQUIP

@@ -1,0 +1,33 @@
+name: MythicWardrobe
+version: '${version}'
+main: dev.mythicwardrobe.MythicWardrobePlugin
+api-version: '1.21'
+authors: [MythicWardrobe]
+description: Modular 2D skin layering, cosmetic armor, 3D accessories & MythicMobs/MythicArmors wardrobe system.
+softdepend:
+  - SkinsRestorer
+  - MythicMobs
+  - MythicCrucible
+  - MythicArmors
+  - packetevents
+  - ProtocolLib
+
+commands:
+  wardrobe:
+    description: Открыть гардероб или управлять слоями одежды, режимом меню и типом тела
+    aliases: [wd, clothes, одеть]
+    usage: /wardrobe [open|mode|web|set|clear|reset|bodytype|layers|tag|block|merge|buildheadpack|list|prewarm|reload|debug]
+
+permissions:
+  mythicwardrobe.use:
+    description: Доступ к гардеробу и меню слотов брони
+    default: true
+  mythicwardrobe.web:
+    description: Доступ к временному тестовому веб-редактору (/wardrobe web)
+    default: true
+  mythicwardrobe.quickequip:
+    description: Быстрое надевание одежды ПКМ из руки
+    default: true
+  mythicwardrobe.admin:
+    description: Админ-команды (/wardrobe set, clear, reset, tag, reload, debug)
+    default: op

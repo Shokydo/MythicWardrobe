@@ -1,0 +1,116 @@
+# ==============================================================================
+# MythicWardrobe — Конструктор слоёв скина (Z-порядок наложения PNG 64x64)
+# ==============================================================================
+# Вы можете свободно ДОБАВЛЯТЬ сюда свои строки/слои (например: tattoos, makeup,
+# blood, wings_2d, clan_patch и любые другие).
+# После команды /wardrobe reload:
+#   • Автоматически создастся папка plugins/MythicWardrobe/overlays/<folder>/
+#   • Новый слой сразу появится в type= (в /wardrobe set, /wardrobe clear,
+#     автодополнении Tab и скиллах MythicMobs: - wardrobe{type=...;texture=...})
+#
+# Параметры каждого слоя:
+#   priority            — порядок наложения (меньше = ниже, больше = выше поверх других)
+#   folder              — подпапка внутри plugins/MythicWardrobe/overlays/
+#   replaces-base-skin  — если true, этот слой ПОЛНОСТЬЮ заменяет базовый скин игрока
+#                         (используйте для body_skin — цвета кожи/тела персонажа!)
+#   clear-outer-regions — зоны 2-го слоя базового скина, очищаемые перед рисованием:
+#                         HEAD_OUTER, BODY_OUTER, RIGHT_ARM_OUTER, LEFT_ARM_OUTER,
+#                         RIGHT_LEG_OUTER, LEFT_LEG_OUTER, ALL_OUTER
+#   aliases             — дополнительные названия для type= в командах и MythicMobs
+#
+# Поддержка slim / wide (узкие / широкие руки):
+#   Внутри папки любого слоя можно разложить варианты по подпапкам:
+#     overlays/body_skin/wide/pale.png   (широкие руки 4px — Steve/Classic)
+#     overlays/body_skin/slim/pale.png   (узкие руки 3px — Alex/Slim)
+#   А в команде/скилле писать просто texture=pale.png — плагин сам выберет нужный файл
+#   под текущий bodytype игрока!
+# ==============================================================================
+
+layers:
+  # БАЗА: цвет кожи / голое тело персонажа (полностью заменяет базовый скин!)
+  body_skin:
+    priority: 0
+    folder: "body_skin"
+    replaces-base-skin: true
+    aliases: ["body", "bodyskin", "skin_color", "skin"]
+
+  # Черты лица и причёска (рисуются поверх body_skin)
+  eyes:
+    priority: 5
+    folder: "eyes"
+    aliases: ["eye"]
+
+  eyebrows:
+    priority: 8
+    folder: "eyebrows"
+    aliases: ["brows"]
+
+  hair:
+    priority: 10
+    folder: "hairs"
+    aliases: ["hairs", "hairstyle"]
+
+  beard:
+    priority: 12
+    folder: "beards"
+    aliases: ["beards", "facial_hair"]
+
+  scars:
+    priority: 14
+    folder: "scars"
+    aliases: ["tattoos", "markings"]
+
+  # Основные слои одежды (также связаны с GUI-слотами в slots.yml)
+  pants:
+    priority: 15
+    folder: "pants"
+    clear-outer-regions:
+      - RIGHT_LEG_OUTER
+      - LEFT_LEG_OUTER
+    aliases: ["legs", "trousers"]
+
+  belt_skin:
+    priority: 18
+    folder: "belts"
+    aliases: ["belt", "waist_skin", "sash"]
+
+  undershirt:
+    priority: 20
+    folder: "undershirts"
+    clear-outer-regions:
+      - BODY_OUTER
+      - RIGHT_ARM_OUTER
+      - LEFT_ARM_OUTER
+    aliases: ["tshirt", "shirt", "underwear_top"]
+
+  socks:
+    priority: 25
+    folder: "socks"
+
+  jacket:
+    priority: 30
+    folder: "jackets"
+    clear-outer-regions:
+      - BODY_OUTER
+      - RIGHT_ARM_OUTER
+      - LEFT_ARM_OUTER
+    aliases: ["coat", "hoodie", "shirts"]
+
+  boots_skin:
+    priority: 35
+    folder: "boots"
+    aliases: ["boots", "shoes"]
+
+  gloves:
+    priority: 40
+    folder: "gloves"
+
+  mask_skin:
+    priority: 60
+    folder: "masks"
+    aliases: ["mask"]
+
+  hat:
+    priority: 70
+    folder: "hats"
+    aliases: ["hats", "headwear"]

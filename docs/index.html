@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MythicWardrobe Studio v2.2 — 3D .bbmodel, 3D-Волосы, 2D Скины и GUI Редактор (HTML Standalone)</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- TOP NAVIGATION -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-badge">MW v1.9</span>
+      <span>MythicWardrobe Studio</span>
+      <span class="brand-offline" title="Работает полностью в браузере без Python и без сервера!">100% HTML</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="bbmodel">🧩 3D Модели &amp; Волосы</button>
+      <button class="tab-btn" data-tab="skins">🎨 2D Текстуры &amp; Lore</button>
+      <button class="tab-btn" data-tab="gui">🪟 GUI Инвентарь</button>
+      <button class="tab-btn" data-tab="configs">⚙ Конфиги v1.9</button>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="btn btn-sm" id="btnLoadDemo" title="Загрузить все 10 демо .bbmodel (включая 3D-пояса) и 68 стартовых 2D-скинов (включая Костюм химзащиты)">✨ Загрузить демо</button>
+      <button class="btn btn-green btn-sm" id="btnQuickExport">📦 Скачать готовый ZIP</button>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="workspace" id="mainWorkspace">
+
+    <!-- ==================== TAB 1: 3D BBMODEL COMBINER ==================== -->
+    <div class="workspace-tab active" data-tab-panel="bbmodel">
+
+      <!-- LEFT PANE: UPLOAD + MODEL LIBRARY -->
+      <aside class="pane">
+        <div class="card">
+          <div class="card-title">1. Загрузка .bbmodel моделей</div>
+          <div class="dropzone" id="bbDropzone">
+            <strong>Перетащите .bbmodel файлы сюда</strong>
+            <span>или нажмите, чтобы выбрать сразу несколько моделей (обработка локально в браузере!)</span>
+            <input type="file" id="bbFileInput" accept=".bbmodel,.json" multiple hidden>
+          </div>
+          <div class="row">
+            <button class="btn btn-sm btn-block" id="btnLoadDemo3d">✨ Демо (10 моделей + 3D-пояса)</button>
+            <button class="btn btn-danger btn-sm" id="btnClear3d" title="Очистить список">🗑</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>Загруженные модели</span>
+            <span id="modelCountBadge" class="tag">0</span>
+          </div>
+          <div class="row" style="margin-bottom:8px">
+            <select id="filterCategory">
+              <option value="all">Все категории</option>
+              <option value="helmets">Шлемы (HEAD)</option>
+              <option value="mask_3d">3D-Маски / Очки (HEAD)</option>
+              <option value="hair_3d">3D-Причёски (HEAD)</option>
+              <option value="armor_chest">Нагрудники (CHEST)</option>
+              <option value="backpack_3d">3D-Рюкзаки / Плащи (CHEST)</option>
+              <option value="armor_legs">Поножи (LEGS)</option>
+              <option value="belt_3d">3D-Пояса / Декор (LEGS)</option>
+              <option value="armor_feet">Ботинки (FEET)</option>
+            </select>
+          </div>
+          <div id="modelList">
+            <div class="hint">Загрузите свои .bbmodel или нажмите «✨ Демо» — туда уже вшиты 3D-причёски, 3D-пояса (tactical / adventurer / chains), рюкзак, противогаз и броня!</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CENTER PANE: SHARED 3D VIEWPORT (PLACEHOLDER, MOVED BY JS) -->
+      <section class="pane pane-viewer" id="viewerMount3d"></section>
+
+      <!-- RIGHT PANE: INSPECTOR + BLOCKS + CATEGORY LINKS + ZIP EXPORT -->
+      <aside class="pane">
+        <!-- INSPECTOR -->
+        <div class="card" id="inspectorCard">
+          <div class="card-title">
+            <span>2. Подгонка, Кости и Блокировки</span>
+            <span id="inspectorModelTag" class="tag">Не выбрано</span>
+          </div>
+          <div id="inspectorEmpty" class="hint">
+            Выберите модель слева, чтобы настроить категорию, кости MythicArmors, смещение, описание, цвет и правила блокировки слотов (v1.8.0).
+          </div>
+          <div id="inspectorBody" style="display:none">
+            <div class="grid-2">
+              <div>
+                <label class="field-label">ID модели (.bbmodel)</label>
+                <input type="text" id="inpExportId" placeholder="gold_warden_chest">
+              </div>
+              <div>
+                <label class="field-label">MythicMobs ID</label>
+                <input type="text" id="inpMythicId" placeholder="GoldWardenChestplate">
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div>
+                <label class="field-label">Категория</label>
+                <select id="inpCategory">
+                  <option value="helmets">Шлем (HEAD)</option>
+                  <option value="mask_3d">3D-Маска / Очки (HEAD)</option>
+                  <option value="hair_3d">3D-Причёска (HEAD)</option>
+                  <option value="armor_chest">Нагрудник (CHEST)</option>
+                  <option value="backpack_3d">3D-Рюкзак / Плащ (CHEST)</option>
+                  <option value="armor_legs">Поножи (LEGS)</option>
+                  <option value="belt_3d">3D-Пояс / Декор (LEGS)</option>
+                  <option value="armor_feet">Ботинки (FEET)</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label">Слот гардероба (v1.7+)</label>
+                <select id="inpWardrobeSlot">
+                  <option value="">Стандартная броня</option>
+                  <option value="mask_3d">mask_3d (3D Маска)</option>
+                  <option value="hair_3d">hair_3d (3D Причёска)</option>
+                  <option value="backpack_3d">backpack_3d (3D Рюкзак)</option>
+                  <option value="belt_3d">belt_3d (3D Пояс / Декор)</option>
+                  <option value="helmet_cosmetic">helmet_cosmetic</option>
+                  <option value="chest_cosmetic">chest_cosmetic</option>
+                  <option value="legs_cosmetic">legs_cosmetic</option>
+                  <option value="boots_cosmetic">boots_cosmetic</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div>
+                <label class="field-label">Material (можно ECHO_SHARD, PAPER...)</label>
+                <input type="text" id="inpMaterial" list="materialPresets" placeholder="LEATHER_HELMET / ECHO_SHARD">
+                <datalist id="materialPresets">
+                  <option value="LEATHER_HELMET"></option>
+                  <option value="LEATHER_CHESTPLATE"></option>
+                  <option value="LEATHER_LEGGINGS"></option>
+                  <option value="LEATHER_BOOTS"></option>
+                  <option value="ECHO_SHARD"></option>
+                  <option value="PAPER"></option>
+                  <option value="CARVED_PUMPKIN"></option>
+                </datalist>
+              </div>
+              <div>
+                <label class="field-label">CustomModelData (опционально)</label>
+                <input type="number" id="inpCustomModelData" min="1" step="1" placeholder="пусто = иконка из .bbmodel">
+              </div>
+            </div>
+            <div id="materialHintBox" class="hint" style="margin:4px 0 6px"></div>
+
+            <div class="grid-2">
+              <div>
+                <label class="field-label">Название предмета (Display)</label>
+                <input type="text" id="inpDisplayName" placeholder="&6Золотой нагрудник">
+              </div>
+              <div>
+                <label class="field-label">Цвет покраски (опц., только _t.png)</label>
+                <div class="row">
+                  <input type="color" id="inpColorPicker" value="#ffffff" style="width:36px;height:28px;padding:1px;border-radius:5px;border:1px solid var(--border);background:#000">
+                  <input type="text" id="inpColorRgb" placeholder="пусто = родная цветная текстура">
+                </div>
+              </div>
+            </div>
+
+            <label class="field-label">Описание / Lore (по строке)</label>
+            <textarea id="inpLore" placeholder="&7Кастомная 3D-модель MythicArmors&#10;&aСделано в MythicWardrobe Studio"></textarea>
+
+            <label class="field-label">Смещение (X / Y / Z) и Масштаб (подгонка на теле)</label>
+            <div class="grid-4">
+              <input type="number" step="0.25" id="inpOffX" value="0" title="Смещение X">
+              <input type="number" step="0.25" id="inpOffY" value="0" title="Смещение Y">
+              <input type="number" step="0.25" id="inpOffZ" value="0" title="Смещение Z">
+              <input type="number" step="0.05" min="0.2" max="3" id="inpScale" value="1" title="Масштаб">
+            </div>
+
+            <!-- AUTO-TEXTURES COMPLETION FOR RAW .bbmodel (layer_1, layer_2, _t, _e, icon!) -->
+            <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border)">
+              <div class="row" style="justify-content:space-between">
+                <label class="field-label" style="margin:0;color:#ffffff">🛠 Авто-доделка текстур MythicArmors</label>
+                <span class="tag" id="texAutoBadge">Авто</span>
+              </div>
+              <div class="hint" style="margin:3px 0 5px">
+                Если в вашей модели только <code>texture.png</code> без <code>layer_1</code> / <code>layer_2</code> — Студия автоматически досоздаст все недостающие служебные текстуры по стандарту MythicArmors:
+              </div>
+              <div id="texStatusGrid" class="tex-status-grid"></div>
+              <label class="toggle-chip" style="display:flex;margin-bottom:6px">
+                <input type="checkbox" id="chkAutoLayers" checked>
+                <span>Авто-добавлять прозрачные <code>_layer_1.png</code> + <code>_layer_2.png</code> (64×32)</span>
+              </label>
+              <div class="grid-2">
+                <div>
+                  <label class="field-label">Маска покраски (_t.png)</label>
+                  <select id="selAutoTint">
+                    <option value="keep">Как в модели</option>
+                    <option value="full">Вся текстура красится</option>
+                    <option value="light_only">Только светлые пиксели</option>
+                    <option value="none">Убрать _t.png</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label">Маска свечения (_e.png)</label>
+                  <select id="selAutoEmissive">
+                    <option value="keep">Как в модели</option>
+                    <option value="bright_neon">Авто-свечение ярких</option>
+                    <option value="none">Убрать _e.png</option>
+                  </select>
+                </div>
+              </div>
+              <div class="icon-preview-wrap">
+                <div class="icon-preview-box" id="modelIconPreviewBox">
+                  <span style="font-size:10px;color:var(--muted)">2D</span>
+                </div>
+                <div style="flex:1">
+                  <div style="font-size:11px;font-weight:700;margin-bottom:4px">Иконка в инвентаре (вшивается в .bbmodel)</div>
+                  <div class="row-wrap">
+                    <button type="button" class="btn btn-sm" id="btnUploadIconPng">📁 PNG иконка</button>
+                    <button type="button" class="btn btn-sm" id="btnCapture3dIcon" title="Снять прозрачный 32×32 рендер прямо с 3D-вьюпорта">📸 Снять с 3D</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="btnClearIconPng" title="Удалить иконку">×</button>
+                    <input type="file" id="inpIconPngFile" accept="image/png,image/webp" hidden>
+                  </div>
+                </div>
+              </div>
+              <div class="row-wrap" style="margin-top:6px">
+                <button type="button" class="btn btn-sm" id="btnUpload3dMainTex" title="Загрузить/заменить основную текстуру .bbmodel">🖼 Загрузить текстуру PNG</button>
+                <button type="button" class="btn btn-sm" id="btnUpload3dTintTex" title="Загрузить маску покраски _t.png">🎨 Маска _t.png</button>
+                <button type="button" class="btn btn-sm" id="btnUpload3dEmisTex" title="Загрузить маску свечения _e.png">✨ Маска _e.png</button>
+                <input type="file" id="inp3dMainTexFile" accept="image/png,image/webp" hidden>
+                <input type="file" id="inp3dTintTexFile" accept="image/png,image/webp" hidden>
+                <input type="file" id="inp3dEmisTexFile" accept="image/png,image/webp" hidden>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm btn-block" id="btnDownloadSingleBbmodel" style="margin-top:8px">
+                ⬇ Доделать текстуры и скачать готовый .bbmodel
+              </button>
+            </div>
+
+            <!-- v1.9.0 3D HAIR BINDING & PARTIAL HELMET HIDING -->
+            <div id="hair3dPanel" style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border);display:none">
+              <div class="row" style="justify-content:space-between">
+                <label class="field-label" style="margin:0;color:#ffffff">💇 3D-Волосы: привязка к 2D и шлемы (v1.9)</label>
+                <span class="tag" id="hair3dPartBadge">0 скрыто</span>
+              </div>
+              <div class="hint" style="margin:3px 0 6px">
+                Привяжите 3D-причёску к 2D-волосам (<code>hair-3d.yml</code>) и настройте полное или <b>частичное</b> скрытие при надевании шлема (например, убрать высокий хвост сзади, оставив передние пряди!).
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label class="field-label">Привязать к 2D-волосам (PNG)</label>
+                  <input type="text" id="inpHairBind2d" list="hair2dPresets" placeholder="напр. hair_blonde.png">
+                  <datalist id="hair2dPresets">
+                    <option value="hair_brown.png"></option>
+                    <option value="hair_blonde.png"></option>
+                    <option value="hair_black.png"></option>
+                  </datalist>
+                </div>
+                <div>
+                  <label class="field-label">Поведение при шлеме</label>
+                  <select id="selHairHelmetMode">
+                    <option value="SWAP_MODEL">SWAP_MODEL — Заменить на другую модель</option>
+                    <option value="PARTIAL_MODEL">PARTIAL_MODEL — Обрезать части этой модели</option>
+                    <option value="HIDE_ALL">HIDE_ALL — Скрыть целиком</option>
+                    <option value="KEEP">KEEP — Не скрывать</option>
+                  </select>
+                </div>
+              </div>
+              <div id="hairSwapModelWrap" style="margin-top:6px;display:none">
+                <label class="field-label">🔄 Другая 3D-модель при шлеме (выберите из загруженных или укажите MythicMobs ID ниже)</label>
+                <select id="selHairSwapModel">
+                  <option value="">— Указать вручную по MythicMobs ID —</option>
+                </select>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label class="field-label">Список шлемов (режим)</label>
+                  <select id="selHairListMode">
+                    <option value="ALL">ALL — Любой шлем (кроме искл.)</option>
+                    <option value="WHITELIST">WHITELIST — Только из списка</option>
+                    <option value="BLACKLIST">BLACKLIST — Все, кроме списка</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label">MythicMobs ID модели под шлем</label>
+                  <input type="text" id="inpHairPartialId" placeholder="LongHairUnderHelmet3D">
+                </div>
+              </div>
+              <div class="grid-2">
+                <div>
+                  <label class="field-label">Шлемы (ID / *_HELMET / hat:*)</label>
+                  <input type="text" id="inpHairHelmets" placeholder="GoldWardenHelmet, *_HELMET">
+                </div>
+                <div>
+                  <label class="field-label">Исключения (не скрывать)</label>
+                  <input type="text" id="inpHairExceptions" placeholder="CrownHelmet, hat:glasses.png">
+                </div>
+              </div>
+              <div id="hairPartialPartsWrap" style="margin-top:6px">
+                <div class="row" style="justify-content:space-between;margin-bottom:4px">
+                  <label class="field-label" style="margin:0">Отметьте части, которые СКРЫВАТЬ под шлемом:</label>
+                  <div class="row">
+                    <button type="button" class="btn btn-sm" id="btnHairAutoMarkTail" title="Авто-выбрать хвост, макушку и резинку">⚡ Авто (хвост)</button>
+                    <button type="button" class="btn btn-sm" id="btnHairClearParts" title="Снять все галочки">✕</button>
+                  </div>
+                </div>
+                <div id="hairPartsList" class="hair-part-list"></div>
+                <div class="row" style="margin-top:6px">
+                  <button type="button" class="btn btn-sm btn-block" id="btnDownloadPartialHair">⬇ Скачать частичный .bbmodel (под шлем)</button>
+                </div>
+              </div>
+            </div>
+
+            <label class="field-label" style="margin-top:10px">Кости модели → кости MythicArmors</label>
+            <div id="boneMappingTable"></div>
+
+            <!-- v1.8.0 BLOCKING RULES FOR 3D MODEL -->
+            <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border)">
+              <div class="row" style="justify-content:space-between">
+                <label class="field-label" style="margin:0;color:#ffffff">🔒 Блокировка слоёв / слотов (v1.8.0)</label>
+                <select id="inp3dBlockMode" style="width:130px;padding:3px 6px;font-size:11px">
+                  <option value="UNEQUIP">UNEQUIP (Снять)</option>
+                  <option value="PREVENT">PREVENT (Запрет)</option>
+                  <option value="HIDE">HIDE (Скрыть)</option>
+                </select>
+              </div>
+              <div class="hint" style="margin:3px 0 4px">Отметьте, какие слоты/слои блокирует этот 3D-предмет (попадёт в <code>Wardrobe.Blocks</code>):</div>
+              <div id="blockChips3dShortcuts" class="block-chip-grid"></div>
+              <div id="blockChips3dTargets" class="block-chip-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORY LINKS (COMBINATION GENERATOR) -->
+        <div class="card">
+          <div class="card-title">
+            <span>3. Связки категорий (Скрещивание)</span>
+            <button class="btn btn-sm" id="btnAddLink">+ Связка</button>
+          </div>
+          <div class="hint">
+            Свяжите 2 или 3 категории (например <b>Поножи × 3D-Пояса</b> или <b>Нагрудники × Рюкзаки</b>). Студия прямо в браузере сгенерирует все комбо-`.bbmodel` с единым UV-атласом и <code>combo-overrides.yml</code>!
+          </div>
+          <div id="linksContainer"></div>
+          <div id="comboPreviewList" style="margin-top:8px"></div>
+        </div>
+
+        <!-- EXPORT ZIP -->
+        <div class="card">
+          <div class="card-title">4. Экспорт готового ZIP-архива</div>
+          <label class="field-label">Имя пака</label>
+          <input type="text" id="inpPackName" value="my_wardrobe_pack">
+          <div class="row-wrap" style="margin:8px 0">
+            <label class="toggle-chip"><input type="checkbox" id="chkIncludeStandalone" checked> Одиночные .bbmodel</label>
+            <label class="toggle-chip"><input type="checkbox" id="chkInclude2dInZip" checked> + 2D скины &amp; priority.yml</label>
+            <label class="toggle-chip"><input type="checkbox" id="chkIncludeMenusInZip" checked> + GUI menus.yml</label>
+            <label class="toggle-chip"><input type="checkbox" id="chkIncludeConfigInZip" checked> + Сниппет конфига v1.9</label>
+          </div>
+          <button class="btn btn-primary btn-block" id="btnExportFullZip">🚀 Собрать и скачать ZIP (офлайн)</button>
+          <div id="exportReport" class="hint" style="margin-top:8px"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ==================== TAB 2: 2D SKIN FITTER & BLOCKING ==================== -->
+    <div class="workspace-tab" data-tab-panel="skins">
+
+      <!-- LEFT PANE: 2D SKIN LAYERS + PRIORITY + LIVE BLOCKING -->
+      <aside class="pane">
+        <div class="card">
+          <div class="card-title">
+            <span>2D Слои скина (15 категорий)</span>
+            <span id="skinBlockedCountBadge" class="tag tag-lock" style="display:none">🔒 0</span>
+          </div>
+          <div class="row" style="margin-bottom:6px">
+            <button class="btn btn-sm btn-block" id="btnLoadDemo2d">✨ 68 стартовых PNG</button>
+            <select id="skinBodyType" style="width:110px">
+              <option value="wide">Wide (4px)</option>
+              <option value="slim">Slim (3px)</option>
+            </select>
+          </div>
+          <div class="row" style="margin-bottom:8px">
+            <button class="btn btn-amber btn-sm btn-block" id="btnTryHazmat">☣ Примерить Костюм химзащиты (v1.8)</button>
+            <button class="btn btn-sm" id="btnReset2dLayers" title="Сбросить все слои">↺</button>
+          </div>
+          <div class="hint" style="margin-top:0">
+            Слои идут <b>сверху вниз</b> (как в <code>priority.yml</code>). Если слой имеет блокировку 🔒 (как химзащита), конфликтующие слои подсвечиваются красным и скрываются на 3D-манекене!
+          </div>
+          <div id="skinLayersList"></div>
+        </div>
+      </aside>
+
+      <!-- CENTER PANE: SHARED 3D VIEWPORT -->
+      <section class="pane pane-viewer" id="viewerMount2d"></section>
+
+      <!-- RIGHT PANE: UPLOAD & AUTO-FIT 2D SKIN + BLOCKS + EXPORT -->
+      <aside class="pane">
+        <div class="card">
+          <div class="card-title">
+            <span>Подгонка PNG на слой</span>
+            <span id="activeSkinLayerTag" class="tag">Куртка / Костюм</span>
+          </div>
+          <div class="dropzone" id="skinDropzone">
+            <strong>Перетащите PNG-скин или слой одежды</strong>
+            <span>Любой формат: 64×64, старый 64×32, HD 128×128+ — подгонится мгновенно</span>
+            <input type="file" id="skinFileInput" accept="image/png,image/webp,image/jpeg" hidden>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Вырезать зону тела</label>
+              <select id="skinRegion">
+                <option value="full">Весь скин (без вырезки)</option>
+                <option value="head_all">Вся голова (внутр. + внеш.)</option>
+                <option value="head_outer">Только внеш. голова (шапка/волосы)</option>
+                <option value="head_inner">Только лицо / глаза</option>
+                <option value="torso_arms">Торс + Рукава (куртка/костюм)</option>
+                <option value="torso_only">Только торс (футболка)</option>
+                <option value="arms_only">Только рукава / перчатки</option>
+                <option value="waist_belt">Талия / Пояс (belt_skin v1.7)</option>
+                <option value="legs">Штаны / ноги целиком</option>
+                <option value="boots">Только ботинки (низ ног)</option>
+                <option value="outer_only">Только 2-й слой (outer)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Конвертер рук</label>
+              <select id="skinArmConvert">
+                <option value="keep">Не менять</option>
+                <option value="to_slim">Wide (4px) → Slim (3px)</option>
+                <option value="to_wide">Slim (3px) → Wide (4px)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid-3" style="margin-top:6px">
+            <div>
+              <label class="field-label">Оттенок: <span id="lblHue">0°</span></label>
+              <input type="range" id="skinHue" min="-180" max="180" value="0">
+            </div>
+            <div>
+              <label class="field-label">Насыщ.: <span id="lblSat">100%</span></label>
+              <input type="range" id="skinSat" min="0" max="200" value="100">
+            </div>
+            <div>
+              <label class="field-label">Яркость: <span id="lblVal">100%</span></label>
+              <input type="range" id="skinVal" min="20" max="200" value="100">
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:6px">
+            <input type="color" id="skinTintColor" value="#ffffff" style="width:36px;height:28px;padding:1px;border-radius:5px;border:1px solid var(--border);background:#000">
+            <input type="range" id="skinTintStrength" min="0" max="100" value="0" style="flex:1">
+            <span class="hint" style="margin:0;min-width:68px">Тинт <b id="lblTint">0%</b></span>
+          </div>
+
+          <div class="row" style="margin-top:8px">
+            <input type="text" id="skinCustomName" placeholder="имя_файла.png (напр. hazmat_suit)">
+            <button class="btn btn-primary btn-sm" id="btnApplySkinFit">✓ Применить</button>
+          </div>
+        </div>
+
+        <!-- v2.2: 2D ITEM DISPLAY NAME, MATERIAL, CMD & LORE -->
+        <div class="card">
+          <div class="card-title">
+            <span>📝 Название &amp; Lore 2D-предмета</span>
+            <span id="skinMetaLayerTag" class="tag">jacket</span>
+          </div>
+          <div class="hint" style="margin-top:0">
+            Задайте название, материал, CustomModelData и описание (<code>Lore</code>) для загруженной 2D-текстуры — попадёт напрямую в MythicMobs YAML при экспорте!
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">MythicMobs ID (опционально)</label>
+              <input type="text" id="skinItemMythicId" placeholder="WardrobeCustomJacket">
+            </div>
+            <div>
+              <label class="field-label">Название предмета (Display)</label>
+              <input type="text" id="skinItemDisplay" placeholder="&fКожаная куртка">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Material (PAPER / ECHO_SHARD...)</label>
+              <input type="text" id="skinItemMaterial" list="materialPresets" value="PAPER" placeholder="PAPER">
+            </div>
+            <div>
+              <label class="field-label">CustomModelData (опционально)</label>
+              <input type="number" id="skinItemCmd" min="1" step="1" placeholder="пусто = без CMD">
+            </div>
+          </div>
+          <label class="field-label">Описание / Lore (каждая строка — отдельный пункт)</label>
+          <textarea id="skinItemLore" placeholder="&7Стильный 2D-слой одежды&#10;&fНаденьте в гардеробе (/wardrobe)"></textarea>
+        </div>
+
+        <!-- v1.8.0 BLOCKING EDITOR FOR ACTIVE 2D LAYER -->
+        <div class="card">
+          <div class="card-title">
+            <span>🔒 Блокировка других слоёв (v1.8.0)</span>
+            <select id="skinBlockMode" style="width:128px;padding:3px 6px;font-size:11px">
+              <option value="UNEQUIP">UNEQUIP (Снять)</option>
+              <option value="PREVENT">PREVENT (Запрет)</option>
+              <option value="HIDE">HIDE (Скрыть)</option>
+            </select>
+          </div>
+          <div class="hint" style="margin-top:0">
+            Настройте для текущего слоя <b id="skinBlockLayerLabel">Куртка / Костюм</b>: какие слои/слоты он блокирует (пример: химзащита в <code>jacket</code> блокирует штаны, пояс, футболку, перчатки, носки, ботинки, маску и шапку!).
+          </div>
+          <div class="row-wrap" style="margin-bottom:6px">
+            <button class="btn btn-sm" id="btnPresetHazmatBlocks">☣ Пресет Химзащита</button>
+            <button class="btn btn-sm" id="btnPresetSuitBlocks">🧥 Пресет Комбинезон</button>
+            <button class="btn btn-danger btn-sm" id="btnClearSkinBlocks">✕ Очистить</button>
+          </div>
+          <div id="blockChips2dShortcuts" class="block-chip-grid"></div>
+          <div id="blockChips2dTargets" class="block-chip-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Итоговая 2D-развёртка 64×64</div>
+          <div class="uv-preview-box">
+            <canvas id="skin2dCanvas" width="64" height="64"></canvas>
+            <div style="flex:1">
+              <div class="hint" style="margin-top:0">
+                Сборка с учётом <code>priority.yml</code>, авто-очистки outer-зон (<code>clear-outer-regions</code>) и активных блокировок <b>v1.8.0</b>!
+              </div>
+              <button class="btn btn-sm btn-block" id="btnDownloadSkinPng" style="margin-bottom:6px">⬇ Скачать скин 64×64 PNG</button>
+              <button class="btn btn-green btn-sm btn-block" id="btnExport2dZip">📦 Скачать ZIP (2D + Blocks + priority.yml)</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ==================== TAB 4: VISUAL GUI INVENTORY EDITOR (menus.yml) ==================== -->
+    <div class="workspace-tab" data-tab-panel="gui">
+
+      <!-- LEFT PANE: SCREEN SELECTOR & LAYOUT SETTINGS -->
+      <aside class="pane gui-pane-left">
+        <div class="card">
+          <div class="card-title">
+            <span>1. Экраны меню (menus.yml)</span>
+            <button class="btn btn-sm" id="btnGuiResetAll" title="Сбросить к стандартному шаблону">↺ Сброс</button>
+          </div>
+          <div class="grid-2" style="margin-bottom:6px">
+            <div>
+              <label class="field-label">Режим по умолчанию</label>
+              <select id="guiDefaultMode">
+                <option value="TABBED">TABBED (Вкладки)</option>
+                <option value="UNIFIED">UNIFIED (Общее)</option>
+                <option value="PER_SLOT">PER_SLOT (Узкие)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">При кнопке «Назад» (если нет команды)</label>
+              <select id="guiBackFallback">
+                <option value="INVENTORY">Открыть Инвентарь (INVENTORY)</option>
+                <option value="CLOSE">Закрыть меню (CLOSE)</option>
+              </select>
+            </div>
+          </div>
+          <label class="field-label">Команда «Назад» (опц., пусто = открыть инвентарь)</label>
+          <input type="text" id="guiBackCmd" value="" placeholder="пусто = Инвентарь; или menu / dm open" style="margin-bottom:8px">
+          <div id="guiScreenList" class="gui-screen-list"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">2. Заголовок, Размер и Заполнитель</div>
+          <label class="field-label">Название меню (title — MiniMessage или &amp;-коды)</label>
+          <input type="text" id="guiScreenTitle" placeholder="&8Гардероб &7▪ &f<section>">
+
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Размер (ряды: 1–6)</label>
+              <select id="guiScreenRows">
+                <option value="1">1 ряд (9 слотов)</option>
+                <option value="2">2 ряда (18 слотов)</option>
+                <option value="3">3 ряда (27 слотов)</option>
+                <option value="4">4 ряда (36 слотов)</option>
+                <option value="5">5 рядов (45 слотов)</option>
+                <option value="6">6 рядов (54 слота)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Заполнитель (Filler)</label>
+              <label class="toggle-chip" style="height:31px;justify-content:center">
+                <input type="checkbox" id="guiFillerEnabled" checked> Включён
+              </label>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Material заполнителя</label>
+              <input type="text" id="guiFillerMat" list="guiMaterialPresets" value="BLACK_STAINED_GLASS_PANE">
+            </div>
+            <div>
+              <label class="field-label">CustomModelData фона</label>
+              <input type="number" id="guiFillerCmd" min="1" step="1" placeholder="опционально">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">ItemModel фона (1.21.4+)</label>
+              <input type="text" id="guiFillerItemModel" placeholder="mypack:gui_filler">
+            </div>
+            <div>
+              <label class="field-label">Название фона</label>
+              <input type="text" id="guiFillerName" value=" " placeholder="пробел = пусто">
+            </div>
+          </div>
+          <label class="toggle-chip" style="margin-top:8px;display:flex">
+            <input type="checkbox" id="guiShowIndicators">
+            <span>Индикатор надетых предметов (<code>show-equipped-indicators</code>)</span>
+          </label>
+        </div>
+
+        <datalist id="guiMaterialPresets"></datalist>
+      </aside>
+
+      <!-- CENTER PANE: INTERACTIVE MINECRAFT INVENTORY GRID + MC TOOLTIP + LIVE YAML -->
+      <section class="pane gui-pane-center" style="background:#050505">
+        <div class="mc-inv-shell">
+          <div id="guiScreenPills" class="gui-screen-pills"></div>
+          <div class="mc-inv-header">
+            <div class="mc-inv-title" id="guiPreviewTitle">Гардероб</div>
+            <div class="row-wrap">
+              <span class="tag" id="guiGridSizeTag">3×9 (27)</span>
+              <button class="btn btn-sm" id="btnGuiCopyYml">📋 Копировать</button>
+              <button class="btn btn-primary btn-sm" id="btnGuiDownloadYml">⬇ Скачать menus.yml</button>
+            </div>
+          </div>
+          <div id="guiInvGrid" class="mc-inv-grid"></div>
+          <div id="guiTooltipBox" class="mc-tooltip-box">Наведите или нажмите на любой слот инвентаря</div>
+          <div class="gui-legend">
+            <span>✓ Вшиты <b>149 официальных текстур Minecraft 1.21.4</b> · Клик по слоту → настройка материала, <code>CustomModelData</code>, <code>Lore</code> и действия справа</span>
+          </div>
+        </div>
+
+        <div class="card gui-preview-card">
+          <div class="card-title">
+            <span>Предпросмотр plugins/MythicWardrobe/menus.yml</span>
+            <button class="btn btn-sm" data-copy-target="guiLiveMenusYml">📋 Копировать</button>
+          </div>
+          <pre class="yaml-code" id="guiLiveMenusYml" style="max-height:240px;overflow-y:auto"></pre>
+        </div>
+      </section>
+
+      <!-- RIGHT PANE: SELECTED CELL INSPECTOR + MINECRAFT ASSETS PICKER -->
+      <aside class="pane gui-pane-right">
+        <div class="card">
+          <div class="card-title">
+            <span>3. Настройка ячейки</span>
+            <span class="tag" id="guiSelectedSlotBadge">Слот #11</span>
+          </div>
+          <div class="hint" style="margin-top:0">
+            Назначьте слот гардероба (со своей иконкой пустого слота + <code>CustomModelData</code>), кнопку действия или декор.
+          </div>
+
+          <label class="field-label">Тип ячейки</label>
+          <select id="guiCellKind">
+            <option value="empty">Пустая (заполнитель / фон)</option>
+            <option value="slot">Слот гардероба (Wardrobe Slot + пустая иконка)</option>
+            <option value="button">Кнопка действия (Назад / Инвентарь / Закрыть / Команда)</option>
+            <option value="decor">Декоративный / кастомный предмет (DECOR)</option>
+          </select>
+
+          <!-- SLOT-SPECIFIC -->
+          <div id="guiCellSlotGroup" style="display:none;margin-top:6px">
+            <label class="field-label">Слот гардероба (из slots.yml)</label>
+            <select id="guiCellWardrobeSlot"></select>
+            <div class="hint">Ниже настраивается <b>иконка ПУСТОГО слота</b> (<code>empty-slots:</code> в <code>menus.yml</code>).</div>
+          </div>
+
+          <!-- BUTTON-SPECIFIC -->
+          <div id="guiCellButtonGroup" style="display:none;margin-top:6px">
+            <label class="field-label">Действие кнопки (action)</label>
+            <select id="guiCellAction"></select>
+            <div id="guiCellSectionRow" style="display:none">
+              <label class="field-label">Целевая секция (section)</label>
+              <select id="guiCellSection">
+                <option value="HEAD">HEAD (Голова)</option>
+                <option value="CHEST">CHEST (Торс)</option>
+                <option value="LEGS">LEGS (Ноги / Пояса)</option>
+                <option value="FEET">FEET (Ботинки)</option>
+              </select>
+            </div>
+            <div id="guiCellCommandRow" style="display:none">
+              <label class="field-label">Команда (без /, напр. dm open main)</label>
+              <input type="text" id="guiCellCommand" placeholder="menu">
+            </div>
+          </div>
+
+          <!-- SHARED ICON FIELDS (EMPTY SLOT / BUTTON / DECOR) -->
+          <div id="guiCellIconGroup" style="display:none;margin-top:6px;padding-top:8px;border-top:1px solid var(--border)">
+            <div class="grid-2">
+              <div>
+                <label class="field-label">Material (Minecraft)</label>
+                <input type="text" id="guiCellMat" list="guiMaterialPresets" value="PAPER">
+              </div>
+              <div>
+                <label class="field-label">CustomModelData</label>
+                <input type="number" id="guiCellCmd" min="1" step="1" placeholder="напр. 5001">
+              </div>
+            </div>
+
+            <!-- MINECRAFT ASSETS VISUAL PICKER -->
+            <div class="mc-asset-picker">
+              <div class="row" style="justify-content:space-between;margin-bottom:4px">
+                <span style="font-size:11px;font-weight:700;color:#ffffff">🧱 Ассеты Minecraft (149 текстур)</span>
+                <span class="tag" id="guiMcAssetCount">149</span>
+              </div>
+              <input type="text" id="guiMcAssetSearch" placeholder="Поиск: helmet, glass, sword, dye, echo...">
+              <div id="guiMcAssetGrid" class="mc-asset-grid"></div>
+            </div>
+
+            <div class="grid-2" style="margin-top:6px">
+              <div>
+                <label class="field-label">ItemModel (1.21.4+)</label>
+                <input type="text" id="guiCellItemModel" placeholder="mypack:slot_helmet">
+              </div>
+              <div>
+                <label class="field-label">Цвет (кожа, #RRGGBB)</label>
+                <input type="text" id="guiCellColor" placeholder="#ffffff (опц.)">
+              </div>
+            </div>
+            <label class="field-label">Название предмета (name)</label>
+            <input type="text" id="guiCellName" placeholder="&fПустой слот: Шлем">
+
+            <label class="field-label">Описание / Lore (по строке)</label>
+            <textarea id="guiCellLore" placeholder="&7Перетащите предмет сюда&#10;&8Поддержка &amp; и MiniMessage"></textarea>
+
+            <div class="row-wrap" style="margin-top:7px">
+              <label class="toggle-chip"><input type="checkbox" id="guiCellGlint"> Свечение (glint)</label>
+              <label class="toggle-chip"><input type="checkbox" id="guiCellHideTip"> Скрыть tooltip</label>
+            </div>
+
+            <div class="icon-preview-wrap" style="margin-top:8px">
+              <div class="icon-preview-box" id="guiCellPreviewImgBox">
+                <span style="font-size:10px;color:var(--muted)">PNG</span>
+              </div>
+              <div style="flex:1">
+                <div style="font-size:11px;font-weight:700;margin-bottom:4px">Своя PNG иконка (для CMD превью)</div>
+                <div class="row-wrap">
+                  <button type="button" class="btn btn-sm" id="btnGuiUploadCellImg">📁 Загрузить PNG</button>
+                  <button type="button" class="btn btn-danger btn-sm" id="btnGuiClearCellImg">×</button>
+                  <input type="file" id="inpGuiCellImgFile" accept="image/png,image/webp" hidden>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <button type="button" class="btn btn-danger btn-sm btn-block" id="btnGuiClearCell">🗑 Очистить ячейку (сделать фоном)</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ==================== TAB 3: v1.7 / v1.8 / v1.9 CONFIG STUDIO ==================== -->
+    <div class="workspace-tab" data-tab-panel="configs">
+
+      <!-- LEFT PANE: INTERACTIVE CONTROLS -->
+      <aside class="pane">
+        <div class="card">
+          <div class="card-title">1. Инвентарь не закрывается при смене скина (v1.7)</div>
+          <div class="hint">Настройки для <code>plugins/MythicWardrobe/config.yml</code> — решают закрытие GUI при пакете обновления скина SkinsRestorer.</div>
+          <label class="toggle-chip" style="margin-bottom:6px;display:flex">
+            <input type="checkbox" id="cfgDeferGui" checked>
+            <span><code>defer-apply-while-gui-open: true</code> (применять после закрытия GUI)</span>
+          </label>
+          <label class="toggle-chip" style="margin-bottom:6px;display:flex">
+            <input type="checkbox" id="cfgReopenGui" checked>
+            <span><code>auto-reopen-gui-after-skin-apply: true</code> (переоткрывать меню если скин применился внутри GUI)</span>
+          </label>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Задержка дебаунса (тики)</label>
+              <input type="number" id="cfgDebounceTicks" value="8" min="0" max="60">
+            </div>
+            <div>
+              <label class="field-label">Задержка переоткрытия (тики)</label>
+              <input type="number" id="cfgReopenTicks" value="2" min="1" max="20">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">2. Кнопка «Назад» и режим меню (v1.7)</div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Режим меню (menu.mode)</label>
+              <select id="cfgMenuMode">
+                <option value="TABBED">TABBED (1 меню + вкладки)</option>
+                <option value="UNIFIED">UNIFIED (Всё сразу)</option>
+                <option value="PER_SLOT">PER_SLOT (4 узких 1-рядных)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Команда «Назад» (back-command)</label>
+              <input type="text" id="cfgBackCommand" value="menu" placeholder="пусто = просто закрыть">
+            </div>
+          </div>
+          <div class="hint">В подменю <code>BACK</code> возвращает на главный экран гардероба, а с главного экрана выполняет указанную команду (например <code>dm open main</code> или <code>menu</code>).</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">3. Система блокировок по умолчанию (v1.8)</div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Режим по умолчанию</label>
+              <select id="cfgDefaultBlockMode">
+                <option value="UNEQUIP">UNEQUIP (Снять конфликты)</option>
+                <option value="PREVENT">PREVENT (Запретить надевать)</option>
+                <option value="HIDE">HIDE (Скрыть, но не снимать)</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Иконка замка в GUI</label>
+              <input type="text" id="cfgLockMaterial" value="RED_STAINED_GLASS_PANE">
+            </div>
+          </div>
+          <label class="toggle-chip" style="margin-top:8px;display:flex">
+            <input type="checkbox" id="cfgInheritClearOuter" checked>
+            <span><code>inherit-clear-outer-regions: true</code> (химзащита сама очистит 2-й слой штанов/шапки)</span>
+          </label>
+        </div>
+
+        <div class="card">
+          <div class="card-title">4. Конструктор костюма с блокировкой (v1.8)</div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">MythicMobs ID</label>
+              <input type="text" id="cfgSuitId" value="WardrobeHazmatSuit">
+            </div>
+            <div>
+              <label class="field-label">Слот-носитель</label>
+              <select id="cfgSuitSlot">
+                <option value="jacket">jacket (Куртка / Костюм)</option>
+                <option value="pants">pants (Штаны)</option>
+                <option value="hat">hat (Шапка)</option>
+                <option value="chest_cosmetic">chest_cosmetic (3D Нагрудник)</option>
+                <option value="helmet_cosmetic">helmet_cosmetic (3D Шлем)</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">Display Name</label>
+              <input type="text" id="cfgSuitDisplay" value="&eКостюм химзащиты &7[Цельный костюм]">
+            </div>
+            <div>
+              <label class="field-label">2D Текстура (PNG)</label>
+              <input type="text" id="cfgSuitTexture" value="hazmat_suit.png">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div>
+              <label class="field-label">BlockMode</label>
+              <select id="cfgSuitMode">
+                <option value="UNEQUIP">UNEQUIP</option>
+                <option value="PREVENT">PREVENT</option>
+                <option value="HIDE">HIDE</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-label">Блокируемые слои (через запятую)</label>
+              <input type="text" id="cfgSuitBlocks" value="undershirt, pants, belt_skin, gloves, socks, boots_skin, mask_skin, hat">
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT PANE: LIVE YAML OUTPUTS + COPY BUTTONS -->
+      <aside class="pane">
+        <div class="card">
+          <div class="card-title">
+            <span>plugins/MythicWardrobe/config.yml (фрагмент v1.7–v1.8)</span>
+            <button class="btn btn-sm" data-copy-target="outConfigYml">📋 Копировать</button>
+          </div>
+          <pre class="yaml-code" id="outConfigYml"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>plugins/MythicWardrobe/menus.yml (кнопка «Назад» + слот пояса)</span>
+            <button class="btn btn-sm" data-copy-target="outMenusYml">📋 Копировать</button>
+          </div>
+          <pre class="yaml-code" id="outMenusYml"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>plugins/MythicWardrobe/hair-3d.yml (v1.9 — автопривязка 3D-волос и шлемы)</span>
+            <button class="btn btn-sm" data-copy-target="outHair3dYml">📋 Копировать</button>
+          </div>
+          <pre class="yaml-code" id="outHair3dYml"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>MythicMobs YAML + items.yml + Команда /wardrobe block</span>
+            <button class="btn btn-sm" data-copy-target="outSuitYml">📋 Копировать</button>
+          </div>
+          <pre class="yaml-code" id="outSuitYml"></pre>
+        </div>
+      </aside>
+    </div>
+
+  </main>
+
+  <!-- SHARED 3D VIEWER TEMPLATE -->
+  <div id="sharedViewerRoot" style="display:none">
+    <div class="viewer-header">
+      <div class="row-wrap">
+        <strong style="font-size:12.5px">🎮 Интерактивный 3D Предпросмотр</strong>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowMannequin" checked> Скин</label>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowArmor" checked> 3D-модели</label>
+        <label class="toggle-chip"><input type="checkbox" id="chkWalkAnim"> Ходьба</label>
+        <label class="toggle-chip"><input type="checkbox" id="chkAutoRotate"> Вращать</label>
+        <button type="button" class="btn btn-sm helmet-test-toggle" id="btnToggleTestHelmet" title="Примерить шлем поверх 3D-причёски и проверить HIDE_ALL / PARTIAL_MODEL (скрытие хвоста и т.д.)">🪖 Тест: Надеть шлем</button>
+      </div>
+      <div class="row">
+        <button class="btn btn-sm" id="btnViewFront">Спереди</button>
+        <button class="btn btn-sm" id="btnViewBack">Сзади</button>
+        <button class="btn btn-sm" id="btnViewReset">↺</button>
+      </div>
+    </div>
+    <div class="viewer-stage">
+      <canvas id="viewport3d"></canvas>
+      <div class="viewer-overlay-badge" id="viewerBadge">ЛКМ — вращение · Колесо — зум · ПКМ — панорама</div>
+    </div>
+    <div class="viewer-controls">
+      <div class="row-wrap" style="justify-content:space-between">
+        <div class="row-wrap" id="equippedChips">
+          <span class="hint" style="margin:0">Выберите модель или комбо-связку для примерки на 3D-манекене</span>
+        </div>
+        <button class="btn btn-sm" id="btnClearEquipped">Снять всё 3D</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="./webgl_viewer.js"></script>
+  <script src="./studio_engine.js"></script>
+  <script src="./demo_pack_data.js"></script>
+  <script src="./mc_assets.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+# ==============================================================================
+# MythicWardrobe v1.9.0 — Автопривязка 3D-волос к 2D-волосам и поведение под шлемом
+# ==============================================================================
+# КАК ЭТО РАБОТАЕТ:
+#   1) В секции `bindings:` вы привязываете 2D-текстуру волос (из overlays/hairs/)
+#      к готовой 3D-модели MythicMobs/MythicArmors (например SpikyHair3D / PonytailHair3D).
+#      Как только игрок выбирает эти 2D-волосы (в веб-редакторе, командой /wardrobe set hair ...
+#      или через предмет волос) — 3D-волосы надеваются АВТОМАТИЧЕСКИ!
+#
+#   2) Поведение при надевании шлема (`helmet-mode`):
+#      • SWAP_MODEL    — при шлеме ПРОСТО заменяет 3D-модель волос на другую готовую модель
+#                        из `helmet-model:` (например: обычная причёска -> другая модель под шлем!)
+#      • PARTIAL_MODEL — то же самое (синоним SWAP_MODEL: частичная модель без высокого хвоста)
+#      • HIDE_ALL      — при шлеме 3D-волосы отключаются полностью
+#      • KEEP          — 3D-волосы остаются целиком даже под шлемом
+#
+#   * Параметр `color:` НЕОБЯЗАТЕЛЬНЫЙ! Он нужен ТОЛЬКО для перекрашиваемых моделей с `_t.png`
+#     (на базе LEATHER_HELMET). Если у вашей 3D-модели своя готовая цветная текстура — просто не пишите `color:`!
+#
+#   3) Списки шлемов (`helmet-list-mode`):
+#      • ALL       — любой шлем (реальный, косметический или 2D-шапка) скрывает/обрезает волосы,
+#                    КРОМЕ перечисленных в `exceptions:` (напр. очки/корона/обруч)
+#      • WHITELIST — ТОЛЬКО шлемы из `helmets:` скрывают/обрезают волосы
+#      • BLACKLIST — все шлемы, КРОМЕ перечисленных в `helmets:` и `exceptions:`
+#
+#   В списках `helmets` и `exceptions` можно указывать:
+#     • MythicMobs ID шлема (например "TacticalWardenHelmet", "GoldWardenHelmet")
+#     • Ванильный Material или маску (например "IRON_HELMET", "*_HELMET")
+#     • 2D-шапку из слоя `hat` (например "hat:beanie_red.png" или "hat:*")
+# ==============================================================================
+
+enabled: true
+# Если игрок вручную положил предмет в слот hair_3d — он приоритетнее автопривязки
+manual-slot-overrides-binding: true
+# Считать ли 2D-шапку (слой `hat`) шлемом, влияющим на 3D-волосы
+trigger-on-2d-hat: true
+
+default-helmet-list-mode: ALL
+default-helmets: []
+default-exceptions: []
+
+# ------------------------------------------------------------------------------
+# 1. ПРИВЯЗКА 2D-ТИПОВ ВОЛОС (overlays/hairs/*.png) -> 3D-ВОЛОСЫ
+# ------------------------------------------------------------------------------
+bindings:
+  hair_brown.png:
+    mythic-item: "HairSpiky3D_Golden"
+    color: "135,78,52"
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  hair_blonde.png:
+    mythic-item: "HairPonytail3D_Chestnut"
+    color: "225,192,110"
+    # Пример ЧАСТИЧНОГО отключения: высокий хвост сзади отключается при шлеме,
+    # а передние пряди, свисающие вниз, ОСТАЮТСЯ видны из-под шлема!
+    helmet-mode: PARTIAL_MODEL
+    helmet-partial-item: "HairPonytail3D_HelmetSafe"
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  hair_black.png:
+    mythic-item: "HairBob3D_Black"
+    color: "42,36,34"
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+# ------------------------------------------------------------------------------
+# 2. ПРАВИЛА ДЛЯ РУЧНО НАДЕТЫХ 3D-ПРИЧЁСОК (в слоте `hair_3d`)
+# ------------------------------------------------------------------------------
+items:
+  HairPonytail3D_Chestnut:
+    helmet-mode: PARTIAL_MODEL
+    helmet-partial-item: "HairPonytail3D_HelmetSafe"
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  HairPonytail3D_Silver:
+    helmet-mode: PARTIAL_MODEL
+    helmet-partial-item: "HairPonytail3D_HelmetSafe"
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  HairSpiky3D_Golden:
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  HairBob3D_Black:
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []

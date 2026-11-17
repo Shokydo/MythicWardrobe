@@ -1,0 +1,56 @@
+# ==============================================================================
+# MythicWardrobe — Сообщения и заголовки GUI (поддерживает MiniMessage и &-коды)
+# ==============================================================================
+
+prefix: "<gradient:#38bdf8:#818cf8>[Гардероб]</gradient> <gray>"
+
+gui:
+  hub-title: "<#1e293b>Гардероб и Экипировка"
+  section-titles:
+    HEAD: "<#1e293b>Экипировка: Голова и Шлем"
+    CHEST: "<#1e293b>Экипировка: Торс и Нагрудник"
+    LEGS: "<#1e293b>Экипировка: Ноги и Поножи"
+    FEET: "<#1e293b>Экипировка: Обувь и Пояс"
+  nav:
+    head: "<#f8fafc>Голова и Шлем"
+    chest: "<#f8fafc>Торс и Нагрудник"
+    legs: "<#f8fafc>Ноги и Поножи"
+    feet: "<#f8fafc>Обувь и Пояс"
+    hub: "<#94a3b8>Общий гардероб"
+    refresh: "<#4ade80>Обновить скин"
+    reset: "<#f87171>Сбросить слои скина"
+
+messages:
+  no-permission: "<red>У вас нет прав на это действие."
+  player-only: "<red>Эту команду может использовать только игрок."
+  player-not-found: "<red>Игрок <white><player></white> не найден в сети."
+  wrong-slot-item: "<red>Этот предмет нельзя положить в слот <white><slot></white>."
+  skin-updating: "<gray>Применяем одежду на скин..."
+  skin-updated: "<green>Скин обновлён!"
+  skin-update-failed: "<red>Не удалось обновить скин: <gray><reason>"
+  skin-reset: "<yellow>Слои скина сброшены к базовому скину."
+  layer-set: "<green>Слой <white><slot></white> установлен: <aqua><texture></aqua>"
+  layer-cleared: "<yellow>Слой <white><slot></white> очищен."
+  texture-not-found: "<red>PNG-файл текстуры <white><texture></white> не найден в папке overlays/."
+  unknown-slot: "<red>Неизвестный слот: <white><slot></white>."
+  tagged-item: "<green>Предмет в руке привязан к слоту <white><slot></white> <gray>(текстура: <texture>)"
+  hold-item: "<red>Возьмите предмет в основную руку!"
+  reloaded: "<green>MythicWardrobe перезагружен! Загружено текстур: <white><count></white>, слоёв скина: <white><layers></white>, GUI-слотов: <white><slots></white>."
+  quick-equipped: "<green>Экипировано в слот <white><slot></white>!"
+  bodytype-set: "<green>Тип тела (руки) для <white><player></white> установлен: <aqua><bodytype></aqua>."
+  bodytype-invalid: "<red>Неверный тип тела! Используйте: <white>slim</white> (узкие), <white>wide</white> (широкие) или <white>auto</white>."
+  web-editor-disabled: "<red>Временный веб-редактор отключён в config.yml (<white>web-editor.enabled: false</white>)."
+  web-editor-link: "<green>Откройте тестовый редактор скина: <click:open_url:'<url>'><underlined><aqua><url></aqua></underlined></click> <gray>(ссылка действует <minutes> мин.)"
+  web-editor-applied: "<green>Изменения из веб-редактора применены! Обновляем скин..."
+  prewarm-started: "<yellow>Запущен фоновый прогрев кэша базовых скинов (<white><total></white> вариантов)..."
+  prewarm-done: "<green>Прогрев кэша завершён! Подписано новых: <white><signed></white>, уже было в кэше: <white><cached></white>, ошибок: <white><failed></white>."
+  mode-switched: "<green>Режим меню переключён на: <white><mode></white>."
+  mode-disabled: "<red>Переключение режима меню игроками отключено в <white>menus.yml</white>."
+  mode-invalid: "<red>Неверный режим меню! Используйте: <white>compact</white>, <white>tabbed</white>, <white>unified</white> или <white>default</white>."
+  invalid-slot-item: "<red>Этот предмет нельзя положить в слот <white><slot></white>."
+  slot-blocked-by: "<red>Слот <white><slot></white> <red>заблокирован предметом <yellow><blocker></yellow><red>!"
+  layer-blocked-by: "<red>Слой <white><slot></white> <red>сейчас заблокирован предметом <yellow><blocker></yellow><red>!"
+  equip-blocked-conflicts: "<red>Нельзя надеть: сначала снимите вещи из слотов <white><conflicts></white><red>!"
+  equip-auto-unequipped: "<yellow>Снято конфликтующих вещей: <white><count></white> <gray>(возвращены в инвентарь)."
+  item-blocks-set: "<green>Для предмета в руке задана блокировка слоёв/слотов: <yellow><blocks></yellow> <gray>(режим: <white><mode></white>)."
+  item-blocks-cleared: "<yellow>Блокировки слоёв/слотов сняты с предмета в руке."

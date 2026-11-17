@@ -1,0 +1,981 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "free",
+    "box_uv": false
+  },
+  "name": "hair_bob_3d",
+  "model_identifier": "",
+  "visible_box": [
+    1,
+    1,
+    0
+  ],
+  "variable_placeholders": "",
+  "variable_placeholder_buttons": [],
+  "timeline_setups": [],
+  "unhandled_root_fields": {},
+  "resolution": {
+    "width": 64,
+    "height": 64
+  },
+  "elements": [
+    {
+      "name": "bob_crown",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.55,
+        31.3,
+        -4.55
+      ],
+      "to": [
+        4.55,
+        32.95,
+        4.55
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "3be3f11e-37ae-522a-8b15-a940258fb5e0"
+    },
+    {
+      "name": "bob_top_puff",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -3.9,
+        32.6,
+        -3.7
+      ],
+      "to": [
+        3.9,
+        33.45,
+        3.8
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            32,
+            0,
+            48,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "075f41ca-b89e-5ad9-a046-d08303936edd"
+    },
+    {
+      "name": "bob_fringe_m",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -2.4,
+        29.0,
+        -4.85
+      ],
+      "to": [
+        2.4,
+        32.1,
+        -3.9
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "bf84bff3-6d9b-5d31-85b9-4c061bebab70"
+    },
+    {
+      "name": "bob_fringe_r",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.2,
+        28.6,
+        -4.95
+      ],
+      "to": [
+        4.6,
+        32.0,
+        -3.75
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "7dd7adf0-5a37-55da-b756-273fb3623331"
+    },
+    {
+      "name": "bob_fringe_l",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.6,
+        28.6,
+        -4.95
+      ],
+      "to": [
+        -2.2,
+        32.0,
+        -3.75
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "29e0f852-7691-5175-90ec-0b969a3b076e"
+    },
+    {
+      "name": "bob_side_r",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        3.95,
+        23.6,
+        -3.95
+      ],
+      "to": [
+        5.05,
+        31.9,
+        4.45
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        4.4,
+        31.5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        -4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "8c1fe5af-40e1-50c0-b0f3-588db4f4a03c"
+    },
+    {
+      "name": "bob_side_l",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -5.05,
+        23.6,
+        -3.95
+      ],
+      "to": [
+        -3.95,
+        31.9,
+        4.45
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        -4.4,
+        31.5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "0fdee61c-d3a9-5ba2-bef6-1257e147ec99"
+    },
+    {
+      "name": "bob_back_main",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.7,
+        23.5,
+        3.7
+      ],
+      "to": [
+        4.7,
+        32.0,
+        5.05
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        31.5,
+        4.2
+      ],
+      "rotation": [
+        4,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            16,
+            0,
+            32,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "c04d18e5-2fc0-5465-bc4e-06b46f3914ba"
+    },
+    {
+      "name": "bob_clip_r",
+      "box_uv": false,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        4.55,
+        29.4,
+        -3.2
+      ],
+      "to": [
+        5.15,
+        30.3,
+        -1.6
+      ],
+      "autouv": 0,
+      "color": 0,
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "east": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "south": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "west": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "up": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        },
+        "down": {
+          "uv": [
+            48,
+            0,
+            64,
+            16
+          ],
+          "texture": 0
+        }
+      },
+      "type": "cube",
+      "uuid": "595c1400-a094-5ec8-8959-7d085ca3569f"
+    }
+  ],
+  "outliner": [
+    {
+      "name": "head",
+      "origin": [
+        0,
+        24,
+        0
+      ],
+      "color": 0,
+      "uuid": "857f7d82-3d3d-5f12-94e2-07486a44da62",
+      "export": true,
+      "mirror_uv": false,
+      "isOpen": true,
+      "locked": false,
+      "visibility": true,
+      "autouv": 0,
+      "children": [
+        "3be3f11e-37ae-522a-8b15-a940258fb5e0",
+        "075f41ca-b89e-5ad9-a046-d08303936edd",
+        "bf84bff3-6d9b-5d31-85b9-4c061bebab70",
+        "7dd7adf0-5a37-55da-b756-273fb3623331",
+        "29e0f852-7691-5175-90ec-0b969a3b076e",
+        "8c1fe5af-40e1-50c0-b0f3-588db4f4a03c",
+        "0fdee61c-d3a9-5ba2-bef6-1257e147ec99",
+        "c04d18e5-2fc0-5465-bc4e-06b46f3914ba",
+        "595c1400-a094-5ec8-8959-7d085ca3569f"
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "path": "",
+      "name": "hair_bob_3d_main.png",
+      "folder": "armor",
+      "namespace": "hair_bob_3d",
+      "id": "0",
+      "width": 64,
+      "height": 64,
+      "uv_width": 64,
+      "uv_height": 64,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "4df96c8f-0d16-5007-b628-36dc03985e09",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABI0lEQVR4nO3SwUqFQBTG8a9Bbq5ksE29h6/WtkWblj1IL+CTtAgiEATBzSAIQ8LUSsG7crzF3Fv/H8g5fKgzHueqruuvsixVlqXatl3VLVnTNLLWylqrrutWdUtWVZWKolBRFOr7flW3ZHf3T7o5XGuP549XZfOmrLUax3FVt2TDMCy5935Vt2bzh03TtKpbMkl6G4ddA5Aks/vJPyL5API8V57nMsYsfUx2KnO8QOx16ZKfgNSSD8B7L++9QghLH5OdKjteIPY6F7ePn1H3dw8HSWdwAlLLUm/gp8x/NNa/PwEMIPUGUmMAqTeQWuackzFGxhjNfUzmnFteNvcxmXNOIQSFEJY+Jntp3393QgAAAAAAAAAAAAAAAAAAAAAA4OJ8A0DAPCO5kTn4AAAAAElFTkSuQmCC"
+    },
+    {
+      "path": "",
+      "name": "hair_bob_3d_main_t.png",
+      "folder": "armor",
+      "namespace": "hair_bob_3d",
+      "id": "1",
+      "width": 64,
+      "height": 64,
+      "uv_width": 64,
+      "uv_height": 64,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "948a1905-c5e8-5162-a58a-0d8b5bc66b64",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAA7ElEQVR4nO3SscqFMAyG4Zxwhk6l9FLEi/d6BEE4SxGEgtD/nxTq1OIQhPeBkvANNYZ+pmn6izFKjFGWZalqSzbPs4QQJIQg67pWtSUbx1G89+K9l9/vV9WWbBiGjzzwPYcKIci+71VtybZtu/Kcc1Vbs/PHjuOoakv2lD6+4eXMF+CcE+ecqOrV92RP6f0DveftzF+ANfMF5Jwl5yyllKvvyZ7S+wd6z9uZvwBrLMB6AGsswHoAayzAegBr35SSqKqoqpx9T5ZSui47+54spSSlFCmlXH1PBgAAAAAAAAAAAAAAAAAAAAAAcPcPwLsvo5AfJAkAAAAASUVORK5CYII="
+    },
+    {
+      "path": "",
+      "name": "hair_bob_3d_layer_1.png",
+      "folder": "armor",
+      "namespace": "hair_bob_3d",
+      "id": "2",
+      "width": 64,
+      "height": 32,
+      "uv_width": 64,
+      "uv_height": 32,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "98bd9ea9-35ba-56e2-a44f-dd77ea3b21b1",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAQ0lEQVR4nO3QsQ0AIQwEQaAb91+My/nvADKOYCa1ZK1ujoPu/nb3qpqnHy9b6YA0A6QD0gyQDkgzQDoAAAAAAADglh+31wQQJFpN9gAAAABJRU5ErkJggg=="
+    },
+    {
+      "path": "",
+      "name": "hair_bob_3d_layer_2.png",
+      "folder": "armor",
+      "namespace": "hair_bob_3d",
+      "id": "3",
+      "width": 64,
+      "height": 32,
+      "uv_width": 64,
+      "uv_height": 32,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "224d2e61-d141-5437-8b19-8c41f314e029",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAHklEQVR4nO3BAQ0AAADCoPdPbQ8HFAAAAAAAAADwbiAgAAFXlYP5AAAAAElFTkSuQmCC"
+    },
+    {
+      "path": "",
+      "name": "hair_bob_3d_helmet.png",
+      "folder": "armor",
+      "namespace": "hair_bob_3d",
+      "id": "4",
+      "width": 16,
+      "height": 16,
+      "uv_width": 16,
+      "uv_height": 16,
+      "particle": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "a36bd56c-5b98-5e9e-b853-49c7f80b0e95",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAZklEQVR4nGNgGGjACGMk2Kn9J0XjgkO3GBkYGBhYkAWNVCSI0nzuzgs4mwVdUktFCq/ma3eeofAxDEBXQAgwkaQaC8BwAQMDA0PevEOM2MQnJdlhBDTFLhg1AC0WkFMYNkBIfmAAANiMFd6TRNkEAAAAAElFTkSuQmCC"
+    }
+  ]
+}

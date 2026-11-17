@@ -1,0 +1,149 @@
+# ==============================================================================
+# Примеры предметов MythicMobs 5.13+ + MythicArmors для MythicWardrobe
+# Положите этот файл (или нужные блоки) в plugins/MythicMobs/Items/
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. 2D-ОДЕЖДА НА СКИН (через встроенную секцию Wardrobe: — работает в GUI слотах!)
+# ------------------------------------------------------------------------------
+Bandana_Mask:
+  Id: PAPER
+  Display: '<#a8dadc>Бандана-маска'
+  Lore:
+    - '<gray>Слот: <white>Маска (Скин)'
+    - '<dark_gray>Наденьте через меню слота шлема или ПКМ'
+  Wardrobe:
+    Slot: mask_skin
+    Texture: masks/demo_mask.png
+
+White_TShirt:
+  Id: LEATHER_CHESTPLATE
+  Display: '<#90e0ef>Белая футболка'
+  Options:
+    Color: 240,240,240
+  Lore:
+    - '<gray>Слот: <white>Футболка / Майка (Скин)'
+    - '<dark_gray>Надевается под куртку'
+  Wardrobe:
+    Slot: undershirt
+    Texture: undershirts/white_tshirt.png
+
+Leather_Jacket:
+  Id: LEATHER_CHESTPLATE
+  Display: '<#48cae4>Кожаная куртка'
+  Options:
+    Color: 88,56,36
+  Lore:
+    - '<gray>Слот: <white>Куртка / Кофта (Скин)'
+    - '<dark_gray>Рисуется поверх футболки'
+  Wardrobe:
+    Slot: jacket
+    Texture: jackets/demo_jacket.png
+    # Опционально: вызывать MythicMobs скиллы при надевании/снятии из GUI-слота
+    # OnEquipSkill: ColdResistApply
+    # OnUnequipSkill: ColdResistRemove
+
+# ------------------------------------------------------------------------------
+# 2. АЛЬТЕРНАТИВА: СКИЛЛЫ MythicMobs wardrobe (~onEquip) + unwardrobe (~onUnequip)
+#    Работает с любыми слоями из plugins/MythicWardrobe/layers.yml!
+# ------------------------------------------------------------------------------
+Skill_Triggered_Jacket:
+  Id: LEATHER_CHESTPLATE
+  Display: '<#ffd166>Куртка на скиллах wardrobe / unwardrobe'
+  Skills:
+    - wardrobe{type=jacket;texture=jackets/demo_jacket.png} @self ~onEquip
+    # texture= защищает от гонки: снимет слой ТОЛЬКО если на игроке всё ещё надета именно эта куртка!
+    - unwardrobe{type=jacket;texture=jackets/demo_jacket.png} @self ~onUnequip
+
+# Также unwardrobe поддерживает снятие нескольких слоёв сразу, всех слоёв и сброс bodytype:
+#   - unwardrobe{type=jacket,undershirt,gloves} @self ~onUnequip
+#   - unwardrobe{type=all} @self ~onUnequip
+#   - unwardrobe{type=body_skin;resetbodytype=true} @self ~onUnequip
+# Алиасы механики: unwardrobe, removewardrobe, clearwardrobe, unwear, unskinlayer
+
+# Пример предмета/свитка смены цвета кожи (body_skin) и типа рук (slim / wide)
+Character_Preset_Slim:
+  Id: PAPER
+  Display: '<#f4a261>Образ: Светлая кожа + Узкие руки (Slim)'
+  Skills:
+    - wardrobe{type=body_skin;texture=demo_light.png;bodytype=slim} @self ~onUse
+
+Character_Preset_Wide:
+  Id: PAPER
+  Display: '<#f4a261>Образ: Светлая кожа + Широкие руки (Wide)'
+  Skills:
+    - wardrobe{type=body_skin;texture=demo_light.png;bodytype=wide} @self ~onUse
+
+# Пример проверки типа тела и слоёв в условиях MythicMobs:
+# Conditions:
+#   - hasbodytype{type=slim} true
+#   - haswardrobelayer{type=body_skin;texture=demo_light.png} true
+
+# ------------------------------------------------------------------------------
+# 3. 3D-АКСЕССУАРЫ (Рюкзак и 3D-маска поверх шлема)
+# ------------------------------------------------------------------------------
+Example_GasMask_3D:
+  Id: PAPER
+  Display: '<#f4a261>Тактический противогаз (3D)'
+  Options:
+    ItemModel: mypack:gasmask_3d
+  Wardrobe:
+    Slot: mask_3d
+    Display:
+      Mount: HEAD
+      OffsetY: 0.0
+      ScaleX: 1.0
+      ScaleY: 1.0
+      ScaleZ: 1.0
+      PitchFollow: true
+      HideFromWearer: true
+
+Example_Tactical_Backpack:
+  Id: PAPER
+  Display: '<#e9c46a>Тактический рюкзак (3D)'
+  Options:
+    ItemModel: mypack:tactical_backpack
+  Wardrobe:
+    Slot: backpack_3d
+    Display:
+      Mount: BACK
+      OffsetY: 1.15
+      OffsetZ: -0.28
+      ScaleX: 1.0
+      ScaleY: 1.0
+      ScaleZ: 1.0
+      PitchFollow: false
+      HideFromWearer: false
+
+# ------------------------------------------------------------------------------
+# 4. 3D-БРОНЯ MythicArmors (Шлем, Бронежилет, Пояс) + Комбо-модель (Шлем + Маска)
+#    Любой предмет с Equippable: Slot: HEAD/CHEST/LEGS/FEET автоматически
+#    принимается в слоты "Броня / Статы" и "Косметика"!
+# ------------------------------------------------------------------------------
+Tactical_Helmet:
+  Id: NETHERITE_HELMET
+  Display: '<#52b788>Тактический шлем (3D MythicArmor)'
+  Equippable:
+    Model: mythicarmors:tactical_helmet
+    Slot: HEAD
+
+Tactical_Helmet_GasMask_Combo:
+  Id: NETHERITE_HELMET
+  Display: '<#52b788>Тактический шлем + Противогаз (Комбо)'
+  Equippable:
+    Model: mythicarmors:tactical_helmet_gasmask_combo
+    Slot: HEAD
+
+Bulletproof_Vest:
+  Id: NETHERITE_CHESTPLATE
+  Display: '<#52b788>Бронежилет 4 класса (3D MythicArmor)'
+  Equippable:
+    Model: mythicarmors:bulletproof_vest
+    Slot: CHEST
+
+Tactical_Belt:
+  Id: IRON_BOOTS
+  Display: '<#52b788>Тактический пояс (3D MythicArmor на слоте FEET)'
+  Equippable:
+    Model: mythicarmors:tactical_belt
+    Slot: FEET

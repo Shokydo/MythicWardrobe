@@ -1,0 +1,80 @@
+# ==============================================================================
+# MythicWardrobe v1.5.0 — Жёсткая 0-lag привязка комбо-моделей (combo-overrides.yml)
+# Положите в: plugins/MythicWardrobe/combo-overrides.yml
+# ==============================================================================
+# КАК ЭТО РАБОТАЕТ:
+# • Маска (TacticalGasMask3D) и Рюкзак (TacticalBackpackArmor) по-прежнему
+#   надеваются 100% САМОСТОЯТЕЛЬНО без шлема / без бронежилета!
+# • Когда же надеты ОБА предмета одновременно (напр. Бронежилет + Рюкзак в backpack_3d),
+#   плагин подменяет визуальный пакет на цельную склеенную комбо-модель MythicArmors
+#   (0 ArmorStand, 0 отставаний при беге — рюкзак приварен прямо к кости торса!).
+# • Свои комбо для ЛЮБЫХ новых моделей создаются за 1 секунду прямо в игре командой:
+#     /wardrobe merge <modelA> <modelB> <outputName>
+# ==============================================================================
+
+combos:
+  # --- Бронежилет + 3D Рюкзак (жёсткая привязка к кости body, 0 лага!) ---
+  tactical_vest_plus_backpack_armor:
+    equipment-slot: CHEST
+    primary-mythic-item: "TacticalWardenVest"
+    secondary-slot: "backpack_3d"
+    secondary-mythic-item: "TacticalBackpackArmor"
+    result-mythic-item: "TacticalWardenVestBackpack"
+    hide-secondary-display: true
+
+  tactical_vest_plus_backpack_3d:
+    equipment-slot: CHEST
+    primary-mythic-item: "TacticalWardenVest"
+    secondary-slot: "backpack_3d"
+    secondary-mythic-item: "TacticalBackpack3D"
+    result-mythic-item: "TacticalWardenVestBackpack"
+    hide-secondary-display: true
+
+  gold_vest_plus_backpack_armor:
+    equipment-slot: CHEST
+    primary-mythic-item: "GoldWardenChestCosmetic"
+    secondary-slot: "backpack_3d"
+    secondary-mythic-item: "TacticalBackpackArmor"
+    result-mythic-item: "GoldWardenChestBackpack"
+    hide-secondary-display: true
+
+  gold_vest_plus_backpack_3d:
+    equipment-slot: CHEST
+    primary-mythic-item: "GoldWardenChestCosmetic"
+    secondary-slot: "backpack_3d"
+    secondary-mythic-item: "TacticalBackpack3D"
+    result-mythic-item: "GoldWardenChestBackpack"
+    hide-secondary-display: true
+
+  # --- Шлем + 3D Противогаз (жёсткая привязка к кости head, 0 лага!) ---
+  warden_helmet_plus_gasmask:
+    equipment-slot: HEAD
+    primary-mythic-item: "TacticalWardenHelmet"
+    secondary-slot: "mask_3d"
+    secondary-mythic-item: "TacticalGasMask3D"
+    result-mythic-item: "TacticalWardenHelmetMasked"
+    hide-secondary-display: true
+
+  gold_helmet_plus_gasmask:
+    equipment-slot: HEAD
+    primary-mythic-item: "GoldWardenHelmetCosmetic"
+    secondary-slot: "mask_3d"
+    secondary-mythic-item: "TacticalGasMask3D"
+    result-mythic-item: "GoldWardenHelmetMasked"
+    hide-secondary-display: true
+
+  tactical_legs_plus_belt:
+    equipment-slot: LEGS
+    primary-mythic-item: "TacticalWardenLeggings"
+    secondary-slot: "belt_3d"
+    secondary-mythic-item: "TacticalUtilityBelt3D"
+    result-mythic-item: "TacticalWardenLegsWithBelt"
+    hide-secondary-display: true
+
+  gold_legs_plus_chains_belt:
+    equipment-slot: LEGS
+    primary-mythic-item: "GoldWardenLeggingsCosmetic"
+    secondary-slot: "belt_3d"
+    secondary-mythic-item: "RoyalChainBelt3D"
+    result-mythic-item: "GoldWardenLegsWithBelt"
+    hide-secondary-display: true

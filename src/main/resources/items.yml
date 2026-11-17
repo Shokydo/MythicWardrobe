@@ -1,0 +1,83 @@
+# ==============================================================================
+# MythicWardrobe — Привязка MythicMobs предметов к слотам гардероба (опционально)
+# ==============================================================================
+# Привязать предмет к слоту можно ТРЕМЯ способами (плагин проверяет все три):
+#   1. Командой в игре: /wardrobe tag <slot> [texture.png]  (пишет PDC-тег на предмет в руке)
+#   2. Прямо внутри конфига MythicMobs item YAML:
+#        Winter_Jacket:
+#          Id: LEATHER_CHESTPLATE
+#          Display: '&bЗимняя куртка'
+#          Wardrobe:
+#            Slot: jacket
+#            Texture: jackets/demo_jacket.png
+#            OnEquipSkill: MyEquipSkill
+#            OnUnequipSkill: MyUnequipSkill
+#   3. В этом файле items.yml по внутреннему ID предмета MythicMobs:
+# ==============================================================================
+
+items:
+  # Пример 2D-куртки
+  Example_Leather_Jacket:
+    slot: jacket
+    texture: "jackets/demo_jacket.png"
+    # Опционально: вызывать MythicMobs скилл при надевании/снятии в кастомном GUI-слоте
+    on-equip-skill: ""
+    on-unequip-skill: ""
+
+  # Пример ЦЕЛЬНОГО КОСТЮМА (химзащита в слоте jacket с блокировкой других слоёв одежды!)
+  # В blocks можно указывать конкретные слои/слоты, алиасы ИЛИ групповые шорткаты:
+  #   all_clothing (вся 2D-одежда), all_body / suit (футболка+штаны+пояс+перчатки+носки+ботинки),
+  #   all_skin (все 2D-слои кроме body_skin), all_3d (все 3D-аксессуары), all (все слоты)
+  Example_Hazmat_Suit:
+    slot: jacket
+    texture: "jackets/hazmat_suit.png"
+    blocks:
+      - undershirt
+      - pants
+      - belt_skin
+      - gloves
+      - socks
+      - boots_skin
+      - mask_skin
+      - hat
+    # Режим: UNEQUIP (снять и вернуть в инвентарь), PREVENT (не давать надеть), HIDE (временно скрыть)
+    block-mode: UNEQUIP
+
+  # Пример 2D-маски
+  Example_Bandana_Mask:
+    slot: mask_skin
+    texture: "masks/demo_mask.png"
+
+  # Пример 3D-маски (показывается через ItemDisplay или комбинируется через combo-overrides.yml)
+  Example_GasMask_3D:
+    slot: mask_3d
+    # Можно переопределить смещение/масштаб именно для этого предмета
+    display-override:
+      offset-y: 0.0
+      scale-x: 1.0
+      scale-y: 1.0
+      scale-z: 1.0
+
+  # Пример 2D-пояса (рисуется поверх штанов!)
+  Example_Leather_Belt:
+    slot: belt_skin
+    texture: "belts/leather_belt.png"
+
+  # Пример 3D-пояса / кобуры / декора на талию
+  Example_Tactical_Belt_3D:
+    slot: belt_3d
+    display-override:
+      offset-y: 0.75
+      scale-x: 1.0
+      scale-y: 1.0
+      scale-z: 1.0
+
+  # Пример 3D-рюкзака
+  Example_Tactical_Backpack:
+    slot: backpack_3d
+    display-override:
+      offset-y: 1.15
+      offset-z: -0.28
+      scale-x: 1.05
+      scale-y: 1.05
+      scale-z: 1.05

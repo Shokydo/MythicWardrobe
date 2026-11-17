@@ -1,0 +1,60 @@
+# MythicWardrobe v1.9.0 — Автопривязка 3D-волос к 2D-волосам и частичное скрытие под шлемом
+enabled: true
+manual-slot-overrides-binding: true
+trigger-on-2d-hat: true
+default-helmet-list-mode: ALL
+default-helmets: []
+default-exceptions: []
+
+bindings:
+  hair_brown.png:
+    mythic-item: "HairSpiky3D_Golden"
+    color: "135,78,52"
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  hair_blonde.png:
+    mythic-item: "HairPonytail3D_Chestnut"
+    color: "225,192,110"
+    helmet-mode: PARTIAL_MODEL
+    helmet-partial-item: "HairPonytail3D_HelmetSafe"
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  hair_black.png:
+    mythic-item: "HairBob3D_Black"
+    color: "42,36,34"
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+items:
+  HairPonytail3D_Chestnut:
+    helmet-mode: PARTIAL_MODEL
+    helmet-partial-item: "HairPonytail3D_HelmetSafe"
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  HairPonytail3D_Silver:
+    helmet-mode: PARTIAL_MODEL
+    helmet-partial-item: "HairPonytail3D_HelmetSafe"
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  HairSpiky3D_Golden:
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []
+
+  HairBob3D_Black:
+    helmet-mode: HIDE_ALL
+    helmet-list-mode: ALL
+    helmets: []
+    exceptions: []

@@ -1,0 +1,28 @@
+# ==============================================================================
+# MythicWardrobe v1.7.0 — Опциональные комбо-замены (combo-overrides.yml)
+# ==============================================================================
+# В MythicWardrobe v1.4+ ЛЮБАЯ 3D-модель MythicArmors (шлем, маска, бронежилет,
+# рюкзак, пояс и т.д.) является 100% самостоятельной — её можно надеть ОДНУ
+# ИЛИ ОДНОВРЕМЕННО поверх любой другой 3D-модели без единого правила здесь!
+#
+# Этот файл нужен ТОЛЬКО если вы сами захотите подменять конкретную пару
+# предметов на заранее склеенную в Blockbench модель:
+#
+# combos:
+#   example_combo:
+#     equipment-slot: HEAD
+#     primary-mythic-item: "TacticalWardenHelmet"
+#     secondary-slot: "mask_3d"
+#     secondary-mythic-item: "TacticalGasMask3D"
+#     result-mythic-item: "TacticalWardenHelmetMasked"
+#     hide-secondary-display: true
+#   example_legs_belt_combo:
+#     equipment-slot: LEGS
+#     primary-mythic-item: "TacticalWardenLeggings"
+#     secondary-slot: "belt_3d"
+#     secondary-mythic-item: "TacticalUtilityBelt3D"
+#     result-mythic-item: "TacticalWardenLegsWithBelt"
+#     hide-secondary-display: true
+# ==============================================================================
+
+combos: {}

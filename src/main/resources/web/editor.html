@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MythicWardrobe — Тестовый редактор скина и слоёв</title>
+<style>
+  :root {
+    --bg: #0b0f17;
+    --panel: #121826;
+    --panel-2: #182133;
+    --border: #263248;
+    --border-hi: #38bdf8;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #818cf8;
+    --ok: #22c55e;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(circle at 20% 10%, #152238 0%, var(--bg) 60%);
+    color: var(--text);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+  }
+
+  .app {
+    display: grid;
+    grid-template-columns: minmax(320px, 420px) 1fr;
+    gap: 18px;
+    height: 100vh;
+    padding: 16px;
+    max-width: 1480px;
+    margin: 0 auto;
+  }
+
+  /* LEFT: 3D CHARACTER VIEWPORT */
+  .viewer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .brand h1 {
+    font-size: 16px;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .brand span {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .status-pill {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.14);
+    color: var(--accent);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    white-space: nowrap;
+  }
+  .status-pill.live {
+    background: rgba(34, 197, 94, 0.14);
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.38);
+  }
+
+  .stage-frame {
+    position: relative;
+    flex: 1;
+    min-height: 300px;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(56, 189, 248, 0.16) 0%, rgba(11, 15, 23, 0.94) 72%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0 1px, transparent 1px 28px);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6), 0 12px 30px rgba(0,0,0,0.35);
+  }
+
+  #skin3d {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: grab;
+  }
+  #skin3d:active { cursor: grabbing; }
+
+  .stage-hint {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    font-size: 11px;
+    color: rgba(226, 232, 240, 0.55);
+    pointer-events: none;
+    background: rgba(11, 15, 23, 0.65);
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+
+  .stage-tools {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+  }
+
+  .mini-btn {
+    background: rgba(18, 24, 38, 0.85);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mini-btn.active {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: var(--accent);
+    color: #e0f2fe;
+  }
+
+  .flat-preview-box {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(18, 24, 38, 0.82);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .flat-preview-box canvas {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    border-radius: 4px;
+    background: repeating-conic-gradient(#1f2937 0% 25%, #111827 0% 50%) 50% / 12px 12px;
+  }
+  .flat-preview-box span {
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* Bodytype Wide / Slim Switcher */
+  .bodytype-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bodytype-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .bodytype-label strong { color: var(--text); }
+  .segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .seg-btn {
+    padding: 9px 10px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .seg-btn:hover { color: var(--text); border-color: #475569; }
+  .seg-btn.active {
+    background: linear-gradient(135deg, rgba(56,189,248,0.22), rgba(129,140,248,0.22));
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.25);
+  }
+
+  /* RIGHT: SCROLLABLE HUD CATEGORIES (matches user sketch!) */
+  .hud-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .hud-scroll {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-right: 6px;
+  }
+
+  .hud-scroll::-webkit-scrollbar,
+  .cat-strip::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .hud-scroll::-webkit-scrollbar-track,
+  .cat-strip::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 999px;
+  }
+  .hud-scroll::-webkit-scrollbar-thumb,
+  .cat-strip::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 999px;
+  }
+  .hud-scroll::-webkit-scrollbar-thumb:hover,
+  .cat-strip::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+
+  .cat-box {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex-shrink: 0;
+    transition: border-color 0.15s ease;
+  }
+  .cat-box:hover { border-color: #364766; }
+
+  .cat-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .cat-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .cat-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  .cat-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: var(--panel-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .cat-badge.base {
+    background: rgba(245, 158, 11, 0.14);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #fbbf24;
+  }
+  .cat-selected {
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .cat-strip {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .item-tile {
+    flex: 0 0 92px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 6px;
+    background: var(--panel-2);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.14s ease;
+    color: var(--text);
+    text-align: center;
+  }
+  .item-tile:hover {
+    border-color: #64748b;
+    transform: translateY(-1px);
+  }
+  .item-tile.selected {
+    border-color: var(--accent);
+    background: rgba(56, 189, 248, 0.14);
+    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), 0 6px 14px rgba(56, 189, 248, 0.14);
+  }
+
+  .thumb-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 7px;
+    background: repeating-conic-gradient(#1f2937 0% 25%, #111827 0% 50%) 50% / 12px 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .thumb-wrap canvas {
+    width: 52px;
+    height: 52px;
+    image-rendering: pixelated;
+  }
+  .thumb-none {
+    font-size: 20px;
+    color: #64748b;
+    font-weight: 700;
+  }
+
+  .item-name {
+    font-size: 11px;
+    line-height: 1.2;
+    color: #cbd5e1;
+    word-break: break-word;
+    max-width: 82px;
+  }
+  .item-tile.selected .item-name { color: #fff; font-weight: 600; }
+
+  .empty-cat {
+    font-size: 12px;
+    color: #64748b;
+    padding: 8px 2px;
+  }
+
+  /* Bottom Action Bar */
+  .hud-actions {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .action-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn:hover { border-color: #64748b; background: #1e293b; }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #0ea5e9, #6366f1);
+    border-color: transparent;
+    color: #fff;
+    padding: 10px 22px;
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.28);
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+
+  .btn-danger {
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+  .btn-danger:hover { background: rgba(239, 68, 68, 0.16); border-color: var(--danger); }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #0f172a;
+    border: 1px solid var(--accent);
+    color: #f8fafc;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transition: all 0.25s ease;
+    z-index: 100;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: var(--danger); color: #fecaca; }
+  .toast.ok { border-color: var(--ok); color: #dcfce7; }
+
+  @media (max-width: 860px) {
+    html, body { overflow: auto; }
+    .app {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+    .stage-frame { height: 420px; }
+    .hud-scroll { overflow-y: visible; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- LEFT COLUMN: LIVE 3D SKIN VIEWPORT -->
+  <section class="viewer-col">
+    <div class="viewer-header">
+      <div class="brand">
+        <h1>MythicWardrobe</h1>
+        <span id="playerLabel">Загрузка игрока...</span>
+      </div>
+      <div id="statusPill" class="status-pill">Тест-превью</div>
+    </div>
+
+    <div class="stage-frame">
+      <canvas id="skin3d"></canvas>
+      <div class="flat-preview-box" title="Итоговая 64x64 развёртка скина">
+        <canvas id="flat64" width="64" height="64"></canvas>
+        <span>64×64 PNG</span>
+      </div>
+      <div class="stage-tools">
+        <button id="btnWalk" class="mini-btn active" title="Анимация ходьбы">Ходьба</button>
+        <button id="btnOuter" class="mini-btn active" title="Показать 2-й слой">2-й слой</button>
+        <button id="btnCamReset" class="mini-btn" title="Сбросить ракурс">↺</button>
+      </div>
+      <div class="stage-hint">ЛКМ — вращать • Колёсико — зум</div>
+    </div>
+
+    <div class="bodytype-card">
+      <div class="bodytype-label">
+        <strong>Тип тела (bodytype)</strong>
+        <span id="bodyTypeHint">Широкие руки (4px)</span>
+      </div>
+      <div class="segmented">
+        <button id="btnWide" class="seg-btn active" data-bt="wide">Wide (4px)</button>
+        <button id="btnSlim" class="seg-btn" data-bt="slim">Slim (3px)</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RIGHT COLUMN: SCROLLABLE HUD CATEGORIES -->
+  <section class="hud-col">
+    <div id="hudScroll" class="hud-scroll">
+      <!-- Dynamic category cards from layers.yml -->
+    </div>
+
+    <div class="hud-actions">
+      <div class="action-group">
+        <button id="btnRandom" class="btn">🎲 Случайный образ</button>
+        <button id="btnReset" class="btn btn-danger">Сбросить</button>
+        <button id="btnDownload" class="btn">⬇ Скачать PNG</button>
+      </div>
+      <button id="btnApply" class="btn btn-primary">✔ Применить в игре</button>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const LAYER_TITLES_RU = {
+    body_skin: 'Цвет кожи / Тело (База)',
+    eyes: 'Глаза',
+    eyebrows: 'Брови',
+    hair: 'Волосы / Причёска',
+    beard: 'Борода',
+    scars: 'Шрамы и тату',
+    pants: 'Штаны',
+    undershirt: 'Футболка / Майка',
+    socks: 'Носки',
+    jacket: 'Куртка / Кофта',
+    boots_skin: 'Ботинки (Скин)',
+    gloves: 'Перчатки',
+    mask_skin: 'Маска (Скин)',
+    hat: 'Шапка / Головной убор'
+  };
+
+  const OUTER_UV_REGIONS = {
+    HEAD_OUTER: [32, 0, 32, 16],
+    BODY_OUTER: [16, 32, 24, 16],
+    RIGHT_ARM_OUTER: [40, 32, 16, 16],
+    LEFT_ARM_OUTER: [48, 48, 16, 16],
+    RIGHT_LEG_OUTER: [0, 32, 16, 16],
+    LEFT_LEG_OUTER: [0, 48, 16, 16]
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token') || '';
+
+  const state = {
+    playerName: 'Игрок',
+    connectedToServer: false,
+    bodyType: 'wide', // 'wide' | 'slim'
+    layers: [],       // [{id, priority, folder, replacesBaseSkin, clearOuterRegions, textures: []}]
+    selected: {},     // { layerId: textureName }
+    baseSkinImg: null,
+    imageCache: new Map(), // url -> HTMLImageElement
+    showOuter: true,
+    walkAnim: true
+  };
+
+  const flatCanvas = document.getElementById('flat64');
+  const flatCtx = flatCanvas.getContext('2d');
+  flatCtx.imageSmoothingEnabled = false;
+
+  function showToast(msg, kind = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show ' + kind;
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => { el.className = 'toast'; }, 3200);
+  }
+
+  function prettyName(filename) {
+    return filename.replace(/\.png$/i, '').replace(/[_-]+/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function loadImage(url) {
+    if (state.imageCache.has(url)) {
+      return Promise.resolve(state.imageCache.get(url));
+    }
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        state.imageCache.set(url, img);
+        resolve(img);
+      };
+      img.onerror = () => resolve(null);
+      img.src = url;
+    });
+  }
+
+  function overlayUrl(layerId, fileName, bodyType) {
+    const q = new URLSearchParams({ layer: layerId, file: fileName, bodytype: bodyType });
+    return '/api/overlay?' + q.toString();
+  }
+
+  // ===========================================================================
+  // 1. PURE WEBGL 3D MINECRAFT CHARACTER RENDERER (64x64 UV, Wide 4px / Slim 3px)
+  // ===========================================================================
+  const glCanvas = document.getElementById('skin3d');
+  const gl = glCanvas.getContext('webgl', { alpha: true, antialias: true, preserveDrawingBuffer: false });
+
+  let rotYaw = 0.42;
+  let rotPitch = 0.14;
+  let camDist = 48;
+  let dragging = false;
+  let lastX = 0, lastY = 0;
+
+  let program, texHandle, aPos, aUV, aNorm, uMVP, uModel, uTex;
+  let innerMesh = null, outerMesh = null;
+
+  function initWebGL() {
+    if (!gl) {
+      showToast('WebGL недоступен в браузере', 'error');
+      return;
+    }
+    const vsSrc = `
+      attribute vec3 aPos;
+      attribute vec2 aUV;
+      attribute vec3 aNorm;
+      uniform mat4 uMVP;
+      uniform mat4 uModel;
+      varying vec2 vUV;
+      varying vec3 vNorm;
+      void main() {
+        vUV = aUV;
+        vNorm = normalize(mat3(uModel) * aNorm);
+        gl_Position = uMVP * vec4(aPos, 1.0);
+      }
+    `;
+    const fsSrc = `
+      precision mediump float;
+      varying vec2 vUV;
+      varying vec3 vNorm;
+      uniform sampler2D uTex;
+      void main() {
+        vec4 col = texture2D(uTex, vUV);
+        if (col.a < 0.05) discard;
+        vec3 lightDir = normalize(vec3(0.45, 0.8, 0.65));
+        float diff = max(dot(normalize(vNorm), lightDir), 0.0);
+        float shade = 0.72 + 0.28 * diff;
+        gl_FragColor = vec4(col.rgb * shade, col.a);
+      }
+    `;
+
+    function compile(type, src) {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      return sh;
+    }
+    program = gl.createProgram();
+    gl.attachShader(program, compile(gl.VERTEX_SHADER, vsSrc));
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, fsSrc));
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    aPos = gl.getAttribLocation(program, 'aPos');
+    aUV = gl.getAttribLocation(program, 'aUV');
+    aNorm = gl.getAttribLocation(program, 'aNorm');
+    uMVP = gl.getUniformLocation(program, 'uMVP');
+    uModel = gl.getUniformLocation(program, 'uModel');
+    uTex = gl.getUniformLocation(program, 'uTex');
+
+    texHandle = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texHandle);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    rebuildModelParts();
+    requestAnimationFrame(renderLoop);
+  }
+
+  function buildBoxBuffers(w, h, d, cx, cy, cz, u, v, inflate) {
+    const hx = w / 2 + inflate;
+    const hy = h / 2 + inflate;
+    const hz = d / 2 + inflate;
+
+    const pos = [];
+    const uv = [];
+    const norm = [];
+    const idx = [];
+
+    const eps = 0.01 / 64.0; // prevents UV bleed at texture edges
+
+    function addQuad(p0, p1, p2, p3, u0, v0, uw, vh, n) {
+      const base = pos.length / 3;
+      const U0 = u0 / 64.0 + eps, U1 = (u0 + uw) / 64.0 - eps;
+      const V0 = v0 / 64.0 + eps, V1 = (v0 + vh) / 64.0 - eps;
+
+      pos.push(
+        p0[0] + cx, p0[1] + cy, p0[2] + cz,
+        p1[0] + cx, p1[1] + cy, p1[2] + cz,
+        p2[0] + cx, p2[1] + cy, p2[2] + cz,
+        p3[0] + cx, p3[1] + cy, p3[2] + cz
+      );
+      uv.push(U0, V0, U1, V0, U1, V1, U0, V1);
+      for (let i = 0; i < 4; i++) norm.push(n[0], n[1], n[2]);
+      idx.push(base, base + 2, base + 1, base, base + 3, base + 2);
+    }
+
+    // Front (+Z)
+    addQuad([-hx, hy, hz], [hx, hy, hz], [hx, -hy, hz], [-hx, -hy, hz], u + d, v + d, w, h, [0, 0, 1]);
+    // Back (-Z)
+    addQuad([hx, hy, -hz], [-hx, hy, -hz], [-hx, -hy, -hz], [hx, -hy, -hz], u + d + w + d, v + d, w, h, [0, 0, -1]);
+    // Right (-X, character right)
+    addQuad([-hx, hy, -hz], [-hx, hy, hz], [-hx, -hy, hz], [-hx, -hy, -hz], u, v + d, d, h, [-1, 0, 0]);
+    // Left (+X, character left)
+    addQuad([hx, hy, hz], [hx, hy, -hz], [hx, -hy, -hz], [hx, -hy, hz], u + d + w, v + d, d, h, [1, 0, 0]);
+    // Top (+Y)
+    addQuad([-hx, hy, -hz], [hx, hy, -hz], [hx, hy, hz], [-hx, hy, hz], u + d, v, w, d, [0, 1, 0]);
+    // Bottom (-Y)
+    addQuad([-hx, -hy, hz], [hx, -hy, hz], [hx, -hy, -hz], [-hx, -hy, -hz], u + d + w, v, w, d, [0, -1, 0]);
+
+    const bPos = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bPos);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pos), gl.STATIC_DRAW);
+
+    const bUV = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bUV);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uv), gl.STATIC_DRAW);
+
+    const bNorm = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bNorm);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(norm), gl.STATIC_DRAW);
+
+    const bIdx = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bIdx);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
+
+    return { bPos, bUV, bNorm, bIdx, count: idx.length };
+  }
+
+  function rebuildModelParts() {
+    if (!gl) return;
+    const slim = state.bodyType === 'slim';
+    const armW = slim ? 3 : 4;
+    const armOffsetX = 4 + armW / 2;
+
+    innerMesh = [
+      { name: 'head',     pivot: [0, 24, 0],           buf: buildBoxBuffers(8, 8, 8, 0, 4, 0, 0, 0, 0) },
+      { name: 'body',     pivot: [0, 12, 0],           buf: buildBoxBuffers(8, 12, 4, 0, 6, 0, 16, 16, 0) },
+      { name: 'rightArm', pivot: [-armOffsetX, 22, 0], buf: buildBoxBuffers(armW, 12, 4, 0, -4, 0, 40, 16, 0) },
+      { name: 'leftArm',  pivot: [armOffsetX, 22, 0],  buf: buildBoxBuffers(armW, 12, 4, 0, -4, 0, 32, 48, 0) },
+      { name: 'rightLeg', pivot: [-2, 12, 0],          buf: buildBoxBuffers(4, 12, 4, 0, -6, 0, 0, 16, 0) },
+      { name: 'leftLeg',  pivot: [2, 12, 0],           buf: buildBoxBuffers(4, 12, 4, 0, -6, 0, 16, 48, 0) }
+    ];
+
+    outerMesh = [
+      { name: 'head',     pivot: [0, 24, 0],           buf: buildBoxBuffers(8, 8, 8, 0, 4, 0, 32, 0, 0.5) },
+      { name: 'body',     pivot: [0, 12, 0],           buf: buildBoxBuffers(8, 12, 4, 0, 6, 0, 16, 32, 0.28) },
+      { name: 'rightArm', pivot: [-armOffsetX, 22, 0], buf: buildBoxBuffers(armW, 12, 4, 0, -4, 0, 40, 32, 0.28) },
+      { name: 'leftArm',  pivot: [armOffsetX, 22, 0],  buf: buildBoxBuffers(armW, 12, 4, 0, -4, 0, 48, 48, 0.28) },
+      { name: 'rightLeg', pivot: [-2, 12, 0],          buf: buildBoxBuffers(4, 12, 4, 0, -6, 0, 0, 32, 0.28) },
+      { name: 'leftLeg',  pivot: [2, 12, 0],           buf: buildBoxBuffers(4, 12, 4, 0, -6, 0, 0, 48, 0.28) }
+    ];
+  }
+
+  function uploadSkinTexture() {
+    if (!gl || !texHandle) return;
+    gl.bindTexture(gl.TEXTURE_2D, texHandle);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, flatCanvas);
+  }
+
+  // Minimal 4x4 matrix math (column-major)
+  function mat4Identity() {
+    return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
+  }
+  function mat4Multiply(a, b) {
+    const o = new Float32Array(16);
+    for (let c = 0; c < 4; c++) {
+      for (let r = 0; r < 4; r++) {
+        o[c*4+r] = a[0*4+r]*b[c*4+0] + a[1*4+r]*b[c*4+1] + a[2*4+r]*b[c*4+2] + a[3*4+r]*b[c*4+3];
+      }
+    }
+    return o;
+  }
+  function mat4Perspective(fovRad, aspect, near, far) {
+    const f = 1.0 / Math.tan(fovRad / 2);
+    const nf = 1 / (near - far);
+    return new Float32Array([
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (far + near) * nf, -1,
+      0, 0, (2 * far * near) * nf, 0
+    ]);
+  }
+  function mat4Translate(x, y, z) {
+    return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, x,y,z,1]);
+  }
+  function mat4RotateX(rad) {
+    const c = Math.cos(rad), s = Math.sin(rad);
+    return new Float32Array([1,0,0,0, 0,c,s,0, 0,-s,c,0, 0,0,0,1]);
+  }
+  function mat4RotateY(rad) {
+    const c = Math.cos(rad), s = Math.sin(rad);
+    return new Float32Array([c,0,-s,0, 0,1,0,0, s,0,c,0, 0,0,0,1]);
+  }
+  function mat4RotateZ(rad) {
+    const c = Math.cos(rad), s = Math.sin(rad);
+    return new Float32Array([c,s,0,0, -s,c,0,0, 0,0,1,0, 0,0,0,1]);
+  }
+
+  function drawPartList(parts, vp, rootMat, timeSec) {
+    const swing = state.walkAnim ? Math.sin(timeSec * 3.4) * 0.45 : 0;
+    const breathe = Math.sin(timeSec * 1.8) * 0.03;
+
+    for (const part of parts) {
+      let local = mat4Translate(part.pivot[0], part.pivot[1] - 16, part.pivot[2]);
+      if (part.name === 'rightArm') {
+        local = mat4Multiply(local, mat4RotateX(-swing));
+        local = mat4Multiply(local, mat4RotateZ(-0.04 - breathe));
+      } else if (part.name === 'leftArm') {
+        local = mat4Multiply(local, mat4RotateX(swing));
+        local = mat4Multiply(local, mat4RotateZ(0.04 + breathe));
+      } else if (part.name === 'rightLeg') {
+        local = mat4Multiply(local, mat4RotateX(swing));
+      } else if (part.name === 'leftLeg') {
+        local = mat4Multiply(local, mat4RotateX(-swing));
+      } else if (part.name === 'head') {
+        local = mat4Multiply(local, mat4RotateY(Math.sin(timeSec * 1.1) * 0.08));
+      }
+
+      const model = mat4Multiply(rootMat, local);
+      const mvp = mat4Multiply(vp, model);
+      gl.uniformMatrix4fv(uModel, false, model);
+      gl.uniformMatrix4fv(uMVP, false, mvp);
+
+      const b = part.buf;
+      gl.bindBuffer(gl.ARRAY_BUFFER, b.bPos);
+      gl.vertexAttribPointer(aPos, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(aPos);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, b.bUV);
+      gl.vertexAttribPointer(aUV, 2, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(aUV);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, b.bNorm);
+      gl.vertexAttribPointer(aNorm, 3, gl.FLOAT, false, 0, 0);
+      gl.enableVertexAttribArray(aNorm);
+
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b.bIdx);
+      gl.drawElements(gl.TRIANGLES, b.count, gl.UNSIGNED_SHORT, 0);
+    }
+  }
+
+  function renderLoop(nowMs) {
+    if (!gl) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = glCanvas.getBoundingClientRect();
+    const w = Math.max(1, Math.floor(rect.width * dpr));
+    const h = Math.max(1, Math.floor(rect.height * dpr));
+    if (glCanvas.width !== w || glCanvas.height !== h) {
+      glCanvas.width = w;
+      glCanvas.height = h;
+    }
+    gl.viewport(0, 0, w, h);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    if (!dragging && state.walkAnim) {
+      rotYaw += 0.004;
+    }
+
+    const proj = mat4Perspective(38 * Math.PI / 180, w / h, 0.5, 200);
+    const view = mat4Translate(0, -1.2, -camDist);
+    const vp = mat4Multiply(proj, view);
+    const rootMat = mat4Multiply(mat4RotateX(rotPitch), mat4RotateY(rotYaw));
+
+    gl.useProgram(program);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texHandle);
+    gl.uniform1i(uTex, 0);
+
+    const t = nowMs * 0.001;
+    if (innerMesh) {
+      gl.enable(gl.CULL_FACE);
+      gl.cullFace(gl.BACK);
+      drawPartList(innerMesh, vp, rootMat, t);
+    }
+    if (outerMesh && state.showOuter) {
+      gl.disable(gl.CULL_FACE);
+      drawPartList(outerMesh, vp, rootMat, t);
+    }
+
+    requestAnimationFrame(renderLoop);
+  }
+
+  // Orbit pointer controls
+  glCanvas.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    glCanvas.setPointerCapture(e.pointerId);
+  });
+  glCanvas.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    rotYaw += dx * 0.011;
+    rotPitch = Math.max(-1.1, Math.min(1.1, rotPitch + dy * 0.011));
+  });
+  glCanvas.addEventListener('pointerup', () => { dragging = false; });
+  glCanvas.addEventListener('pointercancel', () => { dragging = false; });
+  glCanvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    camDist = Math.max(26, Math.min(72, camDist + e.deltaY * 0.04));
+  }, { passive: false });
+
+  // ===========================================================================
+  // 2. CLIENT-SIDE 64x64 SKIN COMPOSITOR (matches Java SkinCompositor 1:1!)
+  // ===========================================================================
+  async function recomposeSkin() {
+    const activeEntries = [];
+    for (const layer of state.layers) {
+      const chosen = state.selected[layer.id];
+      if (!chosen) continue;
+      const img = await loadImage(overlayUrl(layer.id, chosen, state.bodyType));
+      if (img) {
+        activeEntries.push({ layer, img });
+      }
+    }
+
+    let replaceIndex = -1;
+    for (let i = 0; i < activeEntries.length; i++) {
+      if (activeEntries[i].layer.replacesBaseSkin) {
+        replaceIndex = i;
+      }
+    }
+
+    flatCtx.clearRect(0, 0, 64, 64);
+
+    let overlaysToDraw;
+    if (replaceIndex >= 0) {
+      flatCtx.drawImage(activeEntries[replaceIndex].img, 0, 0);
+      overlaysToDraw = activeEntries.slice(replaceIndex + 1);
+    } else {
+      if (state.baseSkinImg) {
+        flatCtx.drawImage(state.baseSkinImg, 0, 0);
+      }
+      overlaysToDraw = activeEntries;
+    }
+
+    // Clear requested outer-layer UV regions before drawing clothes on top
+    const clearSet = new Set();
+    for (const entry of overlaysToDraw) {
+      for (const r of (entry.layer.clearOuterRegions || [])) {
+        if (r === 'ALL_OUTER') {
+          Object.keys(OUTER_UV_REGIONS).forEach(k => clearSet.add(k));
+        } else if (OUTER_UV_REGIONS[r]) {
+          clearSet.add(r);
+        }
+      }
+    }
+    for (const key of clearSet) {
+      const [rx, ry, rw, rh] = OUTER_UV_REGIONS[key];
+      flatCtx.clearRect(rx, ry, rw, rh);
+    }
+
+    for (const entry of overlaysToDraw) {
+      flatCtx.drawImage(entry.img, 0, 0);
+    }
+
+    uploadSkinTexture();
+  }
+
+  // ===========================================================================
+  // 3. SMART CROPPED THUMBNAILS FOR EACH CATEGORY CARD
+  // ===========================================================================
+  function drawSmartThumb(canvas, img, layerId) {
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
+    ctx.clearRect(0, 0, 32, 32);
+    if (!img) return;
+
+    const id = layerId.toLowerCase();
+    if (id.includes('eye') || id.includes('hair') || id.includes('mask') || id.includes('hat') || id.includes('beard') || id.includes('brow') || id.includes('scar')) {
+      // Draw inner head front (8,8,8,8) + outer head front (40,8,8,8) zoomed cleanly to 32x32
+      ctx.drawImage(img, 8, 8, 8, 8, 4, 4, 24, 24);
+      ctx.drawImage(img, 40, 8, 8, 8, 2, 2, 28, 28);
+    } else if (id.includes('glove')) {
+      // Draw both hands/wrists (inner + outer) zoomed cleanly
+      ctx.drawImage(img, 44, 26, 4, 6, 4, 5, 11, 22);
+      ctx.drawImage(img, 44, 42, 4, 6, 4, 5, 11, 22);
+      ctx.drawImage(img, 36, 58, 4, 6, 17, 5, 11, 22);
+      ctx.drawImage(img, 52, 58, 4, 6, 17, 5, 11, 22);
+    } else if (id.includes('jacket') || id.includes('undershirt') || id.includes('shirt') || id.includes('coat')) {
+      // Front torso + sleeves (inner + outer)
+      ctx.drawImage(img, 20, 20, 8, 12, 8, 4, 16, 24);
+      ctx.drawImage(img, 44, 20, 4, 12, 2, 4, 6, 24);
+      ctx.drawImage(img, 36, 52, 4, 12, 24, 4, 6, 24);
+      ctx.drawImage(img, 20, 36, 8, 12, 8, 4, 16, 24);
+      ctx.drawImage(img, 44, 36, 4, 12, 2, 4, 6, 24);
+      ctx.drawImage(img, 52, 52, 4, 12, 24, 4, 6, 24);
+    } else if (id.includes('pant') || id.includes('leg')) {
+      ctx.drawImage(img, 4, 20, 4, 12, 7, 4, 8, 24);
+      ctx.drawImage(img, 20, 52, 4, 12, 17, 4, 8, 24);
+      ctx.drawImage(img, 4, 36, 4, 12, 7, 4, 8, 24);
+      ctx.drawImage(img, 4, 52, 4, 12, 17, 4, 8, 24);
+    } else if (id.includes('sock') || id.includes('boot') || id.includes('shoe')) {
+      ctx.drawImage(img, 4, 26, 4, 6, 5, 6, 10, 20);
+      ctx.drawImage(img, 20, 58, 4, 6, 17, 6, 10, 20);
+      ctx.drawImage(img, 4, 42, 4, 6, 5, 6, 10, 20);
+      ctx.drawImage(img, 4, 58, 4, 6, 17, 6, 10, 20);
+    } else if (id.includes('body')) {
+      // Full miniature front mannequin preview!
+      ctx.drawImage(img, 8, 8, 8, 8, 12, 1, 8, 8);      // head
+      ctx.drawImage(img, 20, 20, 8, 12, 12, 9, 8, 11);   // torso
+      ctx.drawImage(img, 44, 20, 4, 12, 8, 9, 4, 11);    // r-arm
+      ctx.drawImage(img, 36, 52, 4, 12, 20, 9, 4, 11);   // l-arm
+      ctx.drawImage(img, 4, 20, 4, 12, 12, 20, 4, 11);   // r-leg
+      ctx.drawImage(img, 20, 52, 4, 12, 16, 20, 4, 11);  // l-leg
+    } else {
+      ctx.drawImage(img, 0, 0, 64, 64, 0, 0, 32, 32);
+    }
+  }
+
+  // ===========================================================================
+  // 4. RENDER RIGHT-SIDE SCROLLABLE HUD CATEGORIES
+  // ===========================================================================
+  function renderHud() {
+    const container = document.getElementById('hudScroll');
+    container.innerHTML = '';
+
+    for (const layer of state.layers) {
+      const box = document.createElement('div');
+      box.className = 'cat-box';
+
+      const selectedFile = state.selected[layer.id] || '';
+      const title = LAYER_TITLES_RU[layer.id] || prettyName(layer.id);
+
+      const head = document.createElement('div');
+      head.className = 'cat-head';
+      head.innerHTML = `
+        <div class="cat-title-wrap">
+          <span class="cat-title">${title}</span>
+          <span class="cat-badge">type=${layer.id}</span>
+          <span class="cat-badge">Z:${layer.priority}</span>
+          ${layer.replacesBaseSkin ? '<span class="cat-badge base">BASE</span>' : ''}
+        </div>
+        <span class="cat-selected">${selectedFile ? prettyName(selectedFile) : 'Не выбрано'}</span>
+      `;
+      box.appendChild(head);
+
+      const strip = document.createElement('div');
+      strip.className = 'cat-strip';
+
+      if (!layer.textures || layer.textures.length === 0) {
+        strip.innerHTML = `<div class="empty-cat">Положите 64×64 PNG в <code>overlays/${layer.folder}/</code> и выполните /wardrobe reload</div>`;
+      } else {
+        // "None" tile
+        const noneTile = document.createElement('button');
+        noneTile.type = 'button';
+        noneTile.className = 'item-tile' + (!selectedFile ? ' selected' : '');
+        noneTile.innerHTML = `<div class="thumb-wrap"><span class="thumb-none">✕</span></div><span class="item-name">Нет</span>`;
+        noneTile.onclick = () => {
+          delete state.selected[layer.id];
+          renderHud();
+          recomposeSkin();
+        };
+        strip.appendChild(noneTile);
+
+        for (const tex of layer.textures) {
+          const tile = document.createElement('button');
+          tile.type = 'button';
+          tile.className = 'item-tile' + (selectedFile === tex ? ' selected' : '');
+
+          const thumbWrap = document.createElement('div');
+          thumbWrap.className = 'thumb-wrap';
+          const thumbCanvas = document.createElement('canvas');
+          thumbCanvas.width = 32;
+          thumbCanvas.height = 32;
+          thumbWrap.appendChild(thumbCanvas);
+
+          const label = document.createElement('span');
+          label.className = 'item-name';
+          label.textContent = prettyName(tex);
+
+          tile.appendChild(thumbWrap);
+          tile.appendChild(label);
+
+          tile.onclick = () => {
+            state.selected[layer.id] = tex;
+            renderHud();
+            recomposeSkin();
+          };
+
+          strip.appendChild(tile);
+
+          // Async load & draw cropped preview
+          loadImage(overlayUrl(layer.id, tex, state.bodyType)).then(img => {
+            drawSmartThumb(thumbCanvas, img, layer.id);
+          });
+        }
+      }
+
+      box.appendChild(strip);
+      container.appendChild(box);
+    }
+  }
+
+  function updateBodyTypeUI() {
+    document.getElementById('btnWide').classList.toggle('active', state.bodyType === 'wide');
+    document.getElementById('btnSlim').classList.toggle('active', state.bodyType === 'slim');
+    document.getElementById('bodyTypeHint').textContent =
+      state.bodyType === 'slim' ? 'Узкие руки (3px / Alex)' : 'Широкие руки (4px / Steve)';
+  }
+
+  // ===========================================================================
+  // 5. BUTTON HANDLERS & SERVER SYNC (/api/state, /api/apply)
+  // ===========================================================================
+  document.getElementById('btnWide').onclick = () => {
+    state.bodyType = 'wide';
+    updateBodyTypeUI();
+    rebuildModelParts();
+    renderHud();
+    recomposeSkin();
+  };
+  document.getElementById('btnSlim').onclick = () => {
+    state.bodyType = 'slim';
+    updateBodyTypeUI();
+    rebuildModelParts();
+    renderHud();
+    recomposeSkin();
+  };
+
+  document.getElementById('btnWalk').onclick = (e) => {
+    state.walkAnim = !state.walkAnim;
+    e.currentTarget.classList.toggle('active', state.walkAnim);
+  };
+  document.getElementById('btnOuter').onclick = (e) => {
+    state.showOuter = !state.showOuter;
+    e.currentTarget.classList.toggle('active', state.showOuter);
+  };
+  document.getElementById('btnCamReset').onclick = () => {
+    rotYaw = 0.42;
+    rotPitch = 0.14;
+    camDist = 48;
+  };
+
+  document.getElementById('btnRandom').onclick = () => {
+    state.selected = {};
+    for (const layer of state.layers) {
+      if (!layer.textures || layer.textures.length === 0) continue;
+      const mustPick = ['body_skin', 'eyes', 'hair', 'undershirt', 'pants'].includes(layer.id);
+      if (mustPick || Math.random() > 0.35) {
+        const pick = layer.textures[Math.floor(Math.random() * layer.textures.length)];
+        state.selected[layer.id] = pick;
+      }
+    }
+    renderHud();
+    recomposeSkin();
+    showToast('Собран случайный образ!', 'ok');
+  };
+
+  document.getElementById('btnReset').onclick = () => {
+    state.selected = {};
+    renderHud();
+    recomposeSkin();
+    showToast('Все слои очищены');
+  };
+
+  document.getElementById('btnDownload').onclick = () => {
+    const a = document.createElement('a');
+    a.download = `skin_${state.bodyType}.png`;
+    a.href = flatCanvas.toDataURL('image/png');
+    a.click();
+  };
+
+  document.getElementById('btnApply').onclick = async () => {
+    const btn = document.getElementById('btnApply');
+    btn.disabled = true;
+    btn.textContent = '⏳ Применяем...';
+    try {
+      const resp = await fetch('/api/apply?token=' + encodeURIComponent(token), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bodyType: state.bodyType,
+          layers: state.selected
+        })
+      });
+      const data = await resp.json();
+      if (!resp.ok || data.error) {
+        showToast(data.error || ('Ошибка HTTP ' + resp.status), 'error');
+      } else {
+        showToast(data.message || 'Скин отправлен на сервер!', 'ok');
+      }
+    } catch (err) {
+      showToast('Не удалось связаться с сервером: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✔ Применить в игре';
+    }
+  };
+
+  // ===========================================================================
+  // 6. BOOTSTRAP FROM PLUGIN API
+  // ===========================================================================
+  async function bootstrap() {
+    initWebGL();
+    try {
+      const resp = await fetch('/api/state?token=' + encodeURIComponent(token));
+      const data = await resp.json();
+      if (!resp.ok || data.error) {
+        showToast(data.error || 'Недействительный токен сессии', 'error');
+        return;
+      }
+      state.playerName = data.playerName || 'Игрок';
+      state.connectedToServer = !!data.connectedToServer;
+      state.bodyType = data.bodyType === 'slim' ? 'slim' : 'wide';
+      state.layers = data.layers || [];
+      state.selected = Object.assign({}, data.activeLayers || {});
+
+      document.getElementById('playerLabel').textContent = 'Персонаж: ' + state.playerName;
+      const pill = document.getElementById('statusPill');
+      if (state.connectedToServer) {
+        pill.textContent = '● Подключено к Paper';
+        pill.classList.add('live');
+      } else {
+        pill.textContent = '● Тестовый режим';
+      }
+
+      state.baseSkinImg = await loadImage('/api/base-skin?token=' + encodeURIComponent(token));
+
+      updateBodyTypeUI();
+      rebuildModelParts();
+      renderHud();
+      await recomposeSkin();
+    } catch (err) {
+      showToast('Ошибка загрузки редактора: ' + err.message, 'error');
+    }
+  }
+
+  bootstrap();
+})();
+</script>
+</body>
+</html>

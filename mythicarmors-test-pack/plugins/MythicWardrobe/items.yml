@@ -1,0 +1,59 @@
+# ==============================================================================
+# MythicWardrobe v1.4.1 — Привязка предметов MythicMobs к слотам гардероба
+# Положите (или допишите секцию items:) в: plugins/MythicWardrobe/items.yml
+# ==============================================================================
+# ВАЖНО (v1.4.1+):
+# • Все 3D-модели MythicArmors (TacticalGasMask3D, TacticalBackpackArmor,
+#   TacticalWarden*, GoldWarden*) НЕ нуждаются в привязке здесь!
+#   Каждая из них 100% самостоятельна и автоматически работает в ЛЮБОМ слоте
+#   своей части тела: Статы, Косметика И 3D-слой (mask_3d / backpack_3d) —
+#   как в одиночку (без другой брони!), так и одновременно по несколько моделей!
+# • В items.yml достаточно указывать только 2D-одежду скина (SKIN_LAYER).
+# ==============================================================================
+
+items:
+  # 2D-одежда из стартового пака (носится под 3D-бронёй)
+  WardrobeLeatherJacket:
+    slot: jacket
+    texture: "leather_brown.png"
+  WardrobeBlueJeans:
+    slot: pants
+    texture: "blue_jeans.png"
+  WardrobeCombatBoots:
+    slot: boots_skin
+    texture: "combat_boots.png"
+  WardrobeRedBandana:
+    slot: mask_skin
+    texture: "bandana_red.png"
+
+  # 2D-пояса и ремни (слот belt_skin — рисуются поверх любых штанов!)
+  WardrobeLeatherBelt:
+    slot: belt_skin
+    texture: "leather_belt.png"
+  WardrobeTacticalBelt:
+    slot: belt_skin
+    texture: "tactical_belt.png"
+  WardrobeGoldChainBelt:
+    slot: belt_skin
+    texture: "gold_chain_belt.png"
+  WardrobeHolsterBelt:
+    slot: belt_skin
+    texture: "utility_holster_belt.png"
+  WardrobeCrimsonSash:
+    slot: belt_skin
+    texture: "crimson_sash.png"
+
+  # Цельный костюм химзащиты с блокировкой других слоёв одежды (v1.8.0)
+  WardrobeHazmatSuit:
+    slot: jacket
+    texture: "hazmat_suit.png"
+    blocks: [undershirt, pants, belt_skin, gloves, socks, boots_skin, mask_skin, hat]
+    block-mode: UNEQUIP
+
+  # 3D-пояса и декор на талию (явная привязка к belt_3d для быстрого клика ПКМ!)
+  TacticalUtilityBelt3D:
+    slot: belt_3d
+  AdventurerPouchBelt3D:
+    slot: belt_3d
+  RoyalChainBelt3D:
+    slot: belt_3d
