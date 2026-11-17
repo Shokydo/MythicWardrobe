@@ -544,24 +544,32 @@ public final class WardrobeGuiManager {
         EquipmentSlot liveEq = holder.getLiveEquipmentSlotAt(rawSlot);
         if (liveEq != null) {
             ItemStack current = player.getInventory().getItem(liveEq);
+            ItemStack oldCopy = (current == null || current.getType().isAir()) ? null : current.clone();
             ItemStack cursor = event.getCursor();
-            boolean hasCurrent = current != null && !current.getType().isAir();
+            boolean hasCurrent = oldCopy != null;
             boolean hasCursor = cursor != null && !cursor.getType().isAir();
+            ItemStack newItem = oldCopy;
 
             if (event.isShiftClick() && hasCurrent) {
-                Map<Integer, ItemStack> overflow = player.getInventory().addItem(current.clone());
+                Map<Integer, ItemStack> overflow = player.getInventory().addItem(oldCopy.clone());
                 if (overflow.isEmpty()) {
                     player.getInventory().setItem(liveEq, null);
+                    newItem = null;
                     player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 0.7f, 0.9f);
                 }
             } else if (hasCursor) {
-                player.getInventory().setItem(liveEq, cursor.clone());
-                player.setItemOnCursor(hasCurrent ? current.clone() : null);
+                newItem = cursor.clone();
+                player.getInventory().setItem(liveEq, newItem.clone());
+                player.setItemOnCursor(hasCurrent ? oldCopy.clone() : null);
                 player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 0.7f, 1.1f);
             } else if (hasCurrent) {
-                player.setItemOnCursor(current.clone());
+                player.setItemOnCursor(oldCopy.clone());
                 player.getInventory().setItem(liveEq, null);
+                newItem = null;
                 player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 0.7f, 0.9f);
+            }
+            if (liveEq != EquipmentSlot.OFF_HAND) {
+                wardrobeManager.handleRealArmorTransition(player, oldCopy, newItem);
             }
             refreshInventoryView(player, holder);
             wardrobeManager.getArmorVisualManager().refreshPlayerArmorVisuals(player);

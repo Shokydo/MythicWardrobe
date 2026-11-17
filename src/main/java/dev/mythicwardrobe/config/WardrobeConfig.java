@@ -80,6 +80,10 @@ public final class WardrobeConfig {
     private String webEditorPublicUrl;
     private int webEditorTokenExpireMinutes;
 
+    // MythicMobs item ~onEquip / ~onUnequip triggers inside Wardrobe GUI
+    private boolean triggerItemEquipSkillsInGui = true;
+    private boolean triggerRealArmorEquipSkillsWithoutCrucible = true;
+
     // Debug
     private boolean debug;
 
@@ -161,6 +165,9 @@ public final class WardrobeConfig {
         String pub = cfg.getString("web-editor.public-url", "http://localhost:" + this.webEditorPort);
         this.webEditorPublicUrl = pub.endsWith("/") ? pub.substring(0, pub.length() - 1) : pub;
         this.webEditorTokenExpireMinutes = Math.max(1, cfg.getInt("web-editor.token-expire-minutes", 30));
+
+        this.triggerItemEquipSkillsInGui = cfg.getBoolean("mythicmobs.trigger-item-equip-skills-in-gui", true);
+        this.triggerRealArmorEquipSkillsWithoutCrucible = cfg.getBoolean("mythicmobs.trigger-real-armor-equip-skills-without-crucible", true);
 
         this.debug = cfg.getBoolean("debug", false);
 
@@ -715,5 +722,13 @@ public final class WardrobeConfig {
 
     public boolean isAllowPlayerMenuModeSwitch() {
         return menusConfig == null || menusConfig.allowPlayerSwitch();
+    }
+
+    public boolean isTriggerItemEquipSkillsInGui() {
+        return triggerItemEquipSkillsInGui;
+    }
+
+    public boolean isTriggerRealArmorEquipSkillsWithoutCrucible() {
+        return triggerRealArmorEquipSkillsWithoutCrucible;
     }
 }

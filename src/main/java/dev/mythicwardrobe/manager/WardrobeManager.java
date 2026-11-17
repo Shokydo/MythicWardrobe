@@ -293,7 +293,10 @@ public final class WardrobeManager {
         ItemStack cleanNew = isEmpty ? null : newItem.clone();
 
         if (slot.isRealArmor()) {
+            ItemStack oldReal = player.getInventory().getItem(slot.equipmentSlot());
+            ItemStack cleanOld = (oldReal == null || oldReal.getType().isAir()) ? null : oldReal.clone();
             player.getInventory().setItem(slot.equipmentSlot(), cleanNew);
+            handleRealArmorTransition(player, cleanOld, cleanNew);
             armorVisualManager.refreshPlayerArmorVisuals(player);
             displayAccessoryManager.syncPlayerDisplays(player);
             return;
@@ -302,8 +305,9 @@ public final class WardrobeManager {
         PlayerWardrobeState state = getState(player);
         ItemStack oldItem = state.getSlotItem(slot.id());
 
-        // Trigger MythicMobs equip/unequip skills for custom GUI slots
+        // Trigger MythicMobs ~onUnequip / ~onEquip item skills and Wardrobe.OnEquipSkill/OnUnequipSkill
         if (oldItem != null && !oldItem.equals(cleanNew)) {
+            state.setSlotItem(slot.id(), null);
             triggerUnequipSkill(player, oldItem);
         }
         state.setSlotItem(slot.id(), cleanNew);
@@ -1309,19 +1313,59 @@ public final class WardrobeManager {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> database.saveSkillLayers(uuid, snapshot));
     }
 
+    /**
+     * Fires Wardrobe.OnUnequipSkill/OnEquipSkill and (when MythicCrucible is not installed)
+     * MythicMobs item `~onUnequip`/`~onEquip` skills when real armor is changed through a Wardrobe GUI.
+     */
+    public void handleRealArmorTransition(Player player, ItemStack oldItem, ItemStack newItem) {
+        if (mythicHook == null || player == null) return;
+        ItemStack cleanOld = (oldItem == null || oldItem.getType().isAir()) ? null : oldItem;
+        ItemStack cleanNew = (newItem == null || newItem.getType().isAir()) ? null : newItem;
+        if (Objects.equals(cleanOld, cleanNew)) return;
+
+        boolean runRawItemSkills = config.isTriggerItemEquipSkillsInGui()
+                && config.isTriggerRealArmorEquipSkillsWithoutCrucible()
+                && !mythicHook.isMythicCruciblePresent();
+
+        if (cleanOld != null) {
+            ItemWardrobeMeta oldMeta = itemResolver.resolve(cleanOld);
+            if (oldMeta.onUnequipSkill() != null && !oldMeta.onUnequipSkill().isBlank()) {
+                mythicHook.castSkill(player, oldMeta.onUnequipSkill());
+            }
+            if (runRawItemSkills) {
+                mythicHook.triggerItemEquipSkills(player, cleanOld, false);
+            }
+        }
+        if (cleanNew != null) {
+            ItemWardrobeMeta newMeta = itemResolver.resolve(cleanNew);
+            if (newMeta.onEquipSkill() != null && !newMeta.onEquipSkill().isBlank()) {
+                mythicHook.castSkill(player, newMeta.onEquipSkill());
+            }
+            if (runRawItemSkills) {
+                mythicHook.triggerItemEquipSkills(player, cleanNew, true);
+            }
+        }
+    }
+
     private void triggerEquipSkill(Player player, ItemStack item) {
-        if (mythicHook == null || item == null) return;
+        if (mythicHook == null || item == null || item.getType().isAir()) return;
         ItemWardrobeMeta meta = itemResolver.resolve(item);
         if (meta.onEquipSkill() != null && !meta.onEquipSkill().isBlank()) {
             mythicHook.castSkill(player, meta.onEquipSkill());
         }
+        if (config.isTriggerItemEquipSkillsInGui()) {
+            mythicHook.triggerItemEquipSkills(player, item, true);
+        }
     }
 
     private void triggerUnequipSkill(Player player, ItemStack item) {
-        if (mythicHook == null || item == null) return;
+        if (mythicHook == null || item == null || item.getType().isAir()) return;
         ItemWardrobeMeta meta = itemResolver.resolve(item);
         if (meta.onUnequipSkill() != null && !meta.onUnequipSkill().isBlank()) {
             mythicHook.castSkill(player, meta.onUnequipSkill());
+        }
+        if (config.isTriggerItemEquipSkillsInGui()) {
+            mythicHook.triggerItemEquipSkills(player, item, false);
         }
     }
 

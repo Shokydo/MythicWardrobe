@@ -104,6 +104,15 @@ death:
   # Реальная броня в ванильных слотах подчиняется обычному правилу keepInventory сервера.
   keep-wardrobe-items-on-death: true
 
+# Триггеры MythicMobs / MythicCrucible (~onEquip / ~onUnequip) при надевании одежды и 3D-брони в меню
+mythicmobs:
+  # Запускать ли стандартные Skills: предмета (~onEquip / ~onUnequip / ~onEquipArmor / ~onUnequipArmor)
+  # при надевании, снятии и замене вещей в кастомных слотах меню гардероба
+  trigger-item-equip-skills-in-gui: true
+  # Если MythicCrucible НЕ установлен — запускать ли ~onEquip / ~onUnequip и при надевании в реальные слоты брони через меню
+  # (если MythicCrucible установлен, он сам обработает реальную броню без дублирования)
+  trigger-real-armor-equip-skills-without-crucible: true
+
 # Временный встроенный веб-редактор скинов и слоёв для тестирования (/wardrobe web)
 # Изолированный модуль (пакет dev.mythicwardrobe.web): когда сделаете внутриигровое меню,
 # просто поставьте enabled: false (или удалите пакет web).

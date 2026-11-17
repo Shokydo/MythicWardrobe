@@ -6,11 +6,21 @@ import dev.mythicwardrobe.model.BlockBehaviorMode;
 import dev.mythicwardrobe.model.DisplayMountConfig;
 import dev.mythicwardrobe.model.ItemWardrobeMeta;
 import dev.mythicwardrobe.model.WardrobeSlotDef;
+import io.lumine.mythic.api.adapters.AbstractEntity;
 import io.lumine.mythic.api.config.MythicConfig;
+import io.lumine.mythic.api.skills.SkillCaster;
+import io.lumine.mythic.api.skills.SkillTrigger;
+import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythic.bukkit.events.MythicConditionLoadEvent;
 import io.lumine.mythic.bukkit.events.MythicMechanicLoadEvent;
+import io.lumine.mythic.bukkit.events.MythicReloadedEvent;
 import io.lumine.mythic.core.items.MythicItem;
+import io.lumine.mythic.core.skills.SkillExecutor;
+import io.lumine.mythic.core.skills.SkillMechanic;
+import io.lumine.mythic.core.skills.SkillMetadataImpl;
+import io.lumine.mythic.core.skills.SkillTriggers;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,23 +28,38 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
- * Integrates MythicWardrobe with MythicMobs 5.13.0+ (and MythicArmors items created via MythicMobs):
- *  - Registers `wardrobe` / `skinlayer` custom mechanic
- *  - Registers `haswardrobelayer` / `wardrobelayer` custom condition
+ * Integrates MythicWardrobe with MythicMobs 5.13.0+ (and MythicArmors / MythicCrucible items):
+ *  - Registers `wardrobe` / `skinlayer` and `unwardrobe` custom mechanics
+ *  - Registers `haswardrobelayer` / `hasbodytype` custom conditions
  *  - Reads `Wardrobe:` config sections directly from MythicMobs item YAML files
  *  - Resolves MythicItem IDs & generates combo MythicArmors ItemStacks
- *  - Triggers OnEquipSkill / OnUnequipSkill on custom wardrobe GUI slots
+ *  - Executes item `Skills:` with `~onEquip` / `~onUnequip` (as well as `Wardrobe.OnEquipSkill` / `OnUnequipSkill`)
+ *    when items are equipped or removed in MythicWardrobe GUI menus
  */
 public final class MythicMobsHook implements Listener {
 
     private final JavaPlugin plugin;
     private final WardrobeConfig config;
     private WardrobeManager wardrobeManager;
+
+    private record CompiledItemSkills(List<SkillMechanic> equipMechanics, List<SkillMechanic> unequipMechanics) {
+        static final CompiledItemSkills EMPTY = new CompiledItemSkills(List.of(), List.of());
+    }
+
+    private final Map<String, CompiledItemSkills> itemSkillsCache = new ConcurrentHashMap<>();
+    private final ThreadLocal<Set<String>> activeExecutions = ThreadLocal.withInitial(HashSet::new);
 
     public MythicMobsHook(JavaPlugin plugin, WardrobeConfig config) {
         this.plugin = plugin;
@@ -43,6 +68,23 @@ public final class MythicMobsHook implements Listener {
 
     public void attachManager(WardrobeManager manager) {
         this.wardrobeManager = manager;
+    }
+
+    public void clearSkillCache() {
+        itemSkillsCache.clear();
+    }
+
+    public boolean isMythicCruciblePresent() {
+        try {
+            return Bukkit.getPluginManager().isPluginEnabled("MythicCrucible");
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    @EventHandler
+    public void onMythicReloaded(MythicReloadedEvent event) {
+        clearSkillCache();
     }
 
     @EventHandler
@@ -174,6 +216,172 @@ public final class MythicMobsHook implements Listener {
             MythicBukkit.inst().getAPIHelper().castSkill(player, skillName);
         } catch (Throwable t) {
             plugin.getLogger().log(Level.WARNING, "Failed to cast MythicSkill '" + skillName + "' for " + player.getName(), t);
+        }
+    }
+
+    /**
+     * Executes all `Skills:` lines on the item's MythicItem definition whose trigger is
+     * `~onEquip` / `~onEquipArmor` (when {@code equip == true}) or `~onUnequip` / `~onUnequipArmor`
+     * (when {@code equip == false}).
+     *
+     * Works for both MythicMobs and MythicCrucible items placed into MythicWardrobe GUI slots.
+     *
+     * @return number of skill mechanics executed
+     */
+    public int triggerItemEquipSkills(Player player, ItemStack itemStack, boolean equip) {
+        if (player == null || !player.isOnline() || itemStack == null || itemStack.getType().isAir()) {
+            return 0;
+        }
+        String mythicId = getMythicItemId(itemStack);
+        if (mythicId == null || mythicId.isBlank()) {
+            return 0;
+        }
+
+        String guardKey = player.getUniqueId() + ":" + mythicId.toLowerCase(Locale.ROOT) + ":" + (equip ? "E" : "U");
+        Set<String> running = activeExecutions.get();
+        if (!running.add(guardKey)) {
+            return 0; // Prevent accidental recursive loops if a skill manipulates the wardrobe
+        }
+
+        try {
+            CompiledItemSkills compiled = itemSkillsCache.computeIfAbsent(
+                    mythicId.toLowerCase(Locale.ROOT),
+                    k -> compileItemEquipSkills(mythicId)
+            );
+            List<SkillMechanic> mechanics = equip ? compiled.equipMechanics() : compiled.unequipMechanics();
+            if (mechanics.isEmpty()) {
+                return 0;
+            }
+
+            SkillExecutor skillManager = MythicBukkit.inst().getSkillManager();
+            AbstractEntity abstractPlayer = BukkitAdapter.adapt(player);
+            SkillCaster caster = skillManager.getCaster(abstractPlayer);
+            if (caster == null) {
+                return 0;
+            }
+
+            SkillTrigger<?> trigger = equip ? SkillTriggers.ARMOR_EQUIP : SkillTriggers.ARMOR_UNEQUIP;
+            SkillMetadataImpl baseMeta = new SkillMetadataImpl(trigger, caster, abstractPlayer);
+            baseMeta.setOrigin(BukkitAdapter.adapt(player.getLocation()));
+            baseMeta.setCasterItem(BukkitAdapter.adapt(itemStack));
+
+            int executed = 0;
+            for (SkillMechanic mechanic : mechanics) {
+                try {
+                    SkillMetadataImpl metaCopy = baseMeta.deepClone();
+                    if (mechanic.isUsableFromCaster(metaCopy)) {
+                        mechanic.execute(metaCopy);
+                        executed++;
+                    }
+                } catch (Throwable t) {
+                    plugin.getLogger().log(Level.WARNING,
+                            "Error executing " + (equip ? "~onEquip" : "~onUnequip")
+                                    + " skill '" + mechanic.getConfigLine() + "' on item '" + mythicId + "'",
+                            t);
+                }
+            }
+
+            if (config.isDebug() && executed > 0) {
+                plugin.getLogger().info("[Debug] Executed " + executed + " " + (equip ? "~onEquip" : "~onUnequip")
+                        + " skill(s) for " + player.getName() + " from item " + mythicId);
+            }
+            return executed;
+        } catch (Throwable t) {
+            plugin.getLogger().log(Level.WARNING,
+                    "Failed to run item " + (equip ? "~onEquip" : "~onUnequip") + " skills for '" + mythicId + "'",
+                    t);
+            return 0;
+        } finally {
+            running.remove(guardKey);
+        }
+    }
+
+    private CompiledItemSkills compileItemEquipSkills(String mythicId) {
+        try {
+            Optional<MythicItem> opt = MythicBukkit.inst().getItemManager().getItem(mythicId);
+            if (opt.isEmpty()) {
+                return CompiledItemSkills.EMPTY;
+            }
+            MythicItem mythicItem = opt.get();
+            MythicConfig mc = mythicItem.getConfig();
+            if (mc == null) {
+                return CompiledItemSkills.EMPTY;
+            }
+
+            List<String> rawSkills = new ArrayList<>();
+            if (mc.isSet("Skills")) {
+                List<String> list = mc.getStringList("Skills");
+                if (list != null) rawSkills.addAll(list);
+            }
+            if (rawSkills.isEmpty() && mc.isSet("skills")) {
+                List<String> list = mc.getStringList("skills");
+                if (list != null) rawSkills.addAll(list);
+            }
+            if (rawSkills.isEmpty()) {
+                return CompiledItemSkills.EMPTY;
+            }
+
+            SkillExecutor skillManager = MythicBukkit.inst().getSkillManager();
+            List<SkillMechanic> equipList = new ArrayList<>();
+            List<SkillMechanic> unequipList = new ArrayList<>();
+
+            for (String rawLine : rawSkills) {
+                if (rawLine == null || rawLine.isBlank()) continue;
+
+                // Quick pre-filter: only compile lines that relate to equip / unequip triggers
+                ItemEquipTriggerHelper.EquipTriggerKind lineKind = ItemEquipTriggerHelper.detectFromSkillLine(rawLine);
+                if (lineKind == ItemEquipTriggerHelper.EquipTriggerKind.NONE) {
+                    continue;
+                }
+
+                SkillMechanic mechanic = skillManager.getMechanic(mythicItem.getFile(), rawLine);
+                if (mechanic == null) {
+                    continue;
+                }
+
+                // Confirm via parsed SkillTrigger when available, otherwise use line classification
+                SkillTrigger<?> parsedTrigger = mechanic.getTrigger();
+                ItemEquipTriggerHelper.EquipTriggerKind kind = lineKind;
+                if (parsedTrigger != null) {
+                    if (parsedTrigger.equals(SkillTriggers.ARMOR_EQUIP)) {
+                        kind = ItemEquipTriggerHelper.EquipTriggerKind.EQUIP;
+                    } else if (parsedTrigger.equals(SkillTriggers.ARMOR_UNEQUIP)) {
+                        kind = ItemEquipTriggerHelper.EquipTriggerKind.UNEQUIP;
+                    } else {
+                        ItemEquipTriggerHelper.EquipTriggerKind byName = ItemEquipTriggerHelper.classifyTriggerName(parsedTrigger.name());
+                        if (byName != ItemEquipTriggerHelper.EquipTriggerKind.NONE) {
+                            kind = byName;
+                        }
+                    }
+                }
+
+                // Ensure mechanic's trigger aligns with SkillTriggers.ARMOR_EQUIP / ARMOR_UNEQUIP
+                // so mechanic.checkSkillTrigger(meta) succeeds even for aliases like ~onWear / ~onUnwear
+                if (kind == ItemEquipTriggerHelper.EquipTriggerKind.EQUIP) {
+                    if (parsedTrigger == null || !parsedTrigger.equals(SkillTriggers.ARMOR_EQUIP)) {
+                        mechanic.setTrigger(SkillTriggers.ARMOR_EQUIP);
+                    }
+                    equipList.add(mechanic);
+                } else if (kind == ItemEquipTriggerHelper.EquipTriggerKind.UNEQUIP) {
+                    if (parsedTrigger == null || !parsedTrigger.equals(SkillTriggers.ARMOR_UNEQUIP)) {
+                        mechanic.setTrigger(SkillTriggers.ARMOR_UNEQUIP);
+                    }
+                    unequipList.add(mechanic);
+                }
+            }
+
+            if (equipList.isEmpty() && unequipList.isEmpty()) {
+                return CompiledItemSkills.EMPTY;
+            }
+            return new CompiledItemSkills(
+                    Collections.unmodifiableList(equipList),
+                    Collections.unmodifiableList(unequipList)
+            );
+        } catch (Throwable t) {
+            if (config.isDebug()) {
+                plugin.getLogger().log(Level.WARNING, "Failed to compile item skills for '" + mythicId + "'", t);
+            }
+            return CompiledItemSkills.EMPTY;
         }
     }
 

@@ -151,6 +151,9 @@ public final class MythicWardrobePlugin extends JavaPlugin {
                 wardrobeConfig.isCreateExampleOverlays()
         );
         int count = layerRegistry.reload();
+        if (mythicHook != null) {
+            mythicHook.clearSkillCache();
+        }
         if (wardrobeManager != null) {
             wardrobeManager.reloadVisualsForAll();
         }
