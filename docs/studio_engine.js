@@ -1,5 +1,5 @@
 /**
- * MythicWardrobe Studio v2.0 — 100% Client-Side Engine (Zero Python / Zero Server / Zero CDN!)
+ * MythicWardrobe Studio v2.0 - 100% Client-Side Engine (Zero Python / Zero Server / Zero CDN!)
  * Runs directly via file:// in any browser or inside sandboxed iframes.
  *
  * Includes:
@@ -1175,7 +1175,7 @@
   function generatePriorityYml(orderIds) {
     return [
       "# ==============================================================================",
-      "# MythicWardrobe v1.9.0 — Приоритет 2D-слоёв скина (ОТ ВЕРХНЕГО К НИЖНЕМУ)",
+      "# MythicWardrobe v1.9.0 - Приоритет 2D-слоёв скина (ОТ ВЕРХНЕГО К НИЖНЕМУ)",
       "# Сгенерировано в MythicWardrobe Studio v2.2 (HTML Standalone)",
       "# Положите в: plugins/MythicWardrobe/priority.yml и выполните /wardrobe reload",
       "# ==============================================================================",
@@ -1266,7 +1266,7 @@
     const trigger2dHat = opts.triggerOn2dHat !== false;
     const lines = [
       "# ==============================================================================",
-      "# MythicWardrobe v1.9.0 — Автопривязка 3D-волос к 2D-волосам и скрытие под шлемом",
+      "# MythicWardrobe v1.9.0 - Автопривязка 3D-волос к 2D-волосам и скрытие под шлемом",
       "# Сгенерировано в MythicWardrobe Studio v2.2",
       "# Положите в: plugins/MythicWardrobe/hair-3d.yml и выполните /wardrobe reload",
       "# ==============================================================================",
@@ -1369,14 +1369,14 @@
   ];
 
   const GUI_BUTTON_ACTIONS = [
-    { id: "BACK", label: "BACK — Назад (открывает инвентарь / команду)" },
-    { id: "OPEN_INVENTORY", label: "OPEN_INVENTORY — Открыть Инвентарь и Экипировку" },
-    { id: "RUN_COMMAND", label: "RUN_COMMAND — Выполнить команду" },
-    { id: "SWITCH_TAB", label: "SWITCH_TAB — Переключить вкладку" },
-    { id: "OPEN_SECTION", label: "OPEN_SECTION — Открыть секцию (PER_SLOT)" },
-    { id: "SWITCH_MODE", label: "SWITCH_MODE — Сменить режим меню" },
-    { id: "CLOSE", label: "CLOSE — Полностью закрыть меню" },
-    { id: "DECOR", label: "DECOR — Декоративный предмет" },
+    { id: "BACK", label: "BACK - Назад (открывает инвентарь / команду)" },
+    { id: "OPEN_INVENTORY", label: "OPEN_INVENTORY - Открыть Инвентарь и Экипировку" },
+    { id: "RUN_COMMAND", label: "RUN_COMMAND - Выполнить команду" },
+    { id: "SWITCH_TAB", label: "SWITCH_TAB - Переключить вкладку" },
+    { id: "OPEN_SECTION", label: "OPEN_SECTION - Открыть секцию (PER_SLOT)" },
+    { id: "SWITCH_MODE", label: "SWITCH_MODE - Сменить режим меню" },
+    { id: "CLOSE", label: "CLOSE - Полностью закрыть меню" },
+    { id: "DECOR", label: "DECOR - Декоративный предмет" },
   ];
 
   function createDefaultMenusState() {
@@ -1613,7 +1613,7 @@
     const st = menusState || createDefaultMenusState();
     const lines = [
       "# ==============================================================================",
-      "# MythicWardrobe v1.9.0 — Визуальная настройка GUI инвентаря",
+      "# MythicWardrobe v1.9.0 - Визуальная настройка GUI инвентаря",
       "# Сгенерировано в MythicWardrobe Studio v2.2 (Визуальный GUI Редактор)",
       "# Положите в: plugins/MythicWardrobe/menus.yml и выполните /wardrobe reload",
       "# ==============================================================================",
@@ -1881,7 +1881,7 @@
     if (mythicItemsBlocks.length) {
       zip.addText(
         `plugins/MythicMobs/Items/${toPascalId(packName)}_Items.yml`,
-        `# MythicWardrobe Studio v2.0 — Сгенерированные 3D-предметы (${packName})\n` +
+        `# MythicWardrobe Studio v2.0 - Сгенерированные 3D-предметы (${packName})\n` +
         `# Положите в: plugins/MythicMobs/Items/\n\n` +
         mythicItemsBlocks.join("\n\n") + "\n"
       );
@@ -1891,7 +1891,7 @@
     if (comboRulesBlocks.length) {
       zip.addText(
         "plugins/MythicWardrobe/combo-overrides.yml",
-        `# MythicWardrobe v1.8.0 — Автоподмена скрещенных 3D-моделей (0 лага!)\ncombos:\n` +
+        `# MythicWardrobe v1.8.0 - Автоподмена скрещенных 3D-моделей (0 лага!)\ncombos:\n` +
         comboRulesBlocks.join("\n\n") + "\n"
       );
     }
@@ -1963,7 +1963,7 @@
       if (skinMmBlocks.length) {
         zip.addText(
           `plugins/MythicMobs/Items/${toPascalId(packName)}_2DSkins.yml`,
-          `# MythicWardrobe Studio v2.2 — 2D-слои скина, Lore и костюмы с блокировкой слоёв\n\n` +
+          `# MythicWardrobe Studio v2.2 - 2D-слои скина, Lore и костюмы с блокировкой слоёв\n\n` +
           skinMmBlocks.join("\n\n") + "\n"
         );
       }
@@ -1986,7 +1986,7 @@
     if (wardrobeItemsBlocks.length) {
       zip.addText(
         "plugins/MythicWardrobe/items.yml",
-        `# MythicWardrobe v1.8.0 — Привязка слотов и блокировок (plugins/MythicWardrobe/items.yml)\nitems:\n` +
+        `# MythicWardrobe v1.8.0 - Привязка слотов и блокировок (plugins/MythicWardrobe/items.yml)\nitems:\n` +
         wardrobeItemsBlocks.join("\n") + "\n"
       );
     }
@@ -2007,7 +2007,7 @@
     // 8. README_УСТАНОВКА.txt
     const readme = [
       "================================================================================",
-      `  MythicWardrobe Studio v2.0 (HTML) — Готовый пак (${packName})`,
+      `  MythicWardrobe Studio v2.0 (HTML) - Готовый пак (${packName})`,
       "================================================================================",
       "",
       `Всего .bbmodel в архиве: ${writtenModels.length}`,

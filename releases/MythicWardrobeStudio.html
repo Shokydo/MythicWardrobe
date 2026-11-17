@@ -3,155 +3,232 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MythicWardrobe Studio v2.2 — 3D .bbmodel, 3D-Волосы, 2D Скины и GUI Редактор (HTML Standalone)</title>
+  <meta name="theme-color" content="#09090b">
+  <title>MythicWardrobe Studio v2.4 : 3D .bbmodel, 3D-волосы, 2D-скины и GUI-редактор</title>
   <style>
 :root {
-  --bg: #050505;
-  --panel: #0d0d0d;
-  --panel-2: #151515;
-  --panel-3: #1d1d1d;
-  --border: #262626;
-  --border-strong: #404040;
-  --text: #f5f5f5;
-  --muted: #8e8e8e;
-  --accent: #ffffff;
-  --accent-inv: #050505;
-  --soft: #d4d4d4;
-  --danger-bg: #1c1212;
-  --danger-border: #666666;
+  --bg: #09090b;
+  --bg-elev: #0e0e11;
+  --panel: #111114;
+  --panel-2: #18181c;
+  --panel-3: #222227;
+  --border: #27272c;
+  --border-strong: #3f3f46;
+  --text: #f4f4f5;
+  --text-2: #d4d4d8;
+  --muted: #9898a3;
+  --accent: #fafafa;
+  --accent-inv: #09090b;
   --radius: 8px;
+  --radius-sm: 6px;
+  --h-ctrl: 32px;
+  --h-sm: 28px;
+  color-scheme: dark;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; }
+
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100%;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
   font-size: 13px;
+  line-height: 1.45;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
+
 body {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
 }
 
-/* Top Header */
+h1, h2, h3, h4, h5, h6, .card-title, .section-head {
+  text-wrap: balance;
+}
+
+p, .hint {
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Unified Monochrome SVG Icons (Lucide-style 1.75px stroke) */
+.ico {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.ico-sm { width: 13px; height: 13px; }
+.ico-md { width: 15px; height: 15px; }
+.ico-lg { width: 18px; height: 18px; }
+
+/* ==================== TOP NAVIGATION BAR ==================== */
 .topbar {
-  min-height: 50px;
-  background: #080808;
+  min-height: 54px;
+  background: var(--bg-elev);
   border-bottom: 1px solid var(--border);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 12px;
-  gap: 8px;
+  padding: 8px 16px;
+  gap: 10px 16px;
   flex-shrink: 0;
 }
+
 .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-weight: 800;
-  font-size: 13.5px;
-  letter-spacing: 0.2px;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.01em;
   white-space: nowrap;
-  color: #ffffff;
+  color: var(--text);
+}
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--accent-inv);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 .brand-badge {
-  background: #ffffff;
-  color: #050505;
-  font-size: 10px;
-  font-weight: 900;
-  padding: 2px 6px;
-  border-radius: 4px;
-  letter-spacing: 0.4px;
+  background: var(--panel-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 5px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
 }
 .brand-offline {
   background: transparent;
-  border: 1px solid #444444;
-  color: #d4d4d4;
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 2px 5px;
-  border-radius: 4px;
-  letter-spacing: 0.3px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 5px;
+  line-height: 1.3;
 }
+
 .tabs {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 3px;
-  background: #050505;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg);
   padding: 3px;
-  border-radius: 7px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
 }
+
 .tab-btn {
+  height: 30px;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   color: var(--muted);
-  padding: 5px 10px;
+  padding: 0 12px;
   border-radius: 5px;
   cursor: pointer;
+  font-family: inherit;
   font-weight: 600;
-  font-size: 12px;
-  transition: 0.14s;
+  font-size: 12.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   white-space: nowrap;
+  transition: background-color 0.14s, color 0.14s, border-color 0.14s;
 }
-.tab-btn:hover { color: #ffffff; background: #141414; }
+.tab-btn:hover {
+  color: var(--text);
+  background: var(--panel-2);
+}
 .tab-btn.active {
-  background: #ffffff;
-  color: #050505;
-  font-weight: 800;
+  background: var(--accent);
+  color: var(--accent-inv);
+  font-weight: 700;
 }
 
-.topbar-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.topbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
-/* Main 3-Column Workspace */
+/* ==================== MAIN 3-COLUMN WORKSPACE ==================== */
 .workspace {
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 290px minmax(340px, 1fr) 390px;
+  grid-template-columns: 300px minmax(340px, 1fr) 410px;
   overflow: hidden;
 }
 .workspace.config-mode {
-  grid-template-columns: 420px minmax(360px, 1fr);
+  grid-template-columns: 440px minmax(380px, 1fr);
 }
 .workspace.config-mode .pane-viewer {
   display: none;
 }
 .workspace.gui-mode {
-  grid-template-columns: 270px minmax(470px, 1fr) 340px;
+  grid-template-columns: 280px minmax(470px, 1fr) 360px;
 }
+
 .pane {
   height: 100%;
   min-width: 0;
   overflow-y: auto;
-  padding: 11px;
+  overscroll-behavior: contain;
+  padding: 12px;
   border-right: 1px solid var(--border);
   background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 .pane:last-child { border-right: none; }
+
 .pane-viewer {
   display: flex;
   flex-direction: column;
   padding: 0;
+  gap: 0;
   overflow: hidden;
-  background: #050505;
+  background: var(--bg);
 }
 
 .workspace-tab { display: none; }
 .workspace-tab.active { display: contents; }
 
-@media (max-width: 1160px) {
+@media (max-width: 1180px) {
   .workspace {
-    grid-template-columns: 240px minmax(280px, 1fr) 320px;
+    grid-template-columns: 260px minmax(280px, 1fr) 340px;
   }
   .workspace.gui-mode {
     display: flex;
@@ -177,7 +254,8 @@ body {
   .gui-pane-center { grid-area: center; }
   .gui-pane-right { grid-area: right; }
 }
-@media (max-width: 760px) {
+
+@media (max-width: 780px) {
   .workspace.gui-mode .workspace-tab[data-tab-panel="gui"].active {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -188,174 +266,438 @@ body {
   .gui-pane-left { border-right: none !important; }
 }
 
-/* Cards & Headings */
+/* ==================== CARDS, HEADINGS & DESCRIPTIONS ==================== */
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 11px 12px;
-  margin-bottom: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
+
 .card-title {
-  font-weight: 800;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.85px;
-  color: #ffffff;
-  margin: 0 0 9px 0;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #1e1e1e;
+  font-weight: 600;
+  font-size: 13.5px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
-.hint {
-  color: var(--muted);
-  font-size: 11.5px;
-  line-height: 1.45;
-  margin: 4px 0 8px 0;
-}
-.hint b, .hint code { color: #e5e5e5; }
-code {
-  background: #181818;
-  border: 1px solid #2a2a2a;
-  padding: 1px 4px;
-  border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
-}
-
-/* Dropzone */
-.dropzone {
-  border: 1.5px dashed #4a4a4a;
-  border-radius: var(--radius);
-  padding: 14px 12px;
-  text-align: center;
-  cursor: pointer;
-  background: #090909;
-  transition: 0.15s;
-  margin-bottom: 8px;
-}
-.dropzone:hover, .dropzone.dragover {
-  border-color: #ffffff;
-  background: #141414;
-}
-.dropzone strong { display: block; font-size: 13px; margin-bottom: 3px; color: #ffffff; }
-.dropzone span { color: var(--muted); font-size: 11.5px; }
-
-/* Buttons & Inputs — Crisp Monochrome */
-.btn {
-  background: var(--panel-2);
-  color: #f0f0f0;
-  border: 1px solid #303030;
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.14s;
+.card-title-main {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-.btn:hover { border-color: #ffffff; background: #222222; color: #ffffff; }
-.btn:disabled { opacity: 0.35; cursor: not-allowed; }
-
-.btn-primary, .btn-green {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #050505;
-  font-weight: 800;
-}
-.btn-primary:hover, .btn-green:hover {
-  background: #dcdcdc;
-  border-color: #dcdcdc;
-  color: #050505;
-}
-.btn-amber {
-  background: #1f1f1f;
-  border: 1px solid #ffffff;
-  color: #ffffff;
-  font-weight: 700;
-}
-.btn-amber:hover {
-  background: #ffffff;
-  color: #050505;
-}
-.btn-danger {
-  background: #0f0f0f;
-  border-color: #444444;
-  color: #b5b5b5;
-}
-.btn-danger:hover {
-  background: #262626;
-  border-color: #ffffff;
-  color: #ffffff;
-}
-.btn-sm { padding: 4px 8px; font-size: 11px; }
-.btn-block { width: 100%; }
-
-input[type="text"], input[type="number"], select, textarea {
-  width: 100%;
-  background: #070707;
-  color: #f5f5f5;
-  border: 1px solid #2b2b2b;
-  border-radius: 5px;
-  padding: 6px 8px;
-  font-size: 12px;
-  font-family: inherit;
-}
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #ffffff;
-  background: #0c0c0c;
-}
-input[type="range"] {
-  accent-color: #ffffff;
-}
-textarea { resize: vertical; min-height: 52px; }
-label.field-label {
-  display: block;
-  font-size: 11px;
-  color: var(--muted);
-  margin: 7px 0 3px 0;
-  font-weight: 600;
+  gap: 7px;
+  min-width: 0;
 }
 
-.row { display: flex; gap: 8px; align-items: center; }
-.row-wrap { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-
-/* Model list items */
-.model-item {
-  background: var(--panel-2);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  padding: 8px 10px;
-  margin-bottom: 6px;
-  cursor: pointer;
-  transition: 0.14s;
+.section-block {
+  padding-top: 12px;
+  margin-top: 2px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
-.model-item:hover { border-color: #555555; background: #1a1a1a; }
-.model-item.selected {
-  border-color: #ffffff;
-  background: #1c1c1c;
-  box-shadow: inset 3px 0 0 #ffffff;
-}
-.model-item-top {
+.section-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+}
+.section-head-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 65ch;
+}
+.hint b, .hint strong, .hint code { color: var(--text-2); }
+
+code {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  overflow-wrap: break-word;
+}
+
+/* ==================== FORM FIELDS & STRICT GRIDS ==================== */
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+label.field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-2);
+  margin: 0;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 8px;
+  align-items: end;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  align-items: end;
+}
+
+.btn-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
-.model-item-name {
-  font-weight: 700;
+.btn-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.btn-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  gap: 6px;
+  align-items: center;
+}
+.btn-split-sm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px;
+  gap: 6px;
+  align-items: center;
+}
+.btn-split-select {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 118px;
+  gap: 6px;
+  align-items: center;
+}
+.input-action {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+}
+.color-field {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+}
+.check-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  min-width: 0;
+}
+.row-between {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+.row-wrap {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ==================== DROPZONE ==================== */
+.dropzone {
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--bg-elev);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.dropzone:hover, .dropzone.dragover {
+  border-color: var(--accent);
+  background: var(--panel-2);
+}
+.dropzone-ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+.dropzone strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.dropzone span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+/* ==================== BUTTONS & INPUTS (ALIGNED SCALE) ==================== */
+.btn {
+  height: var(--h-ctrl);
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  font-family: inherit;
   font-size: 12.5px;
-  color: #ffffff;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  transition: background-color 0.14s, border-color 0.14s, color 0.14s;
+}
+.btn:hover {
+  border-color: var(--accent);
+  background: var(--panel-3);
+  color: var(--accent);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-primary, .btn-green {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-inv);
+  font-weight: 700;
+}
+.btn-primary:hover, .btn-green:hover {
+  background: #e4e4e7;
+  border-color: #e4e4e7;
+  color: var(--accent-inv);
+}
+
+.btn-amber {
+  background: var(--panel-2);
+  border-color: var(--text-2);
+  color: var(--text);
+  font-weight: 600;
+}
+.btn-amber:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-inv);
+}
+
+.btn-danger {
+  background: var(--panel);
+  border-color: var(--border-strong);
+  color: var(--muted);
+}
+.btn-danger:hover {
+  background: var(--panel-3);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.btn-sm {
+  height: var(--h-sm);
+  padding: 0 10px;
+  font-size: 12px;
+  gap: 5px;
+}
+.btn-xs {
+  height: 24px;
+  padding: 0 7px;
+  font-size: 11.5px;
+  gap: 4px;
+}
+.btn-icon {
+  width: var(--h-sm);
+  height: var(--h-sm);
+  padding: 0;
+  flex-shrink: 0;
+}
+.btn-icon-md {
+  width: var(--h-ctrl);
+  height: var(--h-ctrl);
+  padding: 0;
+  flex-shrink: 0;
+}
+.btn-icon-xs {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  flex-shrink: 0;
+}
+.btn-block { width: 100%; }
+
+.seg-group {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--panel-2);
+}
+.seg-group .btn {
+  border: none;
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+}
+.seg-group .btn:last-child { border-right: none; }
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-family: inherit;
+  transition: border-color 0.14s, background-color 0.14s;
+}
+input[type="text"],
+input[type="number"],
+select {
+  height: var(--h-ctrl);
+  padding: 0 10px;
+}
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+select.select-sm {
+  height: var(--h-sm);
+  padding: 0 8px;
+  font-size: 12px;
+}
+textarea {
+  padding: 8px 10px;
+  resize: vertical;
+  min-height: 60px;
+  line-height: 1.45;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  background: var(--panel);
+}
+input[type="color"] {
+  width: 32px;
+  height: var(--h-ctrl);
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elev);
+  cursor: pointer;
+}
+input[type="range"] {
+  width: 100%;
+  accent-color: var(--accent);
+  margin: 4px 0;
+}
+
+/* ==================== MODEL LIST ITEMS ==================== */
+.model-list-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.model-item {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: border-color 0.14s, background-color 0.14s;
+}
+.model-item:hover {
+  border-color: var(--border-strong);
+  background: #1c1c21;
+}
+.model-item.selected {
+  border-color: var(--accent);
+  background: #1e1e23;
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.model-item-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+.model-item-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -364,175 +706,214 @@ label.field-label {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
-  margin-top: 5px;
 }
 
-/* Monochrome Tags */
+/* ==================== MONOCHROME TAGS ==================== */
 .tag {
   display: inline-flex;
   align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  background: #1f1f1f;
-  border: 1px solid #303030;
-  color: #d4d4d4;
-  letter-spacing: 0.2px;
+  gap: 4px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--panel-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .tag-head, .tag-chest, .tag-legs, .tag-feet {
-  background: #181818;
-  border-color: #3d3d3d;
-  color: #f0f0f0;
+  background: var(--bg-elev);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 .tag-tint, .tag-emis {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #050505;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-inv);
+  font-weight: 700;
 }
 .tag-warn {
-  background: #1f1f1f;
-  border-color: #888888;
-  color: #ffffff;
+  background: var(--panel-3);
+  border-color: var(--muted);
+  color: var(--text);
 }
 .tag-lock {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #050505;
-  font-weight: 800;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-inv);
+  font-weight: 700;
 }
 .tag-missing {
-  background: #0a0a0a;
-  border: 1px dashed #555555;
-  color: #8e8e8e;
+  background: var(--bg-elev);
+  border: 1px dashed var(--border-strong);
+  color: var(--muted);
 }
 
-/* Texture Auto-Fixer Status Grid */
+/* ==================== TEXTURE AUTO-FIXER & ICON BOX ==================== */
 .tex-status-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  margin: 6px 0 8px 0;
+  gap: 6px;
 }
+
 .icon-preview-wrap {
-  display: flex;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
   align-items: center;
   gap: 10px;
-  margin-top: 6px;
-  padding: 7px 8px;
-  background: #080808;
-  border: 1px solid #262626;
-  border-radius: 6px;
+  padding: 9px 10px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 .icon-preview-box {
-  width: 38px;
-  height: 38px;
-  border: 1px solid #3d3d3d;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border-strong);
   border-radius: 5px;
-  background: repeating-conic-gradient(#1c1c1c 0% 25%, #111111 0% 50%) 50% / 8px 8px;
+  background: repeating-conic-gradient(#1f1f24 0% 25%, #131317 0% 50%) 50% / 8px 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
 }
 .icon-preview-box img {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   image-rendering: pixelated;
 }
+.icon-preview-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.icon-preview-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
 
-/* Bone mapping table */
+/* ==================== BONE MAPPING TABLE ==================== */
 .bone-row {
   display: grid;
-  grid-template-columns: 1fr 22px 1.25fr 46px;
+  grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1.25fr) 52px;
   align-items: center;
   gap: 6px;
-  padding: 5px 0;
-  border-bottom: 1px solid #1e1e1e;
-  font-size: 11.5px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
 }
 .bone-row:last-child { border-bottom: none; }
+.bone-row select {
+  height: var(--h-sm);
+  font-size: 12px;
+}
 
-/* Blocking editor chips (v1.8.0 Monochrome Inverted) */
+/* ==================== BLOCKING CHIPS ==================== */
 .block-chip-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 6px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 5px;
 }
 .block-chip {
+  height: 26px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 7px;
-  border-radius: 4px;
-  border: 1px solid #2f2f2f;
-  background: #0a0a0a;
-  color: #9e9e9e;
-  font-size: 10.5px;
-  font-weight: 600;
+  justify-content: flex-start;
+  gap: 5px;
+  padding: 0 8px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 500;
   cursor: pointer;
   user-select: none;
-  transition: 0.12s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: border-color 0.12s, color 0.12s, background-color 0.12s;
 }
-.block-chip:hover { border-color: #ffffff; color: #ffffff; }
+.block-chip:hover {
+  border-color: var(--text-2);
+  color: var(--text);
+}
 .block-chip.active {
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #050505;
-  font-weight: 800;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-inv);
+  font-weight: 700;
 }
 .block-chip.shortcut {
   border-style: dashed;
 }
 .block-chip.shortcut.active {
-  background: #d4d4d4;
+  background: var(--text-2);
   border-style: solid;
-  border-color: #ffffff;
-  color: #050505;
+  border-color: var(--accent);
+  color: var(--accent-inv);
 }
 
-/* Link / Combination Cards */
+/* ==================== CATEGORY LINKS ==================== */
 .link-card {
-  background: #080808;
+  background: var(--bg-elev);
   border: 1px solid var(--border);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   padding: 10px;
-  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 .combo-preview-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 8px 10px;
   background: var(--panel-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  margin-top: 5px;
-  font-size: 11.5px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
 }
 .combo-preview-row.active-preview {
-  border-color: #ffffff;
-  background: #202020;
+  border-color: var(--accent);
+  background: var(--panel-3);
 }
 
-/* 3D Viewer Panel */
+/* ==================== 3D VIEWER PANEL ==================== */
 .viewer-header {
-  padding: 9px 12px;
+  padding: 9px 14px;
   border-bottom: 1px solid var(--border);
-  background: #080808;
+  background: var(--bg-elev);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+.viewer-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
 }
 .viewer-stage {
   position: relative;
   flex: 1;
   min-height: 280px;
-  background: radial-gradient(circle at 50% 42%, #171717 0%, #050505 100%);
+  background: radial-gradient(circle at 50% 42%, #19191f 0%, #09090b 100%);
 }
 #viewport3d {
   width: 100%;
@@ -541,77 +922,135 @@ label.field-label {
   cursor: grab;
 }
 #viewport3d:active { cursor: grabbing; }
+
 .viewer-overlay-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: rgba(5,5,5,0.86);
-  border: 1px solid #303030;
-  border-radius: 6px;
-  padding: 5px 9px;
-  font-size: 11px;
-  color: #d4d4d4;
+  top: 12px;
+  left: 12px;
+  background: rgba(9, 9, 11, 0.88);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: 11.5px;
+  color: var(--text-2);
   pointer-events: none;
   max-width: 92%;
-}
-.viewer-controls {
-  padding: 9px 12px;
-  border-top: 1px solid var(--border);
-  background: #080808;
-}
-.toggle-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 8px;
-  border-radius: 5px;
-  border: 1px solid #2e2e2e;
-  background: #121212;
-  color: #e0e0e0;
-  font-size: 11px;
+  gap: 6px;
+}
+.viewer-controls {
+  padding: 9px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-elev);
+}
+
+.toggle-chip {
+  height: var(--h-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   user-select: none;
+  transition: border-color 0.14s, color 0.14s;
 }
-.toggle-chip input { margin: 0; accent-color: #ffffff; }
+.toggle-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.toggle-chip input {
+  margin: 0;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.toggle-chip-full {
+  height: auto;
+  min-height: var(--h-ctrl);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  line-height: 1.35;
+}
 
-/* 2D Skin Editor Specifics */
+/* ==================== 2D SKIN LAYERS ==================== */
+.skin-layers-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .skin-layer-row {
   display: grid;
-  grid-template-columns: 24px 1fr 124px 52px;
-  gap: 5px;
+  grid-template-columns: 24px minmax(0, 1fr) 122px 54px;
+  gap: 6px;
   align-items: center;
-  padding: 6px 7px;
+  padding: 7px 8px;
   background: var(--panel-2);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  margin-bottom: 5px;
+  border-radius: var(--radius-sm);
+  transition: border-color 0.14s, background-color 0.14s;
+}
+.skin-layer-row select {
+  height: var(--h-sm);
+  font-size: 12px;
+  padding: 0 6px;
 }
 .skin-layer-row.active-layer {
-  border-color: #ffffff;
-  background: #1e1e1e;
+  border-color: var(--accent);
+  background: #1e1e23;
 }
 .skin-layer-row.locked-layer {
   border-style: dashed;
-  border-color: #888888;
+  border-color: var(--muted);
   background: repeating-linear-gradient(
     -45deg,
-    #0e0e0e,
-    #0e0e0e 6px,
-    #171717 6px,
-    #171717 12px
+    #111114,
+    #111114 6px,
+    #18181c 6px,
+    #18181c 12px
   );
 }
-.skin-layer-row.locked-layer select {
-  opacity: 0.45;
-}
+.skin-layer-row.locked-layer select { opacity: 0.45; }
+
 .skin-rank {
-  font-weight: 800;
-  font-size: 11px;
+  font-weight: 700;
+  font-size: 11.5px;
   color: var(--muted);
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
-.uv-preview-box {
+.skin-layer-meta {
+  min-width: 0;
   display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.skin-layer-title {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.skin-layer-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+.uv-preview-box {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
   gap: 12px;
   align-items: center;
 }
@@ -619,19 +1058,19 @@ label.field-label {
   width: 128px;
   height: 128px;
   image-rendering: pixelated;
-  border: 1px solid #383838;
-  border-radius: 5px;
-  background: repeating-conic-gradient(#1f1f1f 0% 25%, #121212 0% 50%) 50% / 12px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: repeating-conic-gradient(#1f1f24 0% 25%, #131317 0% 50%) 50% / 12px 12px;
 }
 
-/* Config Code Preview (Tab 3) */
+/* ==================== CODE PREVIEW ==================== */
 .yaml-code {
   width: 100%;
-  background: #050505;
-  color: #e5e5e5;
-  border: 1px solid #2b2b2b;
-  border-radius: 6px;
-  padding: 10px 12px;
+  background: var(--bg);
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 11.5px;
   line-height: 1.5;
@@ -640,145 +1079,157 @@ label.field-label {
   margin: 0;
 }
 
-/* Status Toast */
+/* ==================== TOAST ==================== */
 .toast {
   position: fixed;
-  bottom: 16px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
-  background: #ffffff;
-  border: 1px solid #ffffff;
-  color: #050505;
-  padding: 9px 16px;
-  border-radius: 6px;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--accent-inv);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
   font-size: 12.5px;
-  font-weight: 800;
-  box-shadow: 0 10px 28px rgba(0,0,0,0.65);
+  font-weight: 700;
+  box-shadow: 0 12px 32px rgba(9, 9, 11, 0.72);
   z-index: 9999;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s;
+  max-width: min(92vw, 560px);
 }
 .toast.show { opacity: 1; }
 
-/* Scrollbars */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #2c2c2c; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #555555; }
-
-/* ==================== v2.2: 3D HAIR PARTS & HELMET PREVIEW ==================== */
+/* ==================== 3D HAIR PARTS & HELMET PREVIEW ==================== */
 .hair-part-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 175px;
+  max-height: 180px;
   overflow-y: auto;
-  padding: 5px;
-  background: #060606;
-  border: 1px solid #262626;
-  border-radius: 6px;
-  margin-top: 5px;
+  padding: 6px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
 }
 .hair-part-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 4px 7px;
-  border-radius: 4px;
-  background: #101010;
-  border: 1px solid #242424;
-  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  font-size: 12px;
   cursor: pointer;
 }
-.hair-part-row:hover { border-color: #666666; }
+.hair-part-row:hover { border-color: var(--border-strong); }
 .hair-part-row.is-hidden {
-  background: #1b1b1b;
-  border-color: #ffffff;
-  color: #ffffff;
+  background: var(--panel-3);
+  border-color: var(--accent);
+  color: var(--text);
 }
 .hair-part-row code {
-  font-size: 10.5px;
-  color: #cfcfcf;
+  font-size: 11px;
+  color: var(--text-2);
 }
 .hair-part-row.is-hidden code {
-  color: #ffffff;
+  color: var(--text);
   text-decoration: line-through;
 }
 
 .helmet-test-toggle {
-  border-color: #666666;
+  border-color: var(--border-strong);
 }
 .helmet-test-toggle.active {
-  background: #ffffff;
-  color: #050505;
-  border-color: #ffffff;
-  font-weight: 800;
+  background: var(--accent);
+  color: var(--accent-inv);
+  border-color: var(--accent);
+  font-weight: 700;
 }
 
-/* ==================== v2.3: VISUAL GUI INVENTORY EDITOR (TAB 4 + MC ASSETS) ==================== */
+/* ==================== VISUAL GUI INVENTORY EDITOR ==================== */
 .gui-screen-list {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 .gui-screen-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 6px;
   margin-bottom: 10px;
 }
 .gui-screen-pill {
-  padding: 5px 9px;
-  border-radius: 5px;
-  border: 1px solid #303030;
-  background: #101010;
-  color: #cccccc;
-  font-size: 11px;
-  font-weight: 700;
+  height: var(--h-sm);
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--panel);
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: border-color 0.14s, background-color 0.14s, color 0.14s;
 }
-.gui-screen-pill:hover { border-color: #888888; color: #ffffff; }
+.gui-screen-pill:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
 .gui-screen-pill.active {
-  background: #ffffff;
-  color: #050505;
-  border-color: #ffffff;
+  background: var(--accent);
+  color: var(--accent-inv);
+  border-color: var(--accent);
+  font-weight: 700;
 }
+
 .gui-screen-btn {
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 9px;
-  border-radius: 6px;
-  border: 1px solid #282828;
-  background: #0d0d0d;
-  color: #cccccc;
-  font-size: 11.5px;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   text-align: left;
+  transition: border-color 0.14s, background-color 0.14s, color 0.14s;
 }
-.gui-screen-btn:hover { border-color: #777777; color: #ffffff; }
+.gui-screen-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
 .gui-screen-btn.active {
-  background: #ffffff;
-  color: #050505;
-  border-color: #ffffff;
-  font-weight: 800;
+  background: var(--accent);
+  color: var(--accent-inv);
+  border-color: var(--accent);
+  font-weight: 700;
 }
 .gui-screen-btn.active .tag {
-  background: #050505;
-  color: #ffffff;
-  border-color: #050505;
+  background: var(--accent-inv);
+  color: var(--accent);
+  border-color: var(--accent-inv);
 }
 
 .mc-inv-shell {
-  background: #232323;
-  border: 2px solid #555555;
-  border-radius: 8px;
-  padding: 12px 14px;
-  box-shadow: inset 2px 2px 0 #3d3d3d, inset -2px -2px 0 #121212, 0 14px 32px rgba(0,0,0,0.7);
-  max-width: 650px;
+  background: #1c1c21;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: inset 1px 1px 0 #32323a, inset -1px -1px 0 #111114, 0 12px 28px rgba(9, 9, 11, 0.55);
+  max-width: 660px;
   width: 100%;
   margin: 0 auto;
 }
@@ -789,32 +1240,31 @@ label.field-label {
   justify-content: space-between;
   gap: 8px;
   margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #383838;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
 }
 .mc-inv-title {
   font-size: 14px;
-  font-weight: 800;
-  color: #f5f5f5;
+  font-weight: 700;
+  color: var(--text);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  text-shadow: 1px 1px 0 #000;
 }
 .mc-inv-grid {
   display: grid;
   grid-template-columns: repeat(9, minmax(0, 1fr));
   gap: 4px;
-  background: #141414;
+  background: #111114;
   padding: 6px;
-  border-radius: 5px;
-  border: 1px solid #0a0a0a;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
 }
 .mc-slot {
   position: relative;
   aspect-ratio: 1 / 1;
-  min-height: 46px;
-  background: #2c2c2c;
-  border: 1px solid #161616;
-  box-shadow: inset 2px 2px 0 #181818, inset -2px -2px 0 #464646;
+  min-height: 48px;
+  background: #27272d;
+  border: 1px solid #16161a;
+  box-shadow: inset 2px 2px 0 #18181c, inset -2px -2px 0 #3c3c45;
   border-radius: 3px;
   display: flex;
   flex-direction: column;
@@ -823,51 +1273,47 @@ label.field-label {
   padding: 2px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.08s, box-shadow 0.1s;
   overflow: hidden;
+  transition: background-color 0.1s, box-shadow 0.1s;
 }
 .mc-slot:hover {
-  background: #3a3a3a;
-  box-shadow: inset 2px 2px 0 #222222, inset -2px -2px 0 #6a6a6a, 0 0 0 1px #ffffff;
+  background: #35353d;
+  box-shadow: inset 2px 2px 0 #222228, inset -2px -2px 0 #5b5b66, 0 0 0 1px var(--accent);
 }
 .mc-slot.selected {
-  background: #3e3e3e;
-  box-shadow: inset 0 0 0 2px #ffffff, 0 0 0 1px #ffffff;
+  background: #3a3a44;
+  box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 1px var(--accent);
   z-index: 2;
 }
-.mc-slot.kind-slot {
-  background: #262626;
-}
-.mc-slot.kind-button {
-  background: #2f2f2f;
-}
-.mc-slot.kind-decor {
-  background: #242424;
-}
-.mc-slot.kind-empty {
-  background: #1d1d1d;
-}
+.mc-slot.kind-slot { background: #24242a; }
+.mc-slot.kind-button { background: #2c2c34; }
+.mc-slot.kind-decor { background: #212127; }
+.mc-slot.kind-empty { background: #1a1a1f; }
+
 .mc-slot-num {
   position: absolute;
   top: 2px;
   left: 3px;
-  font-size: 8.5px;
+  font-size: 9px;
   font-family: ui-monospace, monospace;
-  color: rgba(255,255,255,0.45);
-  text-shadow: 1px 1px 0 #000;
+  font-variant-numeric: tabular-nums;
+  color: rgba(244, 244, 245, 0.5);
   pointer-events: none;
 }
-.mc-slot.selected .mc-slot-num { color: #ffffff; font-weight: 800; }
+.mc-slot.selected .mc-slot-num {
+  color: var(--accent);
+  font-weight: 700;
+}
 .mc-slot-cmd {
   position: absolute;
   top: 2px;
   right: 2px;
   font-size: 8px;
-  font-weight: 800;
+  font-weight: 700;
   padding: 0 3px;
   border-radius: 2px;
-  background: #ffffff;
-  color: #050505;
+  background: var(--accent);
+  color: var(--accent-inv);
   pointer-events: none;
 }
 .mc-slot-img {
@@ -875,7 +1321,7 @@ label.field-label {
   height: 30px;
   image-rendering: pixelated;
   pointer-events: none;
-  filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.65));
+  filter: drop-shadow(1px 1px 0 rgba(9, 9, 11, 0.65));
 }
 .mc-slot-img.is-filler {
   width: 34px;
@@ -884,19 +1330,15 @@ label.field-label {
   filter: none;
 }
 .mc-slot-img.is-glint {
-  filter: drop-shadow(0 0 5px rgba(210,160,255,0.9)) drop-shadow(1px 1px 0 rgba(0,0,0,0.7));
+  filter: drop-shadow(0 0 4px rgba(244, 244, 245, 0.85)) drop-shadow(1px 1px 0 rgba(9, 9, 11, 0.7));
 }
 .mc-slot-sprite-bg {
   position: absolute;
   width: 28px;
   height: 28px;
   image-rendering: pixelated;
-  opacity: 0.25;
+  opacity: 0.28;
   pointer-events: none;
-}
-.mc-slot-icon {
-  font-size: 16px;
-  line-height: 1;
 }
 .mc-slot-label {
   position: absolute;
@@ -904,10 +1346,10 @@ label.field-label {
   left: 2px;
   right: 2px;
   text-align: center;
-  font-size: 8px;
-  font-weight: 700;
-  color: #f0f0f0;
-  background: rgba(0,0,0,0.62);
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(9, 9, 11, 0.74);
   border-radius: 2px;
   padding: 0 2px;
   overflow: hidden;
@@ -924,111 +1366,332 @@ label.field-label {
   border-radius: 50%;
   pointer-events: none;
 }
-.kind-slot .mc-slot-kind-dot { background: #ffffff; }
-.kind-button .mc-slot-kind-dot { background: #a3a3a3; }
+.kind-slot .mc-slot-kind-dot { background: var(--accent); }
+.kind-button .mc-slot-kind-dot { background: var(--muted); }
 
-/* Minecraft Tooltip Preview */
+/* Monochrome Minecraft Tooltip Preview */
 .mc-tooltip-box {
-  margin-top: 9px;
-  background: rgba(16, 0, 16, 0.94);
-  border: 2px solid #5000ff;
-  box-shadow: inset 0 0 0 1px #28007f, 0 6px 18px rgba(0,0,0,0.6);
-  border-radius: 4px;
-  padding: 7px 10px;
+  margin-top: 10px;
+  background: #121216;
+  border: 1px solid #52525b;
+  box-shadow: inset 0 0 0 1px #27272c, 0 6px 16px rgba(9, 9, 11, 0.55);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.45;
-  color: #f5f5f5;
-  min-height: 44px;
+  color: var(--text);
+  min-height: 46px;
 }
 .mc-tooltip-meta {
-  font-size: 10px;
-  color: #8e8e8e;
-  margin-top: 3px;
-  border-top: 1px solid #2b1d45;
-  padding-top: 3px;
+  font-size: 10.5px;
+  color: var(--muted);
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
 }
 
-/* Minecraft Assets Picker Grid */
+/* Minecraft Assets Visual Picker */
 .mc-asset-picker {
-  margin-top: 6px;
-  padding: 7px;
-  background: #060606;
-  border: 1px solid #2e2e2e;
-  border-radius: 6px;
+  padding: 9px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
 }
 .mc-asset-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
   gap: 4px;
-  max-height: 155px;
+  max-height: 160px;
   overflow-y: auto;
-  margin-top: 6px;
   padding-right: 2px;
 }
 .mc-asset-btn {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #181818;
-  border: 1px solid #2d2d2d;
-  border-radius: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 3px;
+  transition: border-color 0.12s, background-color 0.12s;
 }
 .mc-asset-btn:hover {
-  border-color: #ffffff;
-  background: #2b2b2b;
+  border-color: var(--accent);
+  background: var(--panel-3);
 }
 .mc-asset-btn.active {
-  border-color: #ffffff;
-  background: #ffffff;
+  border-color: var(--accent);
+  background: var(--accent);
 }
 .mc-asset-btn img {
   width: 24px;
   height: 24px;
   image-rendering: pixelated;
 }
+
 .gui-legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 11px;
-  color: #a0a0a0;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
 }
 .gui-preview-card {
-  margin-top: 12px;
-  max-width: 650px;
+  max-width: 660px;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
 }
 
+/* Scrollbars */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2c2c33; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 
 </style>
 </head>
 <body>
+  <!-- INLINE MONOCHROME SVG ICON SPRITE (100% OFFLINE, ZERO EMOJI) -->
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <defs>
+      <symbol id="ico-brand" viewBox="0 0 24 24">
+        <path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"></path>
+        <path d="M3 7l9 5 9-5"></path>
+        <path d="M12 12v10"></path>
+      </symbol>
+      <symbol id="ico-cube" viewBox="0 0 24 24">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+      </symbol>
+      <symbol id="ico-palette" viewBox="0 0 24 24">
+        <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+        <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+        <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+        <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z"></path>
+      </symbol>
+      <symbol id="ico-grid" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+        <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+        <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+      </symbol>
+      <symbol id="ico-sliders" viewBox="0 0 24 24">
+        <line x1="4" y1="21" x2="4" y2="14"></line>
+        <line x1="4" y1="10" x2="4" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12" y2="3"></line>
+        <line x1="20" y1="21" x2="20" y2="16"></line>
+        <line x1="20" y1="12" x2="20" y2="3"></line>
+        <line x1="1" y1="14" x2="7" y2="14"></line>
+        <line x1="9" y1="8" x2="15" y2="8"></line>
+        <line x1="17" y1="16" x2="23" y2="16"></line>
+      </symbol>
+      <symbol id="ico-sparkles" viewBox="0 0 24 24">
+        <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"></path>
+        <path d="M5 3v4"></path>
+        <path d="M3 5h4"></path>
+        <path d="M19 17v4"></path>
+        <path d="M17 19h4"></path>
+      </symbol>
+      <symbol id="ico-package" viewBox="0 0 24 24">
+        <path d="M16.5 9.4L7.55 4.24"></path>
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+        <polyline points="3.29 7 12 12 20.71 7"></polyline>
+        <line x1="12" y1="22" x2="12" y2="12"></line>
+      </symbol>
+      <symbol id="ico-trash" viewBox="0 0 24 24">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+        <path d="M10 11v6"></path>
+        <path d="M14 11v6"></path>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+      </symbol>
+      <symbol id="ico-wrench" viewBox="0 0 24 24">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+      </symbol>
+      <symbol id="ico-folder" viewBox="0 0 24 24">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+      </symbol>
+      <symbol id="ico-camera" viewBox="0 0 24 24">
+        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+        <circle cx="12" cy="13" r="4"></circle>
+      </symbol>
+      <symbol id="ico-image" viewBox="0 0 24 24">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+        <polyline points="21 15 16 10 5 21"></polyline>
+      </symbol>
+      <symbol id="ico-download" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </symbol>
+      <symbol id="ico-upload" viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </symbol>
+      <symbol id="ico-scissors" viewBox="0 0 24 24">
+        <circle cx="6" cy="6" r="3"></circle>
+        <circle cx="6" cy="18" r="3"></circle>
+        <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+        <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+        <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+      </symbol>
+      <symbol id="ico-refresh" viewBox="0 0 24 24">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <polyline points="1 20 1 14 7 14"></polyline>
+        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+      </symbol>
+      <symbol id="ico-rotate-ccw" viewBox="0 0 24 24">
+        <polyline points="1 4 1 10 7 10"></polyline>
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+      </symbol>
+      <symbol id="ico-zap" viewBox="0 0 24 24">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+      </symbol>
+      <symbol id="ico-x" viewBox="0 0 24 24">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </symbol>
+      <symbol id="ico-lock" viewBox="0 0 24 24">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </symbol>
+      <symbol id="ico-shield" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+      </symbol>
+      <symbol id="ico-shirt" viewBox="0 0 24 24">
+        <path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path>
+      </symbol>
+      <symbol id="ico-file-text" viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </symbol>
+      <symbol id="ico-copy" viewBox="0 0 24 24">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+      </symbol>
+      <symbol id="ico-blocks" viewBox="0 0 24 24">
+        <rect x="3" y="13" width="8" height="8" rx="1"></rect>
+        <rect x="13" y="13" width="8" height="8" rx="1"></rect>
+        <rect x="8" y="3" width="8" height="8" rx="1"></rect>
+      </symbol>
+      <symbol id="ico-box" viewBox="0 0 24 24">
+        <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"></path>
+        <path d="M12 12l8-4.5"></path>
+        <path d="M12 12v9"></path>
+        <path d="M12 12L4 7.5"></path>
+      </symbol>
+      <symbol id="ico-hard-hat" viewBox="0 0 24 24">
+        <path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"></path>
+        <path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path>
+        <path d="M4 15v-3a6 6 0 0 1 6-6"></path>
+        <path d="M14 6a6 6 0 0 1 6 6v3"></path>
+      </symbol>
+      <symbol id="ico-check" viewBox="0 0 24 24">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </symbol>
+      <symbol id="ico-alert" viewBox="0 0 24 24">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </symbol>
+      <symbol id="ico-plus" viewBox="0 0 24 24">
+        <line x1="12" y1="5" x2="12" y2="19"></line>
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+      </symbol>
+      <symbol id="ico-layers" viewBox="0 0 24 24">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+      </symbol>
+      <symbol id="ico-link" viewBox="0 0 24 24">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+      </symbol>
+      <symbol id="ico-chevron-up" viewBox="0 0 24 24">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </symbol>
+      <symbol id="ico-chevron-down" viewBox="0 0 24 24">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </symbol>
+      <symbol id="ico-star" viewBox="0 0 24 24">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+      </symbol>
+      <symbol id="ico-loader" viewBox="0 0 24 24">
+        <line x1="12" y1="2" x2="12" y2="6"></line>
+        <line x1="12" y1="18" x2="12" y2="22"></line>
+        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+        <line x1="2" y1="12" x2="6" y2="12"></line>
+        <line x1="18" y1="12" x2="22" y2="12"></line>
+        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+      </symbol>
+    </defs>
+  </svg>
+
   <!-- TOP NAVIGATION -->
   <header class="topbar">
     <div class="brand">
-      <span class="brand-badge">MW v1.9</span>
+      <span class="brand-mark" aria-hidden="true">
+        <svg class="ico ico-md"><use href="#ico-brand"></use></svg>
+      </span>
       <span>MythicWardrobe Studio</span>
-      <span class="brand-offline" title="Работает полностью в браузере без Python и без сервера!">100% HTML</span>
+      <span class="brand-badge">v1.9.1</span>
+      <span class="brand-offline" title="Работает полностью в браузере без Python и без сервера">Offline HTML</span>
     </div>
 
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="bbmodel">🧩 3D Модели &amp; Волосы</button>
-      <button class="tab-btn" data-tab="skins">🎨 2D Текстуры &amp; Lore</button>
-      <button class="tab-btn" data-tab="gui">🪟 GUI Инвентарь</button>
-      <button class="tab-btn" data-tab="configs">⚙ Конфиги v1.9</button>
-    </div>
+    <nav class="tabs" aria-label="Разделы студии">
+      <button class="tab-btn active" data-tab="bbmodel">
+        <svg class="ico" aria-hidden="true"><use href="#ico-cube"></use></svg>
+        <span>3D Модели</span>
+      </button>
+      <button class="tab-btn" data-tab="skins">
+        <svg class="ico" aria-hidden="true"><use href="#ico-palette"></use></svg>
+        <span>2D Скины</span>
+      </button>
+      <button class="tab-btn" data-tab="gui">
+        <svg class="ico" aria-hidden="true"><use href="#ico-grid"></use></svg>
+        <span>GUI Меню</span>
+      </button>
+      <button class="tab-btn" data-tab="configs">
+        <svg class="ico" aria-hidden="true"><use href="#ico-sliders"></use></svg>
+        <span>Конфиги</span>
+      </button>
+    </nav>
 
     <div class="topbar-actions">
-      <button class="btn btn-sm" id="btnLoadDemo" title="Загрузить все 10 демо .bbmodel (включая 3D-пояса) и 68 стартовых 2D-скинов (включая Костюм химзащиты)">✨ Загрузить демо</button>
-      <button class="btn btn-green btn-sm" id="btnQuickExport">📦 Скачать готовый ZIP</button>
+      <button class="btn btn-sm" id="btnLoadDemo" title="Загрузить все 10 демо .bbmodel (включая 3D-пояса) и 68 стартовых 2D-скинов">
+        <svg class="ico" aria-hidden="true"><use href="#ico-sparkles"></use></svg>
+        <span>Загрузить демо</span>
+      </button>
+      <button class="btn btn-primary btn-sm" id="btnQuickExport">
+        <svg class="ico" aria-hidden="true"><use href="#ico-package"></use></svg>
+        <span>Скачать ZIP</span>
+      </button>
     </div>
   </header>
 
@@ -1041,43 +1704,61 @@ label.field-label {
       <!-- LEFT PANE: UPLOAD + MODEL LIBRARY -->
       <aside class="pane">
         <div class="card">
-          <div class="card-title">1. Загрузка .bbmodel моделей</div>
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-upload"></use></svg>
+              <span>1. Загрузка моделей</span>
+            </span>
+            <span class="tag">.bbmodel</span>
+          </div>
           <div class="dropzone" id="bbDropzone">
-            <strong>Перетащите .bbmodel файлы сюда</strong>
-            <span>или нажмите, чтобы выбрать сразу несколько моделей (обработка локально в браузере!)</span>
+            <span class="dropzone-ico" aria-hidden="true">
+              <svg class="ico ico-md"><use href="#ico-upload"></use></svg>
+            </span>
+            <strong>Перетащите .bbmodel сюда</strong>
+            <span>или нажмите для выбора нескольких файлов локально</span>
             <input type="file" id="bbFileInput" accept=".bbmodel,.json" multiple hidden>
           </div>
-          <div class="row">
-            <button class="btn btn-sm btn-block" id="btnLoadDemo3d">✨ Демо (10 моделей + 3D-пояса)</button>
-            <button class="btn btn-danger btn-sm" id="btnClear3d" title="Очистить список">🗑</button>
+          <div class="btn-split-sm">
+            <button class="btn btn-sm btn-block" id="btnLoadDemo3d">
+              <svg class="ico" aria-hidden="true"><use href="#ico-sparkles"></use></svg>
+              <span>Демо (10 моделей)</span>
+            </button>
+            <button class="btn btn-danger btn-icon" id="btnClear3d" title="Очистить список моделей" aria-label="Очистить список моделей">
+              <svg class="ico" aria-hidden="true"><use href="#ico-trash"></use></svg>
+            </button>
           </div>
         </div>
 
         <div class="card">
           <div class="card-title">
-            <span>Загруженные модели</span>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-layers"></use></svg>
+              <span>Загруженные модели</span>
+            </span>
             <span id="modelCountBadge" class="tag">0</span>
           </div>
-          <div class="row" style="margin-bottom:8px">
+          <div class="field">
+            <label class="field-label" for="filterCategory">Фильтр по категории</label>
             <select id="filterCategory">
               <option value="all">Все категории</option>
               <option value="helmets">Шлемы (HEAD)</option>
-              <option value="mask_3d">3D-Маски / Очки (HEAD)</option>
+              <option value="mask_3d">3D-Маски и очки (HEAD)</option>
               <option value="hair_3d">3D-Причёски (HEAD)</option>
               <option value="armor_chest">Нагрудники (CHEST)</option>
-              <option value="backpack_3d">3D-Рюкзаки / Плащи (CHEST)</option>
+              <option value="backpack_3d">3D-Рюкзаки и плащи (CHEST)</option>
               <option value="armor_legs">Поножи (LEGS)</option>
-              <option value="belt_3d">3D-Пояса / Декор (LEGS)</option>
+              <option value="belt_3d">3D-Пояса и декор (LEGS)</option>
               <option value="armor_feet">Ботинки (FEET)</option>
             </select>
           </div>
-          <div id="modelList">
-            <div class="hint">Загрузите свои .bbmodel или нажмите «✨ Демо» — туда уже вшиты 3D-причёски, 3D-пояса (tactical / adventurer / chains), рюкзак, противогаз и броня!</div>
+          <div id="modelList" class="model-list-stack">
+            <div class="hint">Загрузите свои файлы .bbmodel или нажмите «Демо (10 моделей)»: в демо вшиты 3D-причёски, 3D-пояса, рюкзак, противогаз и броня.</div>
           </div>
         </div>
       </aside>
 
-      <!-- CENTER PANE: SHARED 3D VIEWPORT (PLACEHOLDER, MOVED BY JS) -->
+      <!-- CENTER PANE: SHARED 3D VIEWPORT -->
       <section class="pane pane-viewer" id="viewerMount3d"></section>
 
       <!-- RIGHT PANE: INSPECTOR + BLOCKS + CATEGORY LINKS + ZIP EXPORT -->
@@ -1085,27 +1766,30 @@ label.field-label {
         <!-- INSPECTOR -->
         <div class="card" id="inspectorCard">
           <div class="card-title">
-            <span>2. Подгонка, Кости и Блокировки</span>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-sliders"></use></svg>
+              <span>2. Подгонка и кости</span>
+            </span>
             <span id="inspectorModelTag" class="tag">Не выбрано</span>
           </div>
           <div id="inspectorEmpty" class="hint">
-            Выберите модель слева, чтобы настроить категорию, кости MythicArmors, смещение, описание, цвет и правила блокировки слотов (v1.8.0).
+            Выберите модель слева, чтобы настроить категорию, кости MythicArmors, смещение, описание, текстуры и правила блокировки слотов.
           </div>
-          <div id="inspectorBody" style="display:none">
+          <div id="inspectorBody" class="form-stack" style="display:none">
             <div class="grid-2">
-              <div>
-                <label class="field-label">ID модели (.bbmodel)</label>
+              <div class="field">
+                <label class="field-label" for="inpExportId">ID модели (.bbmodel)</label>
                 <input type="text" id="inpExportId" placeholder="gold_warden_chest">
               </div>
-              <div>
-                <label class="field-label">MythicMobs ID</label>
+              <div class="field">
+                <label class="field-label" for="inpMythicId">MythicMobs ID</label>
                 <input type="text" id="inpMythicId" placeholder="GoldWardenChestplate">
               </div>
             </div>
 
             <div class="grid-2">
-              <div>
-                <label class="field-label">Категория</label>
+              <div class="field">
+                <label class="field-label" for="inpCategory">Категория</label>
                 <select id="inpCategory">
                   <option value="helmets">Шлем (HEAD)</option>
                   <option value="mask_3d">3D-Маска / Очки (HEAD)</option>
@@ -1117,14 +1801,14 @@ label.field-label {
                   <option value="armor_feet">Ботинки (FEET)</option>
                 </select>
               </div>
-              <div>
-                <label class="field-label">Слот гардероба (v1.7+)</label>
+              <div class="field">
+                <label class="field-label" for="inpWardrobeSlot">Слот гардероба</label>
                 <select id="inpWardrobeSlot">
                   <option value="">Стандартная броня</option>
                   <option value="mask_3d">mask_3d (3D Маска)</option>
                   <option value="hair_3d">hair_3d (3D Причёска)</option>
                   <option value="backpack_3d">backpack_3d (3D Рюкзак)</option>
-                  <option value="belt_3d">belt_3d (3D Пояс / Декор)</option>
+                  <option value="belt_3d">belt_3d (3D Пояс)</option>
                   <option value="helmet_cosmetic">helmet_cosmetic</option>
                   <option value="chest_cosmetic">chest_cosmetic</option>
                   <option value="legs_cosmetic">legs_cosmetic</option>
@@ -1134,8 +1818,8 @@ label.field-label {
             </div>
 
             <div class="grid-2">
-              <div>
-                <label class="field-label">Material (можно ECHO_SHARD, PAPER...)</label>
+              <div class="field">
+                <label class="field-label" for="inpMaterial">Material</label>
                 <input type="text" id="inpMaterial" list="materialPresets" placeholder="LEATHER_HELMET / ECHO_SHARD">
                 <datalist id="materialPresets">
                   <option value="LEATHER_HELMET"></option>
@@ -1147,55 +1831,62 @@ label.field-label {
                   <option value="CARVED_PUMPKIN"></option>
                 </datalist>
               </div>
-              <div>
-                <label class="field-label">CustomModelData (опционально)</label>
+              <div class="field">
+                <label class="field-label" for="inpCustomModelData">CustomModelData</label>
                 <input type="number" id="inpCustomModelData" min="1" step="1" placeholder="пусто = иконка из .bbmodel">
               </div>
             </div>
-            <div id="materialHintBox" class="hint" style="margin:4px 0 6px"></div>
+            <div id="materialHintBox" class="hint"></div>
 
             <div class="grid-2">
-              <div>
-                <label class="field-label">Название предмета (Display)</label>
+              <div class="field">
+                <label class="field-label" for="inpDisplayName">Название предмета</label>
                 <input type="text" id="inpDisplayName" placeholder="&6Золотой нагрудник">
               </div>
-              <div>
-                <label class="field-label">Цвет покраски (опц., только _t.png)</label>
-                <div class="row">
-                  <input type="color" id="inpColorPicker" value="#ffffff" style="width:36px;height:28px;padding:1px;border-radius:5px;border:1px solid var(--border);background:#000">
-                  <input type="text" id="inpColorRgb" placeholder="пусто = родная цветная текстура">
+              <div class="field">
+                <label class="field-label" for="inpColorRgb">Цвет покраски (_t.png)</label>
+                <div class="color-field">
+                  <input type="color" id="inpColorPicker" value="#ffffff" aria-label="Выбор цвета покраски">
+                  <input type="text" id="inpColorRgb" placeholder="пусто = родные цвета">
                 </div>
               </div>
             </div>
 
-            <label class="field-label">Описание / Lore (по строке)</label>
-            <textarea id="inpLore" placeholder="&7Кастомная 3D-модель MythicArmors&#10;&aСделано в MythicWardrobe Studio"></textarea>
-
-            <label class="field-label">Смещение (X / Y / Z) и Масштаб (подгонка на теле)</label>
-            <div class="grid-4">
-              <input type="number" step="0.25" id="inpOffX" value="0" title="Смещение X">
-              <input type="number" step="0.25" id="inpOffY" value="0" title="Смещение Y">
-              <input type="number" step="0.25" id="inpOffZ" value="0" title="Смещение Z">
-              <input type="number" step="0.05" min="0.2" max="3" id="inpScale" value="1" title="Масштаб">
+            <div class="field">
+              <label class="field-label" for="inpLore">Описание / Lore (по строке)</label>
+              <textarea id="inpLore" placeholder="&7Кастомная 3D-модель MythicArmors&#10;&aСделано в MythicWardrobe Studio"></textarea>
             </div>
 
-            <!-- AUTO-TEXTURES COMPLETION FOR RAW .bbmodel (layer_1, layer_2, _t, _e, icon!) -->
-            <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border)">
-              <div class="row" style="justify-content:space-between">
-                <label class="field-label" style="margin:0;color:#ffffff">🛠 Авто-доделка текстур MythicArmors</label>
+            <div class="field">
+              <label class="field-label">Смещение (X / Y / Z) и масштаб</label>
+              <div class="grid-4">
+                <input type="number" step="0.25" id="inpOffX" value="0" title="Смещение X" aria-label="Смещение X">
+                <input type="number" step="0.25" id="inpOffY" value="0" title="Смещение Y" aria-label="Смещение Y">
+                <input type="number" step="0.25" id="inpOffZ" value="0" title="Смещение Z" aria-label="Смещение Z">
+                <input type="number" step="0.05" min="0.2" max="3" id="inpScale" value="1" title="Масштаб" aria-label="Масштаб">
+              </div>
+            </div>
+
+            <!-- AUTO-TEXTURES COMPLETION FOR RAW .bbmodel -->
+            <div class="section-block">
+              <div class="section-head">
+                <span class="section-head-main">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-wrench"></use></svg>
+                  <span>Авто-доделка текстур MythicArmors</span>
+                </span>
                 <span class="tag" id="texAutoBadge">Авто</span>
               </div>
-              <div class="hint" style="margin:3px 0 5px">
-                Если в вашей модели только <code>texture.png</code> без <code>layer_1</code> / <code>layer_2</code> — Студия автоматически досоздаст все недостающие служебные текстуры по стандарту MythicArmors:
+              <div class="hint">
+                Если в модели только <code>texture.png</code> без <code>layer_1</code> и <code>layer_2</code>, Студия автоматически создаст недостающие служебные текстуры.
               </div>
               <div id="texStatusGrid" class="tex-status-grid"></div>
-              <label class="toggle-chip" style="display:flex;margin-bottom:6px">
+              <label class="toggle-chip toggle-chip-full">
                 <input type="checkbox" id="chkAutoLayers" checked>
-                <span>Авто-добавлять прозрачные <code>_layer_1.png</code> + <code>_layer_2.png</code> (64×32)</span>
+                <span>Авто-добавлять <code>_layer_1.png</code> + <code>_layer_2.png</code> (64×32)</span>
               </label>
               <div class="grid-2">
-                <div>
-                  <label class="field-label">Маска покраски (_t.png)</label>
+                <div class="field">
+                  <label class="field-label" for="selAutoTint">Маска покраски (_t.png)</label>
                   <select id="selAutoTint">
                     <option value="keep">Как в модели</option>
                     <option value="full">Вся текстура красится</option>
@@ -1203,8 +1894,8 @@ label.field-label {
                     <option value="none">Убрать _t.png</option>
                   </select>
                 </div>
-                <div>
-                  <label class="field-label">Маска свечения (_e.png)</label>
+                <div class="field">
+                  <label class="field-label" for="selAutoEmissive">Маска свечения (_e.png)</label>
                   <select id="selAutoEmissive">
                     <option value="keep">Как в модели</option>
                     <option value="bright_neon">Авто-свечение ярких</option>
@@ -1214,119 +1905,162 @@ label.field-label {
               </div>
               <div class="icon-preview-wrap">
                 <div class="icon-preview-box" id="modelIconPreviewBox">
-                  <span style="font-size:10px;color:var(--muted)">2D</span>
+                  <span>2D</span>
                 </div>
-                <div style="flex:1">
-                  <div style="font-size:11px;font-weight:700;margin-bottom:4px">Иконка в инвентаре (вшивается в .bbmodel)</div>
-                  <div class="row-wrap">
-                    <button type="button" class="btn btn-sm" id="btnUploadIconPng">📁 PNG иконка</button>
-                    <button type="button" class="btn btn-sm" id="btnCapture3dIcon" title="Снять прозрачный 32×32 рендер прямо с 3D-вьюпорта">📸 Снять с 3D</button>
-                    <button type="button" class="btn btn-danger btn-sm" id="btnClearIconPng" title="Удалить иконку">×</button>
-                    <input type="file" id="inpIconPngFile" accept="image/png,image/webp" hidden>
+                <div class="icon-preview-meta">
+                  <div class="icon-preview-title">Иконка в инвентаре (.bbmodel)</div>
+                  <div class="btn-split-sm">
+                    <div class="btn-grid-2">
+                      <button type="button" class="btn btn-sm" id="btnUploadIconPng">
+                        <svg class="ico" aria-hidden="true"><use href="#ico-folder"></use></svg>
+                        <span>PNG</span>
+                      </button>
+                      <button type="button" class="btn btn-sm" id="btnCapture3dIcon" title="Снять 32×32 рендер прямо с 3D-вьюпорта">
+                        <svg class="ico" aria-hidden="true"><use href="#ico-camera"></use></svg>
+                        <span>Снять 3D</span>
+                      </button>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-icon" id="btnClearIconPng" title="Удалить иконку" aria-label="Удалить иконку">
+                      <svg class="ico" aria-hidden="true"><use href="#ico-x"></use></svg>
+                    </button>
                   </div>
+                  <input type="file" id="inpIconPngFile" accept="image/png,image/webp" hidden>
                 </div>
               </div>
-              <div class="row-wrap" style="margin-top:6px">
-                <button type="button" class="btn btn-sm" id="btnUpload3dMainTex" title="Загрузить/заменить основную текстуру .bbmodel">🖼 Загрузить текстуру PNG</button>
-                <button type="button" class="btn btn-sm" id="btnUpload3dTintTex" title="Загрузить маску покраски _t.png">🎨 Маска _t.png</button>
-                <button type="button" class="btn btn-sm" id="btnUpload3dEmisTex" title="Загрузить маску свечения _e.png">✨ Маска _e.png</button>
+              <div class="btn-grid-3">
+                <button type="button" class="btn btn-sm" id="btnUpload3dMainTex" title="Заменить основную текстуру .bbmodel">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-image"></use></svg>
+                  <span>Текстура</span>
+                </button>
+                <button type="button" class="btn btn-sm" id="btnUpload3dTintTex" title="Загрузить маску покраски _t.png">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-palette"></use></svg>
+                  <span>Маска _t</span>
+                </button>
+                <button type="button" class="btn btn-sm" id="btnUpload3dEmisTex" title="Загрузить маску свечения _e.png">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-sparkles"></use></svg>
+                  <span>Маска _e</span>
+                </button>
                 <input type="file" id="inp3dMainTexFile" accept="image/png,image/webp" hidden>
                 <input type="file" id="inp3dTintTexFile" accept="image/png,image/webp" hidden>
                 <input type="file" id="inp3dEmisTexFile" accept="image/png,image/webp" hidden>
               </div>
-              <button type="button" class="btn btn-primary btn-sm btn-block" id="btnDownloadSingleBbmodel" style="margin-top:8px">
-                ⬇ Доделать текстуры и скачать готовый .bbmodel
+              <button type="button" class="btn btn-primary btn-block" id="btnDownloadSingleBbmodel">
+                <svg class="ico" aria-hidden="true"><use href="#ico-download"></use></svg>
+                <span>Скачать готовый .bbmodel</span>
               </button>
             </div>
 
-            <!-- v1.9.0 3D HAIR BINDING & PARTIAL HELMET HIDING -->
-            <div id="hair3dPanel" style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border);display:none">
-              <div class="row" style="justify-content:space-between">
-                <label class="field-label" style="margin:0;color:#ffffff">💇 3D-Волосы: привязка к 2D и шлемы (v1.9)</label>
+            <!-- 3D HAIR BINDING & HELMET RULES -->
+            <div id="hair3dPanel" class="section-block" style="display:none">
+              <div class="section-head">
+                <span class="section-head-main">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-scissors"></use></svg>
+                  <span>3D-Волосы и поведение под шлемом</span>
+                </span>
                 <span class="tag" id="hair3dPartBadge">0 скрыто</span>
               </div>
-              <div class="hint" style="margin:3px 0 6px">
-                Привяжите 3D-причёску к 2D-волосам (<code>hair-3d.yml</code>) и настройте полное или <b>частичное</b> скрытие при надевании шлема (например, убрать высокий хвост сзади, оставив передние пряди!).
+              <div class="hint">
+                Привяжите 3D-причёску к 2D-волосам (<code>hair-3d.yml</code>) и настройте замену модели (<code>SWAP_MODEL</code>) или частичное скрытие кубов при надевании шлема.
               </div>
               <div class="grid-2">
-                <div>
-                  <label class="field-label">Привязать к 2D-волосам (PNG)</label>
-                  <input type="text" id="inpHairBind2d" list="hair2dPresets" placeholder="напр. hair_blonde.png">
+                <div class="field">
+                  <label class="field-label" for="inpHairBind2d">2D-волосы (PNG)</label>
+                  <input type="text" id="inpHairBind2d" list="hair2dPresets" placeholder="hair_blonde.png">
                   <datalist id="hair2dPresets">
                     <option value="hair_brown.png"></option>
                     <option value="hair_blonde.png"></option>
                     <option value="hair_black.png"></option>
                   </datalist>
                 </div>
-                <div>
-                  <label class="field-label">Поведение при шлеме</label>
+                <div class="field">
+                  <label class="field-label" for="selHairHelmetMode">Режим при шлеме</label>
                   <select id="selHairHelmetMode">
-                    <option value="SWAP_MODEL">SWAP_MODEL — Заменить на другую модель</option>
-                    <option value="PARTIAL_MODEL">PARTIAL_MODEL — Обрезать части этой модели</option>
-                    <option value="HIDE_ALL">HIDE_ALL — Скрыть целиком</option>
-                    <option value="KEEP">KEEP — Не скрывать</option>
+                    <option value="SWAP_MODEL">SWAP_MODEL (Другая модель)</option>
+                    <option value="PARTIAL_MODEL">PARTIAL_MODEL (Скрыть части)</option>
+                    <option value="HIDE_ALL">HIDE_ALL (Скрыть целиком)</option>
+                    <option value="KEEP">KEEP (Не скрывать)</option>
                   </select>
                 </div>
               </div>
-              <div id="hairSwapModelWrap" style="margin-top:6px;display:none">
-                <label class="field-label">🔄 Другая 3D-модель при шлеме (выберите из загруженных или укажите MythicMobs ID ниже)</label>
+              <div id="hairSwapModelWrap" class="field" style="display:none">
+                <label class="field-label" for="selHairSwapModel">
+                  <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-refresh"></use></svg>
+                  <span>Модель при надетом шлеме</span>
+                </label>
                 <select id="selHairSwapModel">
-                  <option value="">— Указать вручную по MythicMobs ID —</option>
+                  <option value="">Указать вручную по MythicMobs ID</option>
                 </select>
               </div>
               <div class="grid-2">
-                <div>
-                  <label class="field-label">Список шлемов (режим)</label>
+                <div class="field">
+                  <label class="field-label" for="selHairListMode">Список шлемов</label>
                   <select id="selHairListMode">
-                    <option value="ALL">ALL — Любой шлем (кроме искл.)</option>
-                    <option value="WHITELIST">WHITELIST — Только из списка</option>
-                    <option value="BLACKLIST">BLACKLIST — Все, кроме списка</option>
+                    <option value="ALL">ALL (Любой шлем)</option>
+                    <option value="WHITELIST">WHITELIST (Только список)</option>
+                    <option value="BLACKLIST">BLACKLIST (Кроме списка)</option>
                   </select>
                 </div>
-                <div>
-                  <label class="field-label">MythicMobs ID модели под шлем</label>
+                <div class="field">
+                  <label class="field-label" for="inpHairPartialId">MythicMobs ID под шлем</label>
                   <input type="text" id="inpHairPartialId" placeholder="LongHairUnderHelmet3D">
                 </div>
               </div>
               <div class="grid-2">
-                <div>
-                  <label class="field-label">Шлемы (ID / *_HELMET / hat:*)</label>
+                <div class="field">
+                  <label class="field-label" for="inpHairHelmets">Шлемы (ID / *_HELMET)</label>
                   <input type="text" id="inpHairHelmets" placeholder="GoldWardenHelmet, *_HELMET">
                 </div>
-                <div>
-                  <label class="field-label">Исключения (не скрывать)</label>
+                <div class="field">
+                  <label class="field-label" for="inpHairExceptions">Исключения</label>
                   <input type="text" id="inpHairExceptions" placeholder="CrownHelmet, hat:glasses.png">
                 </div>
               </div>
-              <div id="hairPartialPartsWrap" style="margin-top:6px">
-                <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                  <label class="field-label" style="margin:0">Отметьте части, которые СКРЫВАТЬ под шлемом:</label>
+              <div id="hairPartialPartsWrap" class="form-stack">
+                <div class="row-between">
+                  <label class="field-label">Части для скрытия под шлемом</label>
                   <div class="row">
-                    <button type="button" class="btn btn-sm" id="btnHairAutoMarkTail" title="Авто-выбрать хвост, макушку и резинку">⚡ Авто (хвост)</button>
-                    <button type="button" class="btn btn-sm" id="btnHairClearParts" title="Снять все галочки">✕</button>
+                    <button type="button" class="btn btn-sm" id="btnHairAutoMarkTail" title="Авто-выбрать хвост, макушку и резинку">
+                      <svg class="ico" aria-hidden="true"><use href="#ico-zap"></use></svg>
+                      <span>Авто (хвост)</span>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-icon" id="btnHairClearParts" title="Снять все галочки" aria-label="Снять все галочки">
+                      <svg class="ico" aria-hidden="true"><use href="#ico-x"></use></svg>
+                    </button>
                   </div>
                 </div>
                 <div id="hairPartsList" class="hair-part-list"></div>
-                <div class="row" style="margin-top:6px">
-                  <button type="button" class="btn btn-sm btn-block" id="btnDownloadPartialHair">⬇ Скачать частичный .bbmodel (под шлем)</button>
-                </div>
+                <button type="button" class="btn btn-sm btn-block" id="btnDownloadPartialHair">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-download"></use></svg>
+                  <span>Скачать частичный .bbmodel (под шлем)</span>
+                </button>
               </div>
             </div>
 
-            <label class="field-label" style="margin-top:10px">Кости модели → кости MythicArmors</label>
-            <div id="boneMappingTable"></div>
+            <!-- BONE MAPPING -->
+            <div class="section-block">
+              <div class="section-head">
+                <span class="section-head-main">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-cube"></use></svg>
+                  <span>Кости модели -> кости MythicArmors</span>
+                </span>
+              </div>
+              <div id="boneMappingTable"></div>
+            </div>
 
-            <!-- v1.8.0 BLOCKING RULES FOR 3D MODEL -->
-            <div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border)">
-              <div class="row" style="justify-content:space-between">
-                <label class="field-label" style="margin:0;color:#ffffff">🔒 Блокировка слоёв / слотов (v1.8.0)</label>
-                <select id="inp3dBlockMode" style="width:130px;padding:3px 6px;font-size:11px">
+            <!-- BLOCKING RULES FOR 3D MODEL -->
+            <div class="section-block">
+              <div class="section-head">
+                <span class="section-head-main">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-lock"></use></svg>
+                  <span>Блокировка слоёв и слотов</span>
+                </span>
+                <select id="inp3dBlockMode" class="select-sm" style="width:138px" aria-label="Режим блокировки">
                   <option value="UNEQUIP">UNEQUIP (Снять)</option>
                   <option value="PREVENT">PREVENT (Запрет)</option>
                   <option value="HIDE">HIDE (Скрыть)</option>
                 </select>
               </div>
-              <div class="hint" style="margin:3px 0 4px">Отметьте, какие слоты/слои блокирует этот 3D-предмет (попадёт в <code>Wardrobe.Blocks</code>):</div>
+              <div class="hint">Отметьте слоты или слои, которые блокирует этот 3D-предмет (записывается в <code>Wardrobe.Blocks</code>):</div>
               <div id="blockChips3dShortcuts" class="block-chip-grid"></div>
               <div id="blockChips3dTargets" class="block-chip-grid"></div>
             </div>
@@ -1336,29 +2070,45 @@ label.field-label {
         <!-- CATEGORY LINKS (COMBINATION GENERATOR) -->
         <div class="card">
           <div class="card-title">
-            <span>3. Связки категорий (Скрещивание)</span>
-            <button class="btn btn-sm" id="btnAddLink">+ Связка</button>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-link"></use></svg>
+              <span>3. Связки категорий</span>
+            </span>
+            <button class="btn btn-sm" id="btnAddLink">
+              <svg class="ico" aria-hidden="true"><use href="#ico-plus"></use></svg>
+              <span>Связка</span>
+            </button>
           </div>
           <div class="hint">
-            Свяжите 2 или 3 категории (например <b>Поножи × 3D-Пояса</b> или <b>Нагрудники × Рюкзаки</b>). Студия прямо в браузере сгенерирует все комбо-`.bbmodel` с единым UV-атласом и <code>combo-overrides.yml</code>!
+            Свяжите 2 или 3 категории (например <b>Поножи × 3D-Пояса</b> или <b>Нагрудники × Рюкзаки</b>). Студия сгенерирует комбо-<code>.bbmodel</code> с общим UV-атласом и <code>combo-overrides.yml</code>.
           </div>
-          <div id="linksContainer"></div>
-          <div id="comboPreviewList" style="margin-top:8px"></div>
+          <div id="linksContainer" class="form-stack"></div>
+          <div id="comboPreviewList" class="form-stack"></div>
         </div>
 
         <!-- EXPORT ZIP -->
         <div class="card">
-          <div class="card-title">4. Экспорт готового ZIP-архива</div>
-          <label class="field-label">Имя пака</label>
-          <input type="text" id="inpPackName" value="my_wardrobe_pack">
-          <div class="row-wrap" style="margin:8px 0">
-            <label class="toggle-chip"><input type="checkbox" id="chkIncludeStandalone" checked> Одиночные .bbmodel</label>
-            <label class="toggle-chip"><input type="checkbox" id="chkInclude2dInZip" checked> + 2D скины &amp; priority.yml</label>
-            <label class="toggle-chip"><input type="checkbox" id="chkIncludeMenusInZip" checked> + GUI menus.yml</label>
-            <label class="toggle-chip"><input type="checkbox" id="chkIncludeConfigInZip" checked> + Сниппет конфига v1.9</label>
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-package"></use></svg>
+              <span>4. Экспорт ZIP-архива</span>
+            </span>
           </div>
-          <button class="btn btn-primary btn-block" id="btnExportFullZip">🚀 Собрать и скачать ZIP (офлайн)</button>
-          <div id="exportReport" class="hint" style="margin-top:8px"></div>
+          <div class="field">
+            <label class="field-label" for="inpPackName">Имя пака</label>
+            <input type="text" id="inpPackName" value="my_wardrobe_pack">
+          </div>
+          <div class="check-grid-2">
+            <label class="toggle-chip"><input type="checkbox" id="chkIncludeStandalone" checked> <span>Одиночные .bbmodel</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="chkInclude2dInZip" checked> <span>2D скины и priority</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="chkIncludeMenusInZip" checked> <span>GUI menus.yml</span></label>
+            <label class="toggle-chip"><input type="checkbox" id="chkIncludeConfigInZip" checked> <span>Конфиг v1.9</span></label>
+          </div>
+          <button class="btn btn-primary btn-block" id="btnExportFullZip">
+            <svg class="ico" aria-hidden="true"><use href="#ico-download"></use></svg>
+            <span>Собрать и скачать ZIP</span>
+          </button>
+          <div id="exportReport" class="hint"></div>
         </div>
       </aside>
     </div>
@@ -1370,24 +2120,35 @@ label.field-label {
       <aside class="pane">
         <div class="card">
           <div class="card-title">
-            <span>2D Слои скина (15 категорий)</span>
-            <span id="skinBlockedCountBadge" class="tag tag-lock" style="display:none">🔒 0</span>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-layers"></use></svg>
+              <span>2D Слои скина (15)</span>
+            </span>
+            <span id="skinBlockedCountBadge" class="tag tag-lock" style="display:none">0</span>
           </div>
-          <div class="row" style="margin-bottom:6px">
-            <button class="btn btn-sm btn-block" id="btnLoadDemo2d">✨ 68 стартовых PNG</button>
-            <select id="skinBodyType" style="width:110px">
+          <div class="btn-split-select">
+            <button class="btn btn-sm btn-block" id="btnLoadDemo2d">
+              <svg class="ico" aria-hidden="true"><use href="#ico-sparkles"></use></svg>
+              <span>68 стартовых PNG</span>
+            </button>
+            <select id="skinBodyType" class="select-sm" aria-label="Тип рук">
               <option value="wide">Wide (4px)</option>
               <option value="slim">Slim (3px)</option>
             </select>
           </div>
-          <div class="row" style="margin-bottom:8px">
-            <button class="btn btn-amber btn-sm btn-block" id="btnTryHazmat">☣ Примерить Костюм химзащиты (v1.8)</button>
-            <button class="btn btn-sm" id="btnReset2dLayers" title="Сбросить все слои">↺</button>
+          <div class="btn-split-sm">
+            <button class="btn btn-amber btn-sm btn-block" id="btnTryHazmat">
+              <svg class="ico" aria-hidden="true"><use href="#ico-shield"></use></svg>
+              <span>Примерить Химзащиту</span>
+            </button>
+            <button class="btn btn-icon" id="btnReset2dLayers" title="Сбросить все слои" aria-label="Сбросить все слои">
+              <svg class="ico" aria-hidden="true"><use href="#ico-rotate-ccw"></use></svg>
+            </button>
           </div>
-          <div class="hint" style="margin-top:0">
-            Слои идут <b>сверху вниз</b> (как в <code>priority.yml</code>). Если слой имеет блокировку 🔒 (как химзащита), конфликтующие слои подсвечиваются красным и скрываются на 3D-манекене!
+          <div class="hint">
+            Слои идут сверху вниз как в <code>priority.yml</code>. Если слой блокирует другие слои, конфликты отмечаются пунктиром и скрываются на 3D-манекене.
           </div>
-          <div id="skinLayersList"></div>
+          <div id="skinLayersList" class="skin-layers-stack"></div>
         </div>
       </aside>
 
@@ -1398,134 +2159,173 @@ label.field-label {
       <aside class="pane">
         <div class="card">
           <div class="card-title">
-            <span>Подгонка PNG на слой</span>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-image"></use></svg>
+              <span>Подгонка PNG на слой</span>
+            </span>
             <span id="activeSkinLayerTag" class="tag">Куртка / Костюм</span>
           </div>
           <div class="dropzone" id="skinDropzone">
-            <strong>Перетащите PNG-скин или слой одежды</strong>
-            <span>Любой формат: 64×64, старый 64×32, HD 128×128+ — подгонится мгновенно</span>
+            <span class="dropzone-ico" aria-hidden="true">
+              <svg class="ico ico-md"><use href="#ico-upload"></use></svg>
+            </span>
+            <strong>Перетащите PNG-скин или слой</strong>
+            <span>64×64, 64×32, HD 128×128+ подгоняются мгновенно</span>
             <input type="file" id="skinFileInput" accept="image/png,image/webp,image/jpeg" hidden>
           </div>
 
           <div class="grid-2">
-            <div>
-              <label class="field-label">Вырезать зону тела</label>
+            <div class="field">
+              <label class="field-label" for="skinRegion">Вырезать зону тела</label>
               <select id="skinRegion">
                 <option value="full">Весь скин (без вырезки)</option>
                 <option value="head_all">Вся голова (внутр. + внеш.)</option>
-                <option value="head_outer">Только внеш. голова (шапка/волосы)</option>
+                <option value="head_outer">Только внеш. голова</option>
                 <option value="head_inner">Только лицо / глаза</option>
-                <option value="torso_arms">Торс + Рукава (куртка/костюм)</option>
-                <option value="torso_only">Только торс (футболка)</option>
+                <option value="torso_arms">Торс + рукава</option>
+                <option value="torso_only">Только торс</option>
                 <option value="arms_only">Только рукава / перчатки</option>
-                <option value="waist_belt">Талия / Пояс (belt_skin v1.7)</option>
+                <option value="waist_belt">Талия / пояс (belt_skin)</option>
                 <option value="legs">Штаны / ноги целиком</option>
-                <option value="boots">Только ботинки (низ ног)</option>
+                <option value="boots">Только ботинки</option>
                 <option value="outer_only">Только 2-й слой (outer)</option>
               </select>
             </div>
-            <div>
-              <label class="field-label">Конвертер рук</label>
+            <div class="field">
+              <label class="field-label" for="skinArmConvert">Конвертер рук</label>
               <select id="skinArmConvert">
                 <option value="keep">Не менять</option>
-                <option value="to_slim">Wide (4px) → Slim (3px)</option>
-                <option value="to_wide">Slim (3px) → Wide (4px)</option>
+                <option value="to_slim">Wide (4px) -> Slim (3px)</option>
+                <option value="to_wide">Slim (3px) -> Wide (4px)</option>
               </select>
             </div>
           </div>
 
-          <div class="grid-3" style="margin-top:6px">
-            <div>
-              <label class="field-label">Оттенок: <span id="lblHue">0°</span></label>
+          <div class="grid-3">
+            <div class="field">
+              <label class="field-label" for="skinHue">Оттенок: <span id="lblHue">0°</span></label>
               <input type="range" id="skinHue" min="-180" max="180" value="0">
             </div>
-            <div>
-              <label class="field-label">Насыщ.: <span id="lblSat">100%</span></label>
+            <div class="field">
+              <label class="field-label" for="skinSat">Насыщ.: <span id="lblSat">100%</span></label>
               <input type="range" id="skinSat" min="0" max="200" value="100">
             </div>
-            <div>
-              <label class="field-label">Яркость: <span id="lblVal">100%</span></label>
+            <div class="field">
+              <label class="field-label" for="skinVal">Яркость: <span id="lblVal">100%</span></label>
               <input type="range" id="skinVal" min="20" max="200" value="100">
             </div>
           </div>
 
-          <div class="row" style="margin-top:6px">
-            <input type="color" id="skinTintColor" value="#ffffff" style="width:36px;height:28px;padding:1px;border-radius:5px;border:1px solid var(--border);background:#000">
-            <input type="range" id="skinTintStrength" min="0" max="100" value="0" style="flex:1">
-            <span class="hint" style="margin:0;min-width:68px">Тинт <b id="lblTint">0%</b></span>
+          <div class="color-field">
+            <input type="color" id="skinTintColor" value="#ffffff" aria-label="Цвет тинта">
+            <div class="row">
+              <input type="range" id="skinTintStrength" min="0" max="100" value="0" style="flex:1" aria-label="Сила тинта">
+              <span class="hint" style="min-width:68px;text-align:right">Тинт <b id="lblTint">0%</b></span>
+            </div>
           </div>
 
-          <div class="row" style="margin-top:8px">
+          <div class="input-action">
             <input type="text" id="skinCustomName" placeholder="имя_файла.png (напр. hazmat_suit)">
-            <button class="btn btn-primary btn-sm" id="btnApplySkinFit">✓ Применить</button>
+            <button class="btn btn-primary" id="btnApplySkinFit">
+              <svg class="ico" aria-hidden="true"><use href="#ico-check"></use></svg>
+              <span>Применить</span>
+            </button>
           </div>
         </div>
 
-        <!-- v2.2: 2D ITEM DISPLAY NAME, MATERIAL, CMD & LORE -->
+        <!-- 2D ITEM DISPLAY NAME, MATERIAL, CMD & LORE -->
         <div class="card">
           <div class="card-title">
-            <span>📝 Название &amp; Lore 2D-предмета</span>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-file-text"></use></svg>
+              <span>Название и Lore предмета</span>
+            </span>
             <span id="skinMetaLayerTag" class="tag">jacket</span>
           </div>
-          <div class="hint" style="margin-top:0">
-            Задайте название, материал, CustomModelData и описание (<code>Lore</code>) для загруженной 2D-текстуры — попадёт напрямую в MythicMobs YAML при экспорте!
+          <div class="hint">
+            Задайте название, материал, CustomModelData и описание (<code>Lore</code>) для 2D-текстуры. Попадёт в MythicMobs YAML при экспорте.
           </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">MythicMobs ID (опционально)</label>
+            <div class="field">
+              <label class="field-label" for="skinItemMythicId">MythicMobs ID</label>
               <input type="text" id="skinItemMythicId" placeholder="WardrobeCustomJacket">
             </div>
-            <div>
-              <label class="field-label">Название предмета (Display)</label>
+            <div class="field">
+              <label class="field-label" for="skinItemDisplay">Название (Display)</label>
               <input type="text" id="skinItemDisplay" placeholder="&fКожаная куртка">
             </div>
           </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">Material (PAPER / ECHO_SHARD...)</label>
+            <div class="field">
+              <label class="field-label" for="skinItemMaterial">Material</label>
               <input type="text" id="skinItemMaterial" list="materialPresets" value="PAPER" placeholder="PAPER">
             </div>
-            <div>
-              <label class="field-label">CustomModelData (опционально)</label>
+            <div class="field">
+              <label class="field-label" for="skinItemCmd">CustomModelData</label>
               <input type="number" id="skinItemCmd" min="1" step="1" placeholder="пусто = без CMD">
             </div>
           </div>
-          <label class="field-label">Описание / Lore (каждая строка — отдельный пункт)</label>
-          <textarea id="skinItemLore" placeholder="&7Стильный 2D-слой одежды&#10;&fНаденьте в гардеробе (/wardrobe)"></textarea>
+          <div class="field">
+            <label class="field-label" for="skinItemLore">Описание / Lore (по строке)</label>
+            <textarea id="skinItemLore" placeholder="&7Стильный 2D-слой одежды&#10;&fНаденьте в гардеробе (/wardrobe)"></textarea>
+          </div>
         </div>
 
-        <!-- v1.8.0 BLOCKING EDITOR FOR ACTIVE 2D LAYER -->
+        <!-- BLOCKING EDITOR FOR ACTIVE 2D LAYER -->
         <div class="card">
           <div class="card-title">
-            <span>🔒 Блокировка других слоёв (v1.8.0)</span>
-            <select id="skinBlockMode" style="width:128px;padding:3px 6px;font-size:11px">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-lock"></use></svg>
+              <span>Блокировка слоёв</span>
+            </span>
+            <select id="skinBlockMode" class="select-sm" style="width:136px" aria-label="Режим блокировки">
               <option value="UNEQUIP">UNEQUIP (Снять)</option>
               <option value="PREVENT">PREVENT (Запрет)</option>
               <option value="HIDE">HIDE (Скрыть)</option>
             </select>
           </div>
-          <div class="hint" style="margin-top:0">
-            Настройте для текущего слоя <b id="skinBlockLayerLabel">Куртка / Костюм</b>: какие слои/слоты он блокирует (пример: химзащита в <code>jacket</code> блокирует штаны, пояс, футболку, перчатки, носки, ботинки, маску и шапку!).
+          <div class="hint">
+            Настройте, какие слои блокирует слой <b id="skinBlockLayerLabel">Куртка / Костюм</b> (например химзащита в <code>jacket</code> блокирует штаны, пояс, футболку, перчатки, носки, ботинки, маску и шапку).
           </div>
-          <div class="row-wrap" style="margin-bottom:6px">
-            <button class="btn btn-sm" id="btnPresetHazmatBlocks">☣ Пресет Химзащита</button>
-            <button class="btn btn-sm" id="btnPresetSuitBlocks">🧥 Пресет Комбинезон</button>
-            <button class="btn btn-danger btn-sm" id="btnClearSkinBlocks">✕ Очистить</button>
+          <div class="btn-grid-3">
+            <button class="btn btn-sm" id="btnPresetHazmatBlocks">
+              <svg class="ico" aria-hidden="true"><use href="#ico-shield"></use></svg>
+              <span>Химзащита</span>
+            </button>
+            <button class="btn btn-sm" id="btnPresetSuitBlocks">
+              <svg class="ico" aria-hidden="true"><use href="#ico-shirt"></use></svg>
+              <span>Комбинезон</span>
+            </button>
+            <button class="btn btn-danger btn-sm" id="btnClearSkinBlocks">
+              <svg class="ico" aria-hidden="true"><use href="#ico-x"></use></svg>
+              <span>Очистить</span>
+            </button>
           </div>
           <div id="blockChips2dShortcuts" class="block-chip-grid"></div>
           <div id="blockChips2dTargets" class="block-chip-grid"></div>
         </div>
 
         <div class="card">
-          <div class="card-title">Итоговая 2D-развёртка 64×64</div>
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-download"></use></svg>
+              <span>Итоговая развёртка 64×64</span>
+            </span>
+          </div>
           <div class="uv-preview-box">
             <canvas id="skin2dCanvas" width="64" height="64"></canvas>
-            <div style="flex:1">
-              <div class="hint" style="margin-top:0">
-                Сборка с учётом <code>priority.yml</code>, авто-очистки outer-зон (<code>clear-outer-regions</code>) и активных блокировок <b>v1.8.0</b>!
+            <div class="form-stack">
+              <div class="hint">
+                Сборка с учётом <code>priority.yml</code>, очистки <code>clear-outer-regions</code> и активных блокировок.
               </div>
-              <button class="btn btn-sm btn-block" id="btnDownloadSkinPng" style="margin-bottom:6px">⬇ Скачать скин 64×64 PNG</button>
-              <button class="btn btn-green btn-sm btn-block" id="btnExport2dZip">📦 Скачать ZIP (2D + Blocks + priority.yml)</button>
+              <button class="btn btn-sm btn-block" id="btnDownloadSkinPng">
+                <svg class="ico" aria-hidden="true"><use href="#ico-download"></use></svg>
+                <span>Скачать PNG 64×64</span>
+              </button>
+              <button class="btn btn-primary btn-sm btn-block" id="btnExport2dZip">
+                <svg class="ico" aria-hidden="true"><use href="#ico-package"></use></svg>
+                <span>Скачать ZIP (2D + YAML)</span>
+              </button>
             </div>
           </div>
         </div>
@@ -1539,39 +2339,54 @@ label.field-label {
       <aside class="pane gui-pane-left">
         <div class="card">
           <div class="card-title">
-            <span>1. Экраны меню (menus.yml)</span>
-            <button class="btn btn-sm" id="btnGuiResetAll" title="Сбросить к стандартному шаблону">↺ Сброс</button>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-grid"></use></svg>
+              <span>1. Экраны меню</span>
+            </span>
+            <button class="btn btn-sm" id="btnGuiResetAll" title="Сбросить к стандартному шаблону">
+              <svg class="ico" aria-hidden="true"><use href="#ico-rotate-ccw"></use></svg>
+              <span>Сброс</span>
+            </button>
           </div>
-          <div class="grid-2" style="margin-bottom:6px">
-            <div>
-              <label class="field-label">Режим по умолчанию</label>
+          <div class="grid-2">
+            <div class="field">
+              <label class="field-label" for="guiDefaultMode">Режим по умолчанию</label>
               <select id="guiDefaultMode">
                 <option value="TABBED">TABBED (Вкладки)</option>
                 <option value="UNIFIED">UNIFIED (Общее)</option>
                 <option value="PER_SLOT">PER_SLOT (Узкие)</option>
               </select>
             </div>
-            <div>
-              <label class="field-label">При кнопке «Назад» (если нет команды)</label>
+            <div class="field">
+              <label class="field-label" for="guiBackFallback">Кнопка «Назад»</label>
               <select id="guiBackFallback">
-                <option value="INVENTORY">Открыть Инвентарь (INVENTORY)</option>
-                <option value="CLOSE">Закрыть меню (CLOSE)</option>
+                <option value="INVENTORY">Открыть Инвентарь</option>
+                <option value="CLOSE">Закрыть меню</option>
               </select>
             </div>
           </div>
-          <label class="field-label">Команда «Назад» (опц., пусто = открыть инвентарь)</label>
-          <input type="text" id="guiBackCmd" value="" placeholder="пусто = Инвентарь; или menu / dm open" style="margin-bottom:8px">
+          <div class="field">
+            <label class="field-label" for="guiBackCmd">Команда «Назад» (опционально)</label>
+            <input type="text" id="guiBackCmd" value="" placeholder="пусто = Инвентарь; или menu">
+          </div>
           <div id="guiScreenList" class="gui-screen-list"></div>
         </div>
 
         <div class="card">
-          <div class="card-title">2. Заголовок, Размер и Заполнитель</div>
-          <label class="field-label">Название меню (title — MiniMessage или &amp;-коды)</label>
-          <input type="text" id="guiScreenTitle" placeholder="&8Гардероб &7▪ &f<section>">
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-sliders"></use></svg>
+              <span>2. Заголовок и фон</span>
+            </span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="guiScreenTitle">Название меню (title)</label>
+            <input type="text" id="guiScreenTitle" placeholder="&8Гардероб &7▪ &f<section>">
+          </div>
 
           <div class="grid-2">
-            <div>
-              <label class="field-label">Размер (ряды: 1–6)</label>
+            <div class="field">
+              <label class="field-label" for="guiScreenRows">Размер (1-6 рядов)</label>
               <select id="guiScreenRows">
                 <option value="1">1 ряд (9 слотов)</option>
                 <option value="2">2 ряда (18 слотов)</option>
@@ -1581,37 +2396,38 @@ label.field-label {
                 <option value="6">6 рядов (54 слота)</option>
               </select>
             </div>
-            <div>
-              <label class="field-label">Заполнитель (Filler)</label>
-              <label class="toggle-chip" style="height:31px;justify-content:center">
-                <input type="checkbox" id="guiFillerEnabled" checked> Включён
+            <div class="field">
+              <label class="field-label">Заполнитель</label>
+              <label class="toggle-chip" style="height:32px;justify-content:center">
+                <input type="checkbox" id="guiFillerEnabled" checked>
+                <span>Включён</span>
               </label>
             </div>
           </div>
 
           <div class="grid-2">
-            <div>
-              <label class="field-label">Material заполнителя</label>
+            <div class="field">
+              <label class="field-label" for="guiFillerMat">Material фона</label>
               <input type="text" id="guiFillerMat" list="guiMaterialPresets" value="BLACK_STAINED_GLASS_PANE">
             </div>
-            <div>
-              <label class="field-label">CustomModelData фона</label>
+            <div class="field">
+              <label class="field-label" for="guiFillerCmd">CustomModelData фона</label>
               <input type="number" id="guiFillerCmd" min="1" step="1" placeholder="опционально">
             </div>
           </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">ItemModel фона (1.21.4+)</label>
+            <div class="field">
+              <label class="field-label" for="guiFillerItemModel">ItemModel фона</label>
               <input type="text" id="guiFillerItemModel" placeholder="mypack:gui_filler">
             </div>
-            <div>
-              <label class="field-label">Название фона</label>
+            <div class="field">
+              <label class="field-label" for="guiFillerName">Название фона</label>
               <input type="text" id="guiFillerName" value=" " placeholder="пробел = пусто">
             </div>
           </div>
-          <label class="toggle-chip" style="margin-top:8px;display:flex">
+          <label class="toggle-chip toggle-chip-full">
             <input type="checkbox" id="guiShowIndicators">
-            <span>Индикатор надетых предметов (<code>show-equipped-indicators</code>)</span>
+            <span>Индикаторы надетых (<code>show-equipped-indicators</code>)</span>
           </label>
         </div>
 
@@ -1619,28 +2435,41 @@ label.field-label {
       </aside>
 
       <!-- CENTER PANE: INTERACTIVE MINECRAFT INVENTORY GRID + MC TOOLTIP + LIVE YAML -->
-      <section class="pane gui-pane-center" style="background:#050505">
+      <section class="pane gui-pane-center">
         <div class="mc-inv-shell">
           <div id="guiScreenPills" class="gui-screen-pills"></div>
           <div class="mc-inv-header">
             <div class="mc-inv-title" id="guiPreviewTitle">Гардероб</div>
             <div class="row-wrap">
               <span class="tag" id="guiGridSizeTag">3×9 (27)</span>
-              <button class="btn btn-sm" id="btnGuiCopyYml">📋 Копировать</button>
-              <button class="btn btn-primary btn-sm" id="btnGuiDownloadYml">⬇ Скачать menus.yml</button>
+              <button class="btn btn-sm" id="btnGuiCopyYml">
+                <svg class="ico" aria-hidden="true"><use href="#ico-copy"></use></svg>
+                <span>Копировать</span>
+              </button>
+              <button class="btn btn-primary btn-sm" id="btnGuiDownloadYml">
+                <svg class="ico" aria-hidden="true"><use href="#ico-download"></use></svg>
+                <span>menus.yml</span>
+              </button>
             </div>
           </div>
           <div id="guiInvGrid" class="mc-inv-grid"></div>
           <div id="guiTooltipBox" class="mc-tooltip-box">Наведите или нажмите на любой слот инвентаря</div>
           <div class="gui-legend">
-            <span>✓ Вшиты <b>149 официальных текстур Minecraft 1.21.4</b> · Клик по слоту → настройка материала, <code>CustomModelData</code>, <code>Lore</code> и действия справа</span>
+            <svg class="ico ico-sm" aria-hidden="true"><use href="#ico-check"></use></svg>
+            <span>Вшито <b>149 текстур Minecraft 1.21.4</b>. Клик по слоту открывает настройку материала, <code>CustomModelData</code>, <code>Lore</code> и действия справа.</span>
           </div>
         </div>
 
         <div class="card gui-preview-card">
           <div class="card-title">
-            <span>Предпросмотр plugins/MythicWardrobe/menus.yml</span>
-            <button class="btn btn-sm" data-copy-target="guiLiveMenusYml">📋 Копировать</button>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-file-text"></use></svg>
+              <span>Предпросмотр menus.yml</span>
+            </span>
+            <button class="btn btn-sm" data-copy-target="guiLiveMenusYml">
+              <svg class="ico" aria-hidden="true"><use href="#ico-copy"></use></svg>
+              <span>Копировать</span>
+            </button>
           </div>
           <pre class="yaml-code" id="guiLiveMenusYml" style="max-height:240px;overflow-y:auto"></pre>
         </div>
@@ -1650,34 +2479,43 @@ label.field-label {
       <aside class="pane gui-pane-right">
         <div class="card">
           <div class="card-title">
-            <span>3. Настройка ячейки</span>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-sliders"></use></svg>
+              <span>3. Настройка ячейки</span>
+            </span>
             <span class="tag" id="guiSelectedSlotBadge">Слот #11</span>
           </div>
-          <div class="hint" style="margin-top:0">
-            Назначьте слот гардероба (со своей иконкой пустого слота + <code>CustomModelData</code>), кнопку действия или декор.
+          <div class="hint">
+            Назначьте слот гардероба с иконкой пустого слота и <code>CustomModelData</code>, кнопку действия или декоративный предмет.
           </div>
 
-          <label class="field-label">Тип ячейки</label>
-          <select id="guiCellKind">
-            <option value="empty">Пустая (заполнитель / фон)</option>
-            <option value="slot">Слот гардероба (Wardrobe Slot + пустая иконка)</option>
-            <option value="button">Кнопка действия (Назад / Инвентарь / Закрыть / Команда)</option>
-            <option value="decor">Декоративный / кастомный предмет (DECOR)</option>
-          </select>
+          <div class="field">
+            <label class="field-label" for="guiCellKind">Тип ячейки</label>
+            <select id="guiCellKind">
+              <option value="empty">Пустая (заполнитель / фон)</option>
+              <option value="slot">Слот гардероба (Wardrobe Slot)</option>
+              <option value="button">Кнопка действия (Назад / Инвентарь / Закрыть)</option>
+              <option value="decor">Декоративный предмет (DECOR)</option>
+            </select>
+          </div>
 
           <!-- SLOT-SPECIFIC -->
-          <div id="guiCellSlotGroup" style="display:none;margin-top:6px">
-            <label class="field-label">Слот гардероба (из slots.yml)</label>
-            <select id="guiCellWardrobeSlot"></select>
-            <div class="hint">Ниже настраивается <b>иконка ПУСТОГО слота</b> (<code>empty-slots:</code> в <code>menus.yml</code>).</div>
+          <div id="guiCellSlotGroup" class="form-stack" style="display:none">
+            <div class="field">
+              <label class="field-label" for="guiCellWardrobeSlot">Слот гардероба (slots.yml)</label>
+              <select id="guiCellWardrobeSlot"></select>
+            </div>
+            <div class="hint">Ниже настраивается иконка пустого слота (<code>empty-slots:</code> в <code>menus.yml</code>).</div>
           </div>
 
           <!-- BUTTON-SPECIFIC -->
-          <div id="guiCellButtonGroup" style="display:none;margin-top:6px">
-            <label class="field-label">Действие кнопки (action)</label>
-            <select id="guiCellAction"></select>
-            <div id="guiCellSectionRow" style="display:none">
-              <label class="field-label">Целевая секция (section)</label>
+          <div id="guiCellButtonGroup" class="form-stack" style="display:none">
+            <div class="field">
+              <label class="field-label" for="guiCellAction">Действие кнопки (action)</label>
+              <select id="guiCellAction"></select>
+            </div>
+            <div id="guiCellSectionRow" class="field" style="display:none">
+              <label class="field-label" for="guiCellSection">Целевая секция</label>
               <select id="guiCellSection">
                 <option value="HEAD">HEAD (Голова)</option>
                 <option value="CHEST">CHEST (Торс)</option>
@@ -1685,156 +2523,189 @@ label.field-label {
                 <option value="FEET">FEET (Ботинки)</option>
               </select>
             </div>
-            <div id="guiCellCommandRow" style="display:none">
-              <label class="field-label">Команда (без /, напр. dm open main)</label>
+            <div id="guiCellCommandRow" class="field" style="display:none">
+              <label class="field-label" for="guiCellCommand">Команда (без /)</label>
               <input type="text" id="guiCellCommand" placeholder="menu">
             </div>
           </div>
 
-          <!-- SHARED ICON FIELDS (EMPTY SLOT / BUTTON / DECOR) -->
-          <div id="guiCellIconGroup" style="display:none;margin-top:6px;padding-top:8px;border-top:1px solid var(--border)">
+          <!-- SHARED ICON FIELDS -->
+          <div id="guiCellIconGroup" class="section-block" style="display:none">
             <div class="grid-2">
-              <div>
-                <label class="field-label">Material (Minecraft)</label>
+              <div class="field">
+                <label class="field-label" for="guiCellMat">Material (Minecraft)</label>
                 <input type="text" id="guiCellMat" list="guiMaterialPresets" value="PAPER">
               </div>
-              <div>
-                <label class="field-label">CustomModelData</label>
+              <div class="field">
+                <label class="field-label" for="guiCellCmd">CustomModelData</label>
                 <input type="number" id="guiCellCmd" min="1" step="1" placeholder="напр. 5001">
               </div>
             </div>
 
             <!-- MINECRAFT ASSETS VISUAL PICKER -->
             <div class="mc-asset-picker">
-              <div class="row" style="justify-content:space-between;margin-bottom:4px">
-                <span style="font-size:11px;font-weight:700;color:#ffffff">🧱 Ассеты Minecraft (149 текстур)</span>
+              <div class="row-between">
+                <span class="section-head-main" style="font-size:12px;font-weight:600">
+                  <svg class="ico" aria-hidden="true"><use href="#ico-blocks"></use></svg>
+                  <span>Ассеты Minecraft</span>
+                </span>
                 <span class="tag" id="guiMcAssetCount">149</span>
               </div>
               <input type="text" id="guiMcAssetSearch" placeholder="Поиск: helmet, glass, sword, dye, echo...">
               <div id="guiMcAssetGrid" class="mc-asset-grid"></div>
             </div>
 
-            <div class="grid-2" style="margin-top:6px">
-              <div>
-                <label class="field-label">ItemModel (1.21.4+)</label>
+            <div class="grid-2">
+              <div class="field">
+                <label class="field-label" for="guiCellItemModel">ItemModel (1.21.4+)</label>
                 <input type="text" id="guiCellItemModel" placeholder="mypack:slot_helmet">
               </div>
-              <div>
-                <label class="field-label">Цвет (кожа, #RRGGBB)</label>
+              <div class="field">
+                <label class="field-label" for="guiCellColor">Цвет (#RRGGBB)</label>
                 <input type="text" id="guiCellColor" placeholder="#ffffff (опц.)">
               </div>
             </div>
-            <label class="field-label">Название предмета (name)</label>
-            <input type="text" id="guiCellName" placeholder="&fПустой слот: Шлем">
-
-            <label class="field-label">Описание / Lore (по строке)</label>
-            <textarea id="guiCellLore" placeholder="&7Перетащите предмет сюда&#10;&8Поддержка &amp; и MiniMessage"></textarea>
-
-            <div class="row-wrap" style="margin-top:7px">
-              <label class="toggle-chip"><input type="checkbox" id="guiCellGlint"> Свечение (glint)</label>
-              <label class="toggle-chip"><input type="checkbox" id="guiCellHideTip"> Скрыть tooltip</label>
+            <div class="field">
+              <label class="field-label" for="guiCellName">Название предмета</label>
+              <input type="text" id="guiCellName" placeholder="&fПустой слот: Шлем">
             </div>
 
-            <div class="icon-preview-wrap" style="margin-top:8px">
+            <div class="field">
+              <label class="field-label" for="guiCellLore">Описание / Lore (по строке)</label>
+              <textarea id="guiCellLore" placeholder="&7Перетащите предмет сюда&#10;&8Поддержка &amp; и MiniMessage"></textarea>
+            </div>
+
+            <div class="check-grid-2">
+              <label class="toggle-chip"><input type="checkbox" id="guiCellGlint"> <span>Свечение (glint)</span></label>
+              <label class="toggle-chip"><input type="checkbox" id="guiCellHideTip"> <span>Скрыть tooltip</span></label>
+            </div>
+
+            <div class="icon-preview-wrap">
               <div class="icon-preview-box" id="guiCellPreviewImgBox">
-                <span style="font-size:10px;color:var(--muted)">PNG</span>
+                <span>PNG</span>
               </div>
-              <div style="flex:1">
-                <div style="font-size:11px;font-weight:700;margin-bottom:4px">Своя PNG иконка (для CMD превью)</div>
-                <div class="row-wrap">
-                  <button type="button" class="btn btn-sm" id="btnGuiUploadCellImg">📁 Загрузить PNG</button>
-                  <button type="button" class="btn btn-danger btn-sm" id="btnGuiClearCellImg">×</button>
-                  <input type="file" id="inpGuiCellImgFile" accept="image/png,image/webp" hidden>
+              <div class="icon-preview-meta">
+                <div class="icon-preview-title">Своя PNG иконка (CMD превью)</div>
+                <div class="btn-split-sm">
+                  <button type="button" class="btn btn-sm btn-block" id="btnGuiUploadCellImg">
+                    <svg class="ico" aria-hidden="true"><use href="#ico-folder"></use></svg>
+                    <span>Загрузить PNG</span>
+                  </button>
+                  <button type="button" class="btn btn-danger btn-icon" id="btnGuiClearCellImg" title="Удалить иконку" aria-label="Удалить иконку">
+                    <svg class="ico" aria-hidden="true"><use href="#ico-x"></use></svg>
+                  </button>
                 </div>
+                <input type="file" id="inpGuiCellImgFile" accept="image/png,image/webp" hidden>
               </div>
             </div>
           </div>
 
-          <div class="row" style="margin-top:10px">
-            <button type="button" class="btn btn-danger btn-sm btn-block" id="btnGuiClearCell">🗑 Очистить ячейку (сделать фоном)</button>
-          </div>
+          <button type="button" class="btn btn-danger btn-sm btn-block" id="btnGuiClearCell">
+            <svg class="ico" aria-hidden="true"><use href="#ico-trash"></use></svg>
+            <span>Очистить ячейку (сделать фоном)</span>
+          </button>
         </div>
       </aside>
     </div>
 
-    <!-- ==================== TAB 3: v1.7 / v1.8 / v1.9 CONFIG STUDIO ==================== -->
+    <!-- ==================== TAB 3: CONFIG STUDIO ==================== -->
     <div class="workspace-tab" data-tab-panel="configs">
 
       <!-- LEFT PANE: INTERACTIVE CONTROLS -->
       <aside class="pane">
         <div class="card">
-          <div class="card-title">1. Инвентарь не закрывается при смене скина (v1.7)</div>
-          <div class="hint">Настройки для <code>plugins/MythicWardrobe/config.yml</code> — решают закрытие GUI при пакете обновления скина SkinsRestorer.</div>
-          <label class="toggle-chip" style="margin-bottom:6px;display:flex">
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-shield"></use></svg>
+              <span>1. Защита GUI при смене скина</span>
+            </span>
+          </div>
+          <div class="hint">Настройки для <code>plugins/MythicWardrobe/config.yml</code>: предотвращают закрытие инвентаря при обновлении скина через SkinsRestorer.</div>
+          <label class="toggle-chip toggle-chip-full">
             <input type="checkbox" id="cfgDeferGui" checked>
             <span><code>defer-apply-while-gui-open: true</code> (применять после закрытия GUI)</span>
           </label>
-          <label class="toggle-chip" style="margin-bottom:6px;display:flex">
+          <label class="toggle-chip toggle-chip-full">
             <input type="checkbox" id="cfgReopenGui" checked>
-            <span><code>auto-reopen-gui-after-skin-apply: true</code> (переоткрывать меню если скин применился внутри GUI)</span>
+            <span><code>auto-reopen-gui-after-skin-apply: true</code> (переоткрывать меню)</span>
           </label>
           <div class="grid-2">
-            <div>
-              <label class="field-label">Задержка дебаунса (тики)</label>
+            <div class="field">
+              <label class="field-label" for="cfgDebounceTicks">Задержка дебаунса (тики)</label>
               <input type="number" id="cfgDebounceTicks" value="8" min="0" max="60">
             </div>
-            <div>
-              <label class="field-label">Задержка переоткрытия (тики)</label>
+            <div class="field">
+              <label class="field-label" for="cfgReopenTicks">Задержка переоткрытия (тики)</label>
               <input type="number" id="cfgReopenTicks" value="2" min="1" max="20">
             </div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title">2. Кнопка «Назад» и режим меню (v1.7)</div>
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-grid"></use></svg>
+              <span>2. Кнопка «Назад» и режим меню</span>
+            </span>
+          </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">Режим меню (menu.mode)</label>
+            <div class="field">
+              <label class="field-label" for="cfgMenuMode">Режим меню (menu.mode)</label>
               <select id="cfgMenuMode">
-                <option value="TABBED">TABBED (1 меню + вкладки)</option>
+                <option value="TABBED">TABBED (Вкладки)</option>
                 <option value="UNIFIED">UNIFIED (Всё сразу)</option>
-                <option value="PER_SLOT">PER_SLOT (4 узких 1-рядных)</option>
+                <option value="PER_SLOT">PER_SLOT (1-рядные)</option>
               </select>
             </div>
-            <div>
-              <label class="field-label">Команда «Назад» (back-command)</label>
-              <input type="text" id="cfgBackCommand" value="menu" placeholder="пусто = просто закрыть">
+            <div class="field">
+              <label class="field-label" for="cfgBackCommand">Команда «Назад»</label>
+              <input type="text" id="cfgBackCommand" value="menu" placeholder="пусто = открыть инвентарь">
             </div>
           </div>
-          <div class="hint">В подменю <code>BACK</code> возвращает на главный экран гардероба, а с главного экрана выполняет указанную команду (например <code>dm open main</code> или <code>menu</code>).</div>
+          <div class="hint">В подменю <code>BACK</code> возвращает на главный экран гардероба, а с главного экрана выполняет указанную команду или открывает инвентарь.</div>
         </div>
 
         <div class="card">
-          <div class="card-title">3. Система блокировок по умолчанию (v1.8)</div>
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-lock"></use></svg>
+              <span>3. Система блокировок по умолчанию</span>
+            </span>
+          </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">Режим по умолчанию</label>
+            <div class="field">
+              <label class="field-label" for="cfgDefaultBlockMode">Режим по умолчанию</label>
               <select id="cfgDefaultBlockMode">
-                <option value="UNEQUIP">UNEQUIP (Снять конфликты)</option>
-                <option value="PREVENT">PREVENT (Запретить надевать)</option>
-                <option value="HIDE">HIDE (Скрыть, но не снимать)</option>
+                <option value="UNEQUIP">UNEQUIP (Снять)</option>
+                <option value="PREVENT">PREVENT (Запретить)</option>
+                <option value="HIDE">HIDE (Скрыть)</option>
               </select>
             </div>
-            <div>
-              <label class="field-label">Иконка замка в GUI</label>
+            <div class="field">
+              <label class="field-label" for="cfgLockMaterial">Иконка замка в GUI</label>
               <input type="text" id="cfgLockMaterial" value="RED_STAINED_GLASS_PANE">
             </div>
           </div>
-          <label class="toggle-chip" style="margin-top:8px;display:flex">
+          <label class="toggle-chip toggle-chip-full">
             <input type="checkbox" id="cfgInheritClearOuter" checked>
-            <span><code>inherit-clear-outer-regions: true</code> (химзащита сама очистит 2-й слой штанов/шапки)</span>
+            <span><code>inherit-clear-outer-regions: true</code> (очистка outer-зон заблокированных слоёв)</span>
           </label>
         </div>
 
         <div class="card">
-          <div class="card-title">4. Конструктор костюма с блокировкой (v1.8)</div>
+          <div class="card-title">
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-shirt"></use></svg>
+              <span>4. Конструктор костюма с блокировкой</span>
+            </span>
+          </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">MythicMobs ID</label>
+            <div class="field">
+              <label class="field-label" for="cfgSuitId">MythicMobs ID</label>
               <input type="text" id="cfgSuitId" value="WardrobeHazmatSuit">
             </div>
-            <div>
-              <label class="field-label">Слот-носитель</label>
+            <div class="field">
+              <label class="field-label" for="cfgSuitSlot">Слот-носитель</label>
               <select id="cfgSuitSlot">
                 <option value="jacket">jacket (Куртка / Костюм)</option>
                 <option value="pants">pants (Штаны)</option>
@@ -1845,26 +2716,26 @@ label.field-label {
             </div>
           </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">Display Name</label>
+            <div class="field">
+              <label class="field-label" for="cfgSuitDisplay">Display Name</label>
               <input type="text" id="cfgSuitDisplay" value="&eКостюм химзащиты &7[Цельный костюм]">
             </div>
-            <div>
-              <label class="field-label">2D Текстура (PNG)</label>
+            <div class="field">
+              <label class="field-label" for="cfgSuitTexture">2D Текстура (PNG)</label>
               <input type="text" id="cfgSuitTexture" value="hazmat_suit.png">
             </div>
           </div>
           <div class="grid-2">
-            <div>
-              <label class="field-label">BlockMode</label>
+            <div class="field">
+              <label class="field-label" for="cfgSuitMode">BlockMode</label>
               <select id="cfgSuitMode">
                 <option value="UNEQUIP">UNEQUIP</option>
                 <option value="PREVENT">PREVENT</option>
                 <option value="HIDE">HIDE</option>
               </select>
             </div>
-            <div>
-              <label class="field-label">Блокируемые слои (через запятую)</label>
+            <div class="field">
+              <label class="field-label" for="cfgSuitBlocks">Блокируемые слои</label>
               <input type="text" id="cfgSuitBlocks" value="undershirt, pants, belt_skin, gloves, socks, boots_skin, mask_skin, hat">
             </div>
           </div>
@@ -1875,32 +2746,56 @@ label.field-label {
       <aside class="pane">
         <div class="card">
           <div class="card-title">
-            <span>plugins/MythicWardrobe/config.yml (фрагмент v1.7–v1.8)</span>
-            <button class="btn btn-sm" data-copy-target="outConfigYml">📋 Копировать</button>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-file-text"></use></svg>
+              <span>plugins/MythicWardrobe/config.yml</span>
+            </span>
+            <button class="btn btn-sm" data-copy-target="outConfigYml">
+              <svg class="ico" aria-hidden="true"><use href="#ico-copy"></use></svg>
+              <span>Копировать</span>
+            </button>
           </div>
           <pre class="yaml-code" id="outConfigYml"></pre>
         </div>
 
         <div class="card">
           <div class="card-title">
-            <span>plugins/MythicWardrobe/menus.yml (кнопка «Назад» + слот пояса)</span>
-            <button class="btn btn-sm" data-copy-target="outMenusYml">📋 Копировать</button>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-file-text"></use></svg>
+              <span>plugins/MythicWardrobe/menus.yml</span>
+            </span>
+            <button class="btn btn-sm" data-copy-target="outMenusYml">
+              <svg class="ico" aria-hidden="true"><use href="#ico-copy"></use></svg>
+              <span>Копировать</span>
+            </button>
           </div>
           <pre class="yaml-code" id="outMenusYml"></pre>
         </div>
 
         <div class="card">
           <div class="card-title">
-            <span>plugins/MythicWardrobe/hair-3d.yml (v1.9 — автопривязка 3D-волос и шлемы)</span>
-            <button class="btn btn-sm" data-copy-target="outHair3dYml">📋 Копировать</button>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-file-text"></use></svg>
+              <span>plugins/MythicWardrobe/hair-3d.yml</span>
+            </span>
+            <button class="btn btn-sm" data-copy-target="outHair3dYml">
+              <svg class="ico" aria-hidden="true"><use href="#ico-copy"></use></svg>
+              <span>Копировать</span>
+            </button>
           </div>
           <pre class="yaml-code" id="outHair3dYml"></pre>
         </div>
 
         <div class="card">
           <div class="card-title">
-            <span>MythicMobs YAML + items.yml + Команда /wardrobe block</span>
-            <button class="btn btn-sm" data-copy-target="outSuitYml">📋 Копировать</button>
+            <span class="card-title-main">
+              <svg class="ico" aria-hidden="true"><use href="#ico-file-text"></use></svg>
+              <span>MythicMobs YAML + items.yml</span>
+            </span>
+            <button class="btn btn-sm" data-copy-target="outSuitYml">
+              <svg class="ico" aria-hidden="true"><use href="#ico-copy"></use></svg>
+              <span>Копировать</span>
+            </button>
           </div>
           <pre class="yaml-code" id="outSuitYml"></pre>
         </div>
@@ -1913,34 +2808,45 @@ label.field-label {
   <div id="sharedViewerRoot" style="display:none">
     <div class="viewer-header">
       <div class="row-wrap">
-        <strong style="font-size:12.5px">🎮 Интерактивный 3D Предпросмотр</strong>
-        <label class="toggle-chip"><input type="checkbox" id="chkShowMannequin" checked> Скин</label>
-        <label class="toggle-chip"><input type="checkbox" id="chkShowArmor" checked> 3D-модели</label>
-        <label class="toggle-chip"><input type="checkbox" id="chkWalkAnim"> Ходьба</label>
-        <label class="toggle-chip"><input type="checkbox" id="chkAutoRotate"> Вращать</label>
-        <button type="button" class="btn btn-sm helmet-test-toggle" id="btnToggleTestHelmet" title="Примерить шлем поверх 3D-причёски и проверить HIDE_ALL / PARTIAL_MODEL (скрытие хвоста и т.д.)">🪖 Тест: Надеть шлем</button>
+        <span class="viewer-title">
+          <svg class="ico" aria-hidden="true"><use href="#ico-box"></use></svg>
+          <span>3D Предпросмотр</span>
+        </span>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowMannequin" checked> <span>Скин</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkShowArmor" checked> <span>3D-модели</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkWalkAnim"> <span>Ходьба</span></label>
+        <label class="toggle-chip"><input type="checkbox" id="chkAutoRotate"> <span>Вращать</span></label>
+        <button type="button" class="btn btn-sm helmet-test-toggle" id="btnToggleTestHelmet" title="Примерить шлем поверх 3D-причёски и проверить SWAP_MODEL, PARTIAL_MODEL или HIDE_ALL">
+          <svg class="ico" aria-hidden="true"><use href="#ico-hard-hat"></use></svg>
+          <span>Тест шлема</span>
+        </button>
       </div>
-      <div class="row">
+      <div class="seg-group" role="group" aria-label="Ракурс камеры">
         <button class="btn btn-sm" id="btnViewFront">Спереди</button>
         <button class="btn btn-sm" id="btnViewBack">Сзади</button>
-        <button class="btn btn-sm" id="btnViewReset">↺</button>
+        <button class="btn btn-icon" id="btnViewReset" title="Сбросить камеру" aria-label="Сбросить камеру">
+          <svg class="ico" aria-hidden="true"><use href="#ico-rotate-ccw"></use></svg>
+        </button>
       </div>
     </div>
     <div class="viewer-stage">
       <canvas id="viewport3d"></canvas>
-      <div class="viewer-overlay-badge" id="viewerBadge">ЛКМ — вращение · Колесо — зум · ПКМ — панорама</div>
+      <div class="viewer-overlay-badge" id="viewerBadge">ЛКМ: вращение · Колесо: зум · ПКМ: панорама</div>
     </div>
     <div class="viewer-controls">
-      <div class="row-wrap" style="justify-content:space-between">
+      <div class="row-between">
         <div class="row-wrap" id="equippedChips">
-          <span class="hint" style="margin:0">Выберите модель или комбо-связку для примерки на 3D-манекене</span>
+          <span class="hint">Выберите модель или комбо-связку для примерки на 3D-манекене</span>
         </div>
-        <button class="btn btn-sm" id="btnClearEquipped">Снять всё 3D</button>
+        <button class="btn btn-sm" id="btnClearEquipped">
+          <svg class="ico" aria-hidden="true"><use href="#ico-x"></use></svg>
+          <span>Снять 3D</span>
+        </button>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
 /**
@@ -2823,7 +3729,7 @@ label.field-label {
 </script>
 <script>
 /**
- * MythicWardrobe Studio v2.0 — 100% Client-Side Engine (Zero Python / Zero Server / Zero CDN!)
+ * MythicWardrobe Studio v2.0 - 100% Client-Side Engine (Zero Python / Zero Server / Zero CDN!)
  * Runs directly via file:// in any browser or inside sandboxed iframes.
  *
  * Includes:
@@ -3999,7 +4905,7 @@ label.field-label {
   function generatePriorityYml(orderIds) {
     return [
       "# ==============================================================================",
-      "# MythicWardrobe v1.9.0 — Приоритет 2D-слоёв скина (ОТ ВЕРХНЕГО К НИЖНЕМУ)",
+      "# MythicWardrobe v1.9.0 - Приоритет 2D-слоёв скина (ОТ ВЕРХНЕГО К НИЖНЕМУ)",
       "# Сгенерировано в MythicWardrobe Studio v2.2 (HTML Standalone)",
       "# Положите в: plugins/MythicWardrobe/priority.yml и выполните /wardrobe reload",
       "# ==============================================================================",
@@ -4090,7 +4996,7 @@ label.field-label {
     const trigger2dHat = opts.triggerOn2dHat !== false;
     const lines = [
       "# ==============================================================================",
-      "# MythicWardrobe v1.9.0 — Автопривязка 3D-волос к 2D-волосам и скрытие под шлемом",
+      "# MythicWardrobe v1.9.0 - Автопривязка 3D-волос к 2D-волосам и скрытие под шлемом",
       "# Сгенерировано в MythicWardrobe Studio v2.2",
       "# Положите в: plugins/MythicWardrobe/hair-3d.yml и выполните /wardrobe reload",
       "# ==============================================================================",
@@ -4193,14 +5099,14 @@ label.field-label {
   ];
 
   const GUI_BUTTON_ACTIONS = [
-    { id: "BACK", label: "BACK — Назад (открывает инвентарь / команду)" },
-    { id: "OPEN_INVENTORY", label: "OPEN_INVENTORY — Открыть Инвентарь и Экипировку" },
-    { id: "RUN_COMMAND", label: "RUN_COMMAND — Выполнить команду" },
-    { id: "SWITCH_TAB", label: "SWITCH_TAB — Переключить вкладку" },
-    { id: "OPEN_SECTION", label: "OPEN_SECTION — Открыть секцию (PER_SLOT)" },
-    { id: "SWITCH_MODE", label: "SWITCH_MODE — Сменить режим меню" },
-    { id: "CLOSE", label: "CLOSE — Полностью закрыть меню" },
-    { id: "DECOR", label: "DECOR — Декоративный предмет" },
+    { id: "BACK", label: "BACK - Назад (открывает инвентарь / команду)" },
+    { id: "OPEN_INVENTORY", label: "OPEN_INVENTORY - Открыть Инвентарь и Экипировку" },
+    { id: "RUN_COMMAND", label: "RUN_COMMAND - Выполнить команду" },
+    { id: "SWITCH_TAB", label: "SWITCH_TAB - Переключить вкладку" },
+    { id: "OPEN_SECTION", label: "OPEN_SECTION - Открыть секцию (PER_SLOT)" },
+    { id: "SWITCH_MODE", label: "SWITCH_MODE - Сменить режим меню" },
+    { id: "CLOSE", label: "CLOSE - Полностью закрыть меню" },
+    { id: "DECOR", label: "DECOR - Декоративный предмет" },
   ];
 
   function createDefaultMenusState() {
@@ -4437,7 +5343,7 @@ label.field-label {
     const st = menusState || createDefaultMenusState();
     const lines = [
       "# ==============================================================================",
-      "# MythicWardrobe v1.9.0 — Визуальная настройка GUI инвентаря",
+      "# MythicWardrobe v1.9.0 - Визуальная настройка GUI инвентаря",
       "# Сгенерировано в MythicWardrobe Studio v2.2 (Визуальный GUI Редактор)",
       "# Положите в: plugins/MythicWardrobe/menus.yml и выполните /wardrobe reload",
       "# ==============================================================================",
@@ -4705,7 +5611,7 @@ label.field-label {
     if (mythicItemsBlocks.length) {
       zip.addText(
         `plugins/MythicMobs/Items/${toPascalId(packName)}_Items.yml`,
-        `# MythicWardrobe Studio v2.0 — Сгенерированные 3D-предметы (${packName})\n` +
+        `# MythicWardrobe Studio v2.0 - Сгенерированные 3D-предметы (${packName})\n` +
         `# Положите в: plugins/MythicMobs/Items/\n\n` +
         mythicItemsBlocks.join("\n\n") + "\n"
       );
@@ -4715,7 +5621,7 @@ label.field-label {
     if (comboRulesBlocks.length) {
       zip.addText(
         "plugins/MythicWardrobe/combo-overrides.yml",
-        `# MythicWardrobe v1.8.0 — Автоподмена скрещенных 3D-моделей (0 лага!)\ncombos:\n` +
+        `# MythicWardrobe v1.8.0 - Автоподмена скрещенных 3D-моделей (0 лага!)\ncombos:\n` +
         comboRulesBlocks.join("\n\n") + "\n"
       );
     }
@@ -4787,7 +5693,7 @@ label.field-label {
       if (skinMmBlocks.length) {
         zip.addText(
           `plugins/MythicMobs/Items/${toPascalId(packName)}_2DSkins.yml`,
-          `# MythicWardrobe Studio v2.2 — 2D-слои скина, Lore и костюмы с блокировкой слоёв\n\n` +
+          `# MythicWardrobe Studio v2.2 - 2D-слои скина, Lore и костюмы с блокировкой слоёв\n\n` +
           skinMmBlocks.join("\n\n") + "\n"
         );
       }
@@ -4810,7 +5716,7 @@ label.field-label {
     if (wardrobeItemsBlocks.length) {
       zip.addText(
         "plugins/MythicWardrobe/items.yml",
-        `# MythicWardrobe v1.8.0 — Привязка слотов и блокировок (plugins/MythicWardrobe/items.yml)\nitems:\n` +
+        `# MythicWardrobe v1.8.0 - Привязка слотов и блокировок (plugins/MythicWardrobe/items.yml)\nitems:\n` +
         wardrobeItemsBlocks.join("\n") + "\n"
       );
     }
@@ -4831,7 +5737,7 @@ label.field-label {
     // 8. README_УСТАНОВКА.txt
     const readme = [
       "================================================================================",
-      `  MythicWardrobe Studio v2.0 (HTML) — Готовый пак (${packName})`,
+      `  MythicWardrobe Studio v2.0 (HTML) - Готовый пак (${packName})`,
       "================================================================================",
       "",
       `Всего .bbmodel в архиве: ${writtenModels.length}`,
@@ -4928,13 +5834,17 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
 </script>
 <script>
 /**
- * MythicWardrobe Studio v2.0 — 100% Client-Side Application Controller
+ * MythicWardrobe Studio v2.4 - 100% Client-Side Application Controller
  * Zero server / Zero Python / Zero external network requests!
  */
 (() => {
   "use strict";
 
   const SE = window.StudioEngine;
+
+  function ico(name, cls = "") {
+    return `<svg class="ico${cls ? " " + cls : ""}" aria-hidden="true"><use href="#ico-${name}"></use></svg>`;
+  }
 
   const CATEGORY_META = {
     helmets:     { label: "Шлемы",      slot: "HEAD",  tagClass: "tag-head",  defaultWardrobe: "helmet_cosmetic" },
@@ -5213,7 +6123,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
 
     const list = state.models.filter(m => filter === "all" || m.category === filter);
     if (!list.length) {
-      container.innerHTML = `<div class="hint">Нет моделей в выбранной категории. Перетащите .bbmodel выше или нажмите «✨ Демо».</div>`;
+      container.innerHTML = `<div class="hint">Нет моделей в выбранной категории. Перетащите .bbmodel выше или нажмите «Демо (10 моделей)».</div>`;
       return;
     }
 
@@ -5227,20 +6137,21 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
         <div class="model-item-top">
           <div class="model-item-name" title="${escapeHtml(m.filename)}">${escapeHtml(m.exportId)}</div>
           <div class="row" style="gap:4px">
-            <button class="btn btn-sm ${equipped ? "btn-green" : ""}" data-act="equip">${equipped ? "✓ Надето" : "Надеть"}</button>
-            <button class="btn btn-danger btn-sm" data-act="del" title="Удалить">×</button>
+            <button class="btn btn-sm ${equipped ? "btn-green" : ""}" data-act="equip">${equipped ? `${ico("check", "ico-sm")}<span>Надето</span>` : "Надеть"}</button>
+            <button class="btn btn-danger btn-icon" data-act="del" title="Удалить модель" aria-label="Удалить модель">${ico("x", "ico-sm")}</button>
           </div>
         </div>
         <div class="model-meta">
           <span class="tag ${cmeta.tagClass}">${cmeta.label}</span>
           <span class="tag">${m.analysis.cubeCount} кубов</span>
-          ${m.analysis.hasTint ? '<span class="tag tag-tint">🎨 _t</span>' : ""}
-          ${m.analysis.hasEmissive ? '<span class="tag tag-emis">✨ _e</span>' : ""}
-          ${(m.blocks && m.blocks.length) ? `<span class="tag tag-lock">🔒 ${m.blocks.length}</span>` : ""}
+          ${m.analysis.hasTint ? `<span class="tag tag-tint">${ico("palette", "ico-sm")} _t</span>` : ""}
+          ${m.analysis.hasEmissive ? `<span class="tag tag-emis">${ico("sparkles", "ico-sm")} _e</span>` : ""}
+          ${(m.blocks && m.blocks.length) ? `<span class="tag tag-lock">${ico("lock", "ico-sm")} ${m.blocks.length}</span>` : ""}
         </div>
       `;
       div.addEventListener("click", (e) => {
-        const act = e.target.dataset && e.target.dataset.act;
+        const actEl = e.target.closest("[data-act]");
+        const act = actEl ? actEl.dataset.act : null;
         if (act === "equip") {
           e.stopPropagation();
           state.activeComboPreview = null;
@@ -5301,16 +6212,16 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     const notes = [];
 
     if (m.slot === "HEAD" && hasCmd) {
-      notes.push(`✓ <b>${escapeHtml(mat)} + CMD ${cmd} (HEAD):</b> при экспорте ZIP создастся <code>resourcepack_snippet/assets/minecraft/items/${escapeHtml(mat.toLowerCase())}.json</code> с <code>display_context</code> (на голове 3D, в инвентаре ваша иконка).`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} + CMD ${cmd} (HEAD):</b> при экспорте ZIP создастся <code>resourcepack_snippet/assets/minecraft/items/${escapeHtml(mat.toLowerCase())}.json</code> с <code>display_context</code> (на голове 3D, в инвентаре ваша иконка).`);
     } else if (m.slot === "HEAD" && !hasCmd) {
-      notes.push(`✓ <b>${escapeHtml(mat)} (HEAD):</b> работает через <code>ItemModel: mythicarmor:${escapeHtml(m.exportId)}_head_piece</code>. Добавьте PNG-иконку ниже — MythicArmors сам покажет её в инвентаре!`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} (HEAD):</b> работает через <code>ItemModel: mythicarmor:${escapeHtml(m.exportId)}_head_piece</code>. Добавьте PNG-иконку ниже, и MythicArmors покажет её в инвентаре.`);
     } else if (hasCmd) {
-      notes.push(`✓ <b>${escapeHtml(mat)} + CMD ${cmd} (${m.slot}):</b> в инвентаре ваша иконка по CustomModelData, а на теле 3D-броня через <code>Equippable.Model</code>.`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} + CMD ${cmd} (${m.slot}):</b> в инвентаре ваша иконка по CustomModelData, а на теле 3D-броня через <code>Equippable.Model</code>.`);
     } else {
-      notes.push(`✓ <b>${escapeHtml(mat)} (${m.slot}):</b> 3D-броня через <code>Equippable.Model</code>.`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} (${m.slot}):</b> 3D-броня через <code>Equippable.Model</code>.`);
     }
     if (!isDyeable && (m.colorRgb || m.analysis.hasTint || m.autoTintMode === "full" || m.autoTintMode === "light_only")) {
-      notes.push(`⚠ Материал <code>${escapeHtml(mat)}</code> не красится через <code>Options.Color</code> — для покраски <code>_t.png</code> используйте <code>LEATHER_*</code>.`);
+      notes.push(`${ico("alert", "ico-sm")} Материал <code>${escapeHtml(mat)}</code> не красится через <code>Options.Color</code>: для покраски <code>_t.png</code> используйте <code>LEATHER_*</code>.`);
     }
     box.innerHTML = notes.join("<br>");
   }
@@ -5322,32 +6233,32 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     const autoL = m.autoLayers !== false;
 
     chips.push(a.hasLayer1
-      ? `<span class="tag">✓ layer_1</span>`
-      : autoL ? `<span class="tag tag-tint">+ layer_1 (авто)</span>` : `<span class="tag tag-missing">нет layer_1</span>`);
+      ? `<span class="tag">${ico("check", "ico-sm")} layer_1</span>`
+      : autoL ? `<span class="tag tag-tint">${ico("plus", "ico-sm")} layer_1 (авто)</span>` : `<span class="tag tag-missing">нет layer_1</span>`);
     chips.push(a.hasLayer2
-      ? `<span class="tag">✓ layer_2</span>`
-      : autoL ? `<span class="tag tag-tint">+ layer_2 (авто)</span>` : `<span class="tag tag-missing">нет layer_2</span>`);
+      ? `<span class="tag">${ico("check", "ico-sm")} layer_2</span>`
+      : autoL ? `<span class="tag tag-tint">${ico("plus", "ico-sm")} layer_2 (авто)</span>` : `<span class="tag tag-missing">нет layer_2</span>`);
 
     if (m.autoTintMode === "full" || m.autoTintMode === "light_only") {
-      chips.push(`<span class="tag tag-tint">+ _t.png (авто)</span>`);
+      chips.push(`<span class="tag tag-tint">${ico("plus", "ico-sm")} _t.png (авто)</span>`);
     } else if (a.hasTint && m.autoTintMode !== "none") {
-      chips.push(`<span class="tag">✓ _t.png</span>`);
+      chips.push(`<span class="tag">${ico("check", "ico-sm")} _t.png</span>`);
     } else {
       chips.push(`<span class="tag tag-missing">без _t.png</span>`);
     }
 
     if (m.autoEmissiveMode === "bright_neon") {
-      chips.push(`<span class="tag tag-emis">+ _e.png (авто)</span>`);
+      chips.push(`<span class="tag tag-emis">${ico("plus", "ico-sm")} _e.png (авто)</span>`);
     } else if (a.hasEmissive && m.autoEmissiveMode !== "none") {
-      chips.push(`<span class="tag">✓ _e.png</span>`);
+      chips.push(`<span class="tag">${ico("check", "ico-sm")} _e.png</span>`);
     } else {
       chips.push(`<span class="tag tag-missing">без _e.png</span>`);
     }
 
     if (m.customIconDataUri) {
-      chips.push(`<span class="tag tag-tint">+ 2D-иконка</span>`);
+      chips.push(`<span class="tag tag-tint">${ico("plus", "ico-sm")} 2D-иконка</span>`);
     } else if (a.hasIcons && a.hasIcons.length) {
-      chips.push(`<span class="tag">✓ иконка (${a.hasIcons.join(",")})</span>`);
+      chips.push(`<span class="tag">${ico("check", "ico-sm")} иконка (${a.hasIcons.join(",")})</span>`);
     } else {
       chips.push(`<span class="tag tag-missing">без 2D-иконки</span>`);
     }
@@ -5360,7 +6271,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     if (m.customIconDataUri) {
       pbox.innerHTML = `<img src="${m.customIconDataUri}" alt="icon">`;
     } else {
-      pbox.innerHTML = `<span style="font-size:10px;color:var(--muted)">2D</span>`;
+      pbox.innerHTML = `<span>2D</span>`;
     }
   }
 
@@ -5482,7 +6393,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     // Populate swap target dropdown with all other loaded 3D models
     const swapSel = $("selHairSwapModel");
     if (swapSel) {
-      const opts = [`<option value="">— Указать вручную по MythicMobs ID ниже —</option>`];
+      const opts = [`<option value="">Указать вручную по MythicMobs ID</option>`];
       for (const other of state.models) {
         if (other.id === m.id) continue;
         const selected = h.swapModelInternalId === other.id ? "selected" : "";
@@ -5621,7 +6532,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
         renderTextureAutoFixer(m);
         showToast("Снята 32×32 PNG-иконка прямо с 3D-модели!");
       } else {
-        showToast("Не удалось снять иконку — убедитесь, что модель видна в 3D");
+        showToast("Не удалось снять иконку: убедитесь, что модель видна в 3D");
       }
     });
 
@@ -5788,31 +6699,32 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
       const card = document.createElement("div");
       card.className = "link-card";
       card.innerHTML = `
-        <div class="row" style="justify-content:space-between;margin-bottom:6px">
-          <label class="row" style="font-weight:700;font-size:12px;cursor:pointer">
+        <div class="row-between">
+          <label class="row" style="font-weight:600;font-size:12.5px;cursor:pointer">
             <input type="checkbox" data-f="enabled" ${link.enabled ? "checked" : ""}>
             <span>${escapeHtml(link.name)}</span>
           </label>
           <div class="row" style="gap:4px">
             <span class="tag">${combos.length} комбо</span>
-            <button class="btn btn-danger btn-sm" data-act="rm">×</button>
+            <button class="btn btn-danger btn-icon" data-act="rm" title="Удалить связку" aria-label="Удалить связку">${ico("x", "ico-sm")}</button>
           </div>
         </div>
         <div class="grid-3">
-          <select data-f="cat0">${catOptions}</select>
-          <select data-f="cat1">${catOptions}</select>
-          <select data-f="slot">
+          <select class="select-sm" data-f="cat0">${catOptions}</select>
+          <select class="select-sm" data-f="cat1">${catOptions}</select>
+          <select class="select-sm" data-f="slot">
             <option value="HEAD">Слот HEAD</option>
             <option value="CHEST">Слот CHEST</option>
             <option value="LEGS">Слот LEGS</option>
             <option value="FEET">Слот FEET</option>
           </select>
         </div>
-        <div class="row-wrap" style="margin-top:6px;justify-content:space-between">
-          <label class="toggle-chip" style="font-size:10.5px">
-            <input type="checkbox" data-f="strip" ${link.stripFrontStraps ? "checked" : ""}> Убирать передние лямки (strap)
+        <div class="row-between">
+          <label class="toggle-chip">
+            <input type="checkbox" data-f="strip" ${link.stripFrontStraps ? "checked" : ""}>
+            <span>Убирать передние лямки</span>
           </label>
-          <select data-f="secSlot" style="width:125px;padding:3px 6px;font-size:11px">
+          <select class="select-sm" data-f="secSlot" style="width:130px">
             <option value="mask_3d">2-й: mask_3d</option>
             <option value="hair_3d">2-й: hair_3d</option>
             <option value="backpack_3d">2-й: backpack_3d</option>
@@ -5876,7 +6788,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(label)}">
           <span class="tag">${link.slot}</span> ${escapeHtml(label)}
         </span>
-        <button class="btn btn-sm ${isActive ? "btn-green" : ""}">${isActive ? "✓ В 3D" : "Примерить"}</button>
+        <button class="btn btn-sm ${isActive ? "btn-green" : ""}">${isActive ? `${ico("check", "ico-sm")}<span>В 3D</span>` : "Примерить"}</button>
       `;
       row.querySelector("button").addEventListener("click", () => previewCombinedPair(key, link, pair));
       previewEl.appendChild(row);
@@ -5919,8 +6831,8 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
         bbmodel: state.activeComboPreview.bbmodel,
         colorRgb: state.activeComboPreview.colorRgb,
       }]);
-      chips.innerHTML = `<span class="tag tag-emis">⚡ Комбо 3D: ${escapeHtml(state.activeComboPreview.name)}</span>`;
-      $("viewerBadge").textContent = `Комбо: ${state.activeComboPreview.name} · ЛКМ — вращение · Колесо — зум`;
+      chips.innerHTML = `<span class="tag tag-emis">${ico("zap", "ico-sm")} Комбо 3D: ${escapeHtml(state.activeComboPreview.name)}</span>`;
+      $("viewerBadge").textContent = `Комбо: ${state.activeComboPreview.name} · ЛКМ: вращение · Колесо: зум`;
       return;
     }
 
@@ -5936,7 +6848,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
       if (isHair && helmetActive && m.hair3d) {
         const mode = m.hair3d.helmetMode || "HIDE_ALL";
         if (mode === "HIDE_ALL") {
-          chipHtml.push(`<span class="tag tag-missing" title="Скрыта шлемом (HIDE_ALL)">${escapeHtml(m.exportId)} [скрыто шлемом]</span>`);
+          chipHtml.push(`<span class="tag tag-missing" title="Скрыта шлемом (HIDE_ALL)">${escapeHtml(m.exportId)} [скрыто]</span>`);
           continue;
         }
         if (mode === "SWAP_MODEL") {
@@ -5952,7 +6864,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
               scale: swapTarget.scale,
               colorRgb: swapTarget.colorRgb || m.colorRgb || null,
             });
-            chipHtml.push(`<span class="tag tag-emis" title="Подмена модели при шлеме (SWAP_MODEL)">🔄 ${escapeHtml(swapTarget.exportId)}</span>`);
+            chipHtml.push(`<span class="tag tag-emis" title="Подмена модели при шлеме (SWAP_MODEL)">${ico("refresh", "ico-sm")} ${escapeHtml(swapTarget.exportId)}</span>`);
             continue;
           }
         }
@@ -5989,20 +6901,20 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
           scale: demoHelmet.scale,
           colorRgb: demoHelmet.colorRgb || null,
         });
-        chipHtml.push(`<span class="tag tag-lock">🪖 ${escapeHtml(demoHelmet.exportId)} (тест)</span>`);
+        chipHtml.push(`<span class="tag tag-lock">${ico("hard-hat", "ico-sm")} ${escapeHtml(demoHelmet.exportId)} (тест)</span>`);
       }
     }
 
     await viewer.setModels(renderList);
 
     if (!chipHtml.length) {
-      chips.innerHTML = `<span class="hint" style="margin:0">3D-модели сняты — показан 2D-манекен скина</span>`;
-      $("viewerBadge").textContent = "ЛКМ — вращение · Колесо — зум · ПКМ — панорама";
+      chips.innerHTML = `<span class="hint">3D-модели сняты: показан 2D-манекен скина</span>`;
+      $("viewerBadge").textContent = "ЛКМ: вращение · Колесо: зум · ПКМ: панорама";
     } else {
       chips.innerHTML = chipHtml.join("");
-      $("viewerBadge").textContent = helmetActive
-        ? `🪖 Шлем надет (проверка 3D-волос) · Моделей: ${renderList.length}`
-        : `Надето 3D-моделей: ${renderList.length} · ЛКМ — вращение · Колесо — зум`;
+      $("viewerBadge").innerHTML = helmetActive
+        ? `${ico("hard-hat", "ico-sm")}<span>Шлем надет (проверка 3D-волос) · Моделей: ${renderList.length}</span>`
+        : `<span>Надето 3D-моделей: ${renderList.length} · ЛКМ: вращение · Колесо: зум</span>`;
     }
   }
 
@@ -6043,7 +6955,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     }
     const btn = $("btnExportFullZip");
     btn.disabled = true;
-    btn.textContent = "⏳ Сшиваем модели и собираем ZIP...";
+    btn.innerHTML = `${ico("loader")}<span>Сборка ZIP...</span>`;
 
     try {
       const packName = $("inpPackName").value.trim() || "my_wardrobe_pack";
@@ -6100,13 +7012,13 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
       });
 
       downloadBlob(blob, `${SE.sanitizeId(packName)}.zip`);
-      $("exportReport").innerHTML = `<span style="color:#ffffff">✓ Готово! В архиве: <b>${summary.modelFiles.length}</b> .bbmodel (из них <b>${summary.comboCount}</b> комбо), <b>${summary.itemCount}</b> команд выдачи + hair-3d.yml + menus.yml + priority.yml.</span>`;
+      $("exportReport").innerHTML = `<span style="color:var(--text)">${ico("check", "ico-sm")} Готово! В архиве: <b>${summary.modelFiles.length}</b> .bbmodel (из них <b>${summary.comboCount}</b> комбо), <b>${summary.itemCount}</b> команд выдачи + hair-3d.yml + menus.yml + priority.yml.</span>`;
       showToast("ZIP-архив собран локально и скачан!");
     } catch (err) {
       showToast(`Ошибка экспорта: ${err.message}`, 5000);
     } finally {
       btn.disabled = false;
-      btn.textContent = "🚀 Собрать и скачать ZIP (офлайн)";
+      btn.innerHTML = `${ico("download")}<span>Собрать и скачать ZIP</span>`;
     }
   }
 
@@ -6203,7 +7115,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     renderSkinLayersList();
     renderSkinBlockingEditor();
     renderSkinComposite();
-    showToast("☣ Надет Костюм химзащиты — 8 конфликтующих слоёв заблокированы 🔒 и скрыты на 3D-манекене!", 4200);
+    showToast("Надет Костюм химзащиты: 8 конфликтующих слоёв заблокированы и скрыты на 3D-манекене!", 4200);
   }
 
   function renderSkinLayersList() {
@@ -6215,7 +7127,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     const lockBadge = $("skinBlockedCountBadge");
     if (blockMap.size > 0) {
       lockBadge.style.display = "inline-flex";
-      lockBadge.textContent = `🔒 Заблок.: ${blockMap.size}`;
+      lockBadge.innerHTML = `${ico("lock", "ico-sm")}<span>Заблок.: ${blockMap.size}</span>`;
     } else {
       lockBadge.style.display = "none";
     }
@@ -6231,9 +7143,9 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
         + (layer.id === state.activeSkinLayerId ? " active-layer" : "")
         + (lockedBy ? " locked-layer" : "");
 
-      const options = [`<option value="">— нет —</option>`];
+      const options = [`<option value="">нет</option>`];
       if (sel && sel.isCustom) {
-        options.push(`<option value="__custom__" selected>★ ${escapeHtml(sel.name)}</option>`);
+        options.push(`<option value="__custom__" selected>* ${escapeHtml(sel.name)}</option>`);
       }
       for (const item of libList) {
         const isSel = sel && !sel.isCustom && sel.name === item.name;
@@ -6241,21 +7153,21 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
       }
 
       const subLine = lockedBy
-        ? `<span style="font-size:10px;color:#ffffff;font-weight:700">🔒 Заблокировано (${escapeHtml(lockedBy.byLabel)})</span>`
+        ? `<span class="skin-layer-status">${ico("lock", "ico-sm")}<span>Заблок. (${escapeHtml(lockedBy.byLabel)})</span></span>`
         : ownBlocks > 0
-          ? `<span style="font-size:10px;color:#d4d4d4;font-weight:700">🛡 Блокирует ${ownBlocks} сл.</span>`
-          : `<span style="font-size:10px;color:var(--muted)">${escapeHtml(layer.alias)}</span>`;
+          ? `<span class="skin-layer-status">${ico("shield", "ico-sm")}<span>Блокирует ${ownBlocks} сл.</span></span>`
+          : `<span style="font-size:11px;color:var(--muted)">${escapeHtml(layer.alias)}</span>`;
 
       row.innerHTML = `
         <div class="skin-rank">${idx + 1}</div>
-        <div style="cursor:pointer;overflow:hidden" data-act="select">
-          <div style="font-weight:700;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(layer.label)}</div>
+        <div class="skin-layer-meta" style="cursor:pointer" data-act="select">
+          <div class="skin-layer-title">${escapeHtml(layer.label)}</div>
           ${subLine}
         </div>
         <select data-act="pick">${options.join("")}</select>
-        <div class="row" style="gap:2px">
-          <button class="btn btn-sm" data-act="up" ${idx === 0 ? "disabled" : ""} style="padding:3px 5px">▲</button>
-          <button class="btn btn-sm" data-act="dn" ${idx === state.skinLayers.length - 1 ? "disabled" : ""} style="padding:3px 5px">▼</button>
+        <div class="row" style="gap:3px;justify-content:flex-end">
+          <button class="btn btn-icon-xs" data-act="up" ${idx === 0 ? "disabled" : ""} title="Поднять выше" aria-label="Поднять слой выше">${ico("chevron-up", "ico-sm")}</button>
+          <button class="btn btn-icon-xs" data-act="dn" ${idx === state.skinLayers.length - 1 ? "disabled" : ""} title="Опустить ниже" aria-label="Опустить слой ниже">${ico("chevron-down", "ico-sm")}</button>
         </div>
       `;
 
@@ -6503,7 +7415,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
 
   // ==================== TAB 4: VISUAL GUI INVENTORY EDITOR (menus.yml + MC ASSETS) ====================
   const MC_COLOR_MAP = {
-    "0": "#000000", "1": "#0000aa", "2": "#00aa00", "3": "#00aaaa",
+    "0": "#111114", "1": "#0000aa", "2": "#00aa00", "3": "#00aaaa",
     "4": "#aa0000", "5": "#aa00aa", "6": "#ffaa00", "7": "#aaaaaa",
     "8": "#555555", "9": "#5555ff", "a": "#55ff55", "b": "#55ffff",
     "c": "#ff5555", "d": "#ff55ff", "e": "#ffff55", "f": "#ffffff",
@@ -6554,7 +7466,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
       } else if (/^<\/?[a-z_]+>$/i.test(tok)) {
         const tag = tok.slice(1, -1).toLowerCase();
         const mmColors = {
-          white: "#ffffff", gray: "#aaaaaa", dark_gray: "#555555", black: "#000000",
+          white: "#ffffff", gray: "#aaaaaa", dark_gray: "#555555", black: "#111114",
           red: "#ff5555", green: "#55ff55", yellow: "#ffff55", gold: "#ffaa00",
           aqua: "#55ffff", blue: "#5555ff", light_purple: "#ff55ff",
         };
@@ -6638,8 +7550,8 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     if (!cell) {
       const f = sc.filler || {};
       box.innerHTML = sc.fillerEnabled !== false
-        ? `<div style="color:#aaaaaa">Слот #${slotIdx} — Заполнитель (<b>${escapeHtml(f.material || "BLACK_STAINED_GLASS_PANE")}</b>)</div><div class="mc-tooltip-meta">Кликните по слоту, чтобы назначить слот гардероба, кнопку или декор</div>`
-        : `<div style="color:#888888">Слот #${slotIdx} — Пустая ячейка (без заполнителя)</div>`;
+        ? `<div style="color:var(--text-2)">Слот #${slotIdx}: Заполнитель (<b>${escapeHtml(f.material || "BLACK_STAINED_GLASS_PANE")}</b>)</div><div class="mc-tooltip-meta">Кликните по слоту, чтобы назначить слот гардероба, кнопку или декор</div>`
+        : `<div style="color:var(--muted)">Слот #${slotIdx}: Пустая ячейка (без заполнителя)</div>`;
       return;
     }
     const spec = cell.kind === "slot" ? (cell.emptyIcon || {}) : cell;
@@ -6687,7 +7599,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
         iconHtml = (hintSprite ? `<img class="mc-slot-sprite-bg" src="${hintSprite}" alt="">` : "")
           + (imgUrl
             ? `<img class="mc-slot-img${glintCls}" src="${imgUrl}" alt="">`
-            : `<div class="mc-slot-icon">◻</div>`);
+            : `<span style="color:var(--muted)">${ico("box", "ico-md")}</span>`);
         labelText = cell.slotId || "slot";
       } else if (kind === "button" || kind === "decor") {
         cmdVal = cell.customModelData || "";
@@ -6695,13 +7607,13 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
         const glintCls = cell.glint ? " is-glint" : "";
         iconHtml = imgUrl
           ? `<img class="mc-slot-img${glintCls}" src="${imgUrl}" alt="">`
-          : `<div class="mc-slot-icon">◈</div>`;
+          : `<span style="color:var(--muted)">${ico("cube", "ico-md")}</span>`;
         labelText = stripMcFormat(cell.name) || cell.action || "";
       } else {
         if (fillerUrl) {
           iconHtml = `<img class="mc-slot-img is-filler" src="${fillerUrl}" alt="">`;
         } else if (sc.fillerEnabled !== false) {
-          iconHtml = `<div class="mc-slot-icon" style="opacity:0.2">▪</div>`;
+          iconHtml = `<span style="opacity:0.25;width:6px;height:6px;border-radius:1px;background:var(--muted)"></span>`;
         }
       }
 
@@ -7018,7 +7930,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     const inheritClear = $("cfgInheritClearOuter").checked;
 
     return [
-      "# MythicWardrobe v1.8.0 — Фрагмент config.yml",
+      "# MythicWardrobe v1.8.0 - Фрагмент config.yml",
       "skin:",
       `  debounce-ticks: ${debounce}`,
       `  defer-apply-while-gui-open: ${defer}`,
@@ -7127,7 +8039,7 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
     try {
       viewer = new window.StudioWebGLViewer($("viewport3d"));
     } catch (err) {
-      $("viewerBadge").textContent = "WebGL недоступен в этом браузере — 2D превью и сборка ZIP работают полностью!";
+      $("viewerBadge").textContent = "WebGL недоступен в этом браузере - 2D превью и сборка ZIP работают полностью!";
     }
 
     // Tabs
@@ -7179,7 +8091,9 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
       state.testHelmetOn = !state.testHelmetOn;
       const btn = $("btnToggleTestHelmet");
       btn.classList.toggle("active", state.testHelmetOn);
-      btn.textContent = state.testHelmetOn ? "🪖 Шлем НАДЕТ (снять)" : "🪖 Тест: Надеть шлем";
+      btn.innerHTML = state.testHelmetOn
+        ? `${ico("hard-hat")}<span>Шлем надет</span>`
+        : `${ico("hard-hat")}<span>Тест шлема</span>`;
       refresh3dViewport();
     });
     $("btnViewFront").addEventListener("click", () => { if (viewer) viewer.setViewFront(); });
@@ -7190,7 +8104,10 @@ window.MC_SLOT_SPRITES = {"SLOT_HELMET":"data:image/png;base64,iVBORw0KGgoAAAANS
       state.activeComboPreview = null;
       state.testHelmetOn = false;
       const btn = $("btnToggleTestHelmet");
-      if (btn) { btn.classList.remove("active"); btn.textContent = "🪖 Тест: Надеть шлем"; }
+      if (btn) {
+        btn.classList.remove("active");
+        btn.innerHTML = `${ico("hard-hat")}<span>Тест шлема</span>`;
+      }
       renderModelList();
       renderLinksAndCombos();
       refresh3dViewport();

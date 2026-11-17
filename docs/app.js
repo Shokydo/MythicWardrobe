@@ -1,11 +1,15 @@
 /**
- * MythicWardrobe Studio v2.0 — 100% Client-Side Application Controller
+ * MythicWardrobe Studio v2.4 - 100% Client-Side Application Controller
  * Zero server / Zero Python / Zero external network requests!
  */
 (() => {
   "use strict";
 
   const SE = window.StudioEngine;
+
+  function ico(name, cls = "") {
+    return `<svg class="ico${cls ? " " + cls : ""}" aria-hidden="true"><use href="#ico-${name}"></use></svg>`;
+  }
 
   const CATEGORY_META = {
     helmets:     { label: "Шлемы",      slot: "HEAD",  tagClass: "tag-head",  defaultWardrobe: "helmet_cosmetic" },
@@ -284,7 +288,7 @@
 
     const list = state.models.filter(m => filter === "all" || m.category === filter);
     if (!list.length) {
-      container.innerHTML = `<div class="hint">Нет моделей в выбранной категории. Перетащите .bbmodel выше или нажмите «✨ Демо».</div>`;
+      container.innerHTML = `<div class="hint">Нет моделей в выбранной категории. Перетащите .bbmodel выше или нажмите «Демо (10 моделей)».</div>`;
       return;
     }
 
@@ -298,20 +302,21 @@
         <div class="model-item-top">
           <div class="model-item-name" title="${escapeHtml(m.filename)}">${escapeHtml(m.exportId)}</div>
           <div class="row" style="gap:4px">
-            <button class="btn btn-sm ${equipped ? "btn-green" : ""}" data-act="equip">${equipped ? "✓ Надето" : "Надеть"}</button>
-            <button class="btn btn-danger btn-sm" data-act="del" title="Удалить">×</button>
+            <button class="btn btn-sm ${equipped ? "btn-green" : ""}" data-act="equip">${equipped ? `${ico("check", "ico-sm")}<span>Надето</span>` : "Надеть"}</button>
+            <button class="btn btn-danger btn-icon" data-act="del" title="Удалить модель" aria-label="Удалить модель">${ico("x", "ico-sm")}</button>
           </div>
         </div>
         <div class="model-meta">
           <span class="tag ${cmeta.tagClass}">${cmeta.label}</span>
           <span class="tag">${m.analysis.cubeCount} кубов</span>
-          ${m.analysis.hasTint ? '<span class="tag tag-tint">🎨 _t</span>' : ""}
-          ${m.analysis.hasEmissive ? '<span class="tag tag-emis">✨ _e</span>' : ""}
-          ${(m.blocks && m.blocks.length) ? `<span class="tag tag-lock">🔒 ${m.blocks.length}</span>` : ""}
+          ${m.analysis.hasTint ? `<span class="tag tag-tint">${ico("palette", "ico-sm")} _t</span>` : ""}
+          ${m.analysis.hasEmissive ? `<span class="tag tag-emis">${ico("sparkles", "ico-sm")} _e</span>` : ""}
+          ${(m.blocks && m.blocks.length) ? `<span class="tag tag-lock">${ico("lock", "ico-sm")} ${m.blocks.length}</span>` : ""}
         </div>
       `;
       div.addEventListener("click", (e) => {
-        const act = e.target.dataset && e.target.dataset.act;
+        const actEl = e.target.closest("[data-act]");
+        const act = actEl ? actEl.dataset.act : null;
         if (act === "equip") {
           e.stopPropagation();
           state.activeComboPreview = null;
@@ -372,16 +377,16 @@
     const notes = [];
 
     if (m.slot === "HEAD" && hasCmd) {
-      notes.push(`✓ <b>${escapeHtml(mat)} + CMD ${cmd} (HEAD):</b> при экспорте ZIP создастся <code>resourcepack_snippet/assets/minecraft/items/${escapeHtml(mat.toLowerCase())}.json</code> с <code>display_context</code> (на голове 3D, в инвентаре ваша иконка).`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} + CMD ${cmd} (HEAD):</b> при экспорте ZIP создастся <code>resourcepack_snippet/assets/minecraft/items/${escapeHtml(mat.toLowerCase())}.json</code> с <code>display_context</code> (на голове 3D, в инвентаре ваша иконка).`);
     } else if (m.slot === "HEAD" && !hasCmd) {
-      notes.push(`✓ <b>${escapeHtml(mat)} (HEAD):</b> работает через <code>ItemModel: mythicarmor:${escapeHtml(m.exportId)}_head_piece</code>. Добавьте PNG-иконку ниже — MythicArmors сам покажет её в инвентаре!`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} (HEAD):</b> работает через <code>ItemModel: mythicarmor:${escapeHtml(m.exportId)}_head_piece</code>. Добавьте PNG-иконку ниже, и MythicArmors покажет её в инвентаре.`);
     } else if (hasCmd) {
-      notes.push(`✓ <b>${escapeHtml(mat)} + CMD ${cmd} (${m.slot}):</b> в инвентаре ваша иконка по CustomModelData, а на теле 3D-броня через <code>Equippable.Model</code>.`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} + CMD ${cmd} (${m.slot}):</b> в инвентаре ваша иконка по CustomModelData, а на теле 3D-броня через <code>Equippable.Model</code>.`);
     } else {
-      notes.push(`✓ <b>${escapeHtml(mat)} (${m.slot}):</b> 3D-броня через <code>Equippable.Model</code>.`);
+      notes.push(`${ico("check", "ico-sm")} <b>${escapeHtml(mat)} (${m.slot}):</b> 3D-броня через <code>Equippable.Model</code>.`);
     }
     if (!isDyeable && (m.colorRgb || m.analysis.hasTint || m.autoTintMode === "full" || m.autoTintMode === "light_only")) {
-      notes.push(`⚠ Материал <code>${escapeHtml(mat)}</code> не красится через <code>Options.Color</code> — для покраски <code>_t.png</code> используйте <code>LEATHER_*</code>.`);
+      notes.push(`${ico("alert", "ico-sm")} Материал <code>${escapeHtml(mat)}</code> не красится через <code>Options.Color</code>: для покраски <code>_t.png</code> используйте <code>LEATHER_*</code>.`);
     }
     box.innerHTML = notes.join("<br>");
   }
@@ -393,32 +398,32 @@
     const autoL = m.autoLayers !== false;
 
     chips.push(a.hasLayer1
-      ? `<span class="tag">✓ layer_1</span>`
-      : autoL ? `<span class="tag tag-tint">+ layer_1 (авто)</span>` : `<span class="tag tag-missing">нет layer_1</span>`);
+      ? `<span class="tag">${ico("check", "ico-sm")} layer_1</span>`
+      : autoL ? `<span class="tag tag-tint">${ico("plus", "ico-sm")} layer_1 (авто)</span>` : `<span class="tag tag-missing">нет layer_1</span>`);
     chips.push(a.hasLayer2
-      ? `<span class="tag">✓ layer_2</span>`
-      : autoL ? `<span class="tag tag-tint">+ layer_2 (авто)</span>` : `<span class="tag tag-missing">нет layer_2</span>`);
+      ? `<span class="tag">${ico("check", "ico-sm")} layer_2</span>`
+      : autoL ? `<span class="tag tag-tint">${ico("plus", "ico-sm")} layer_2 (авто)</span>` : `<span class="tag tag-missing">нет layer_2</span>`);
 
     if (m.autoTintMode === "full" || m.autoTintMode === "light_only") {
-      chips.push(`<span class="tag tag-tint">+ _t.png (авто)</span>`);
+      chips.push(`<span class="tag tag-tint">${ico("plus", "ico-sm")} _t.png (авто)</span>`);
     } else if (a.hasTint && m.autoTintMode !== "none") {
-      chips.push(`<span class="tag">✓ _t.png</span>`);
+      chips.push(`<span class="tag">${ico("check", "ico-sm")} _t.png</span>`);
     } else {
       chips.push(`<span class="tag tag-missing">без _t.png</span>`);
     }
 
     if (m.autoEmissiveMode === "bright_neon") {
-      chips.push(`<span class="tag tag-emis">+ _e.png (авто)</span>`);
+      chips.push(`<span class="tag tag-emis">${ico("plus", "ico-sm")} _e.png (авто)</span>`);
     } else if (a.hasEmissive && m.autoEmissiveMode !== "none") {
-      chips.push(`<span class="tag">✓ _e.png</span>`);
+      chips.push(`<span class="tag">${ico("check", "ico-sm")} _e.png</span>`);
     } else {
       chips.push(`<span class="tag tag-missing">без _e.png</span>`);
     }
 
     if (m.customIconDataUri) {
-      chips.push(`<span class="tag tag-tint">+ 2D-иконка</span>`);
+      chips.push(`<span class="tag tag-tint">${ico("plus", "ico-sm")} 2D-иконка</span>`);
     } else if (a.hasIcons && a.hasIcons.length) {
-      chips.push(`<span class="tag">✓ иконка (${a.hasIcons.join(",")})</span>`);
+      chips.push(`<span class="tag">${ico("check", "ico-sm")} иконка (${a.hasIcons.join(",")})</span>`);
     } else {
       chips.push(`<span class="tag tag-missing">без 2D-иконки</span>`);
     }
@@ -431,7 +436,7 @@
     if (m.customIconDataUri) {
       pbox.innerHTML = `<img src="${m.customIconDataUri}" alt="icon">`;
     } else {
-      pbox.innerHTML = `<span style="font-size:10px;color:var(--muted)">2D</span>`;
+      pbox.innerHTML = `<span>2D</span>`;
     }
   }
 
@@ -553,7 +558,7 @@
     // Populate swap target dropdown with all other loaded 3D models
     const swapSel = $("selHairSwapModel");
     if (swapSel) {
-      const opts = [`<option value="">— Указать вручную по MythicMobs ID ниже —</option>`];
+      const opts = [`<option value="">Указать вручную по MythicMobs ID</option>`];
       for (const other of state.models) {
         if (other.id === m.id) continue;
         const selected = h.swapModelInternalId === other.id ? "selected" : "";
@@ -692,7 +697,7 @@
         renderTextureAutoFixer(m);
         showToast("Снята 32×32 PNG-иконка прямо с 3D-модели!");
       } else {
-        showToast("Не удалось снять иконку — убедитесь, что модель видна в 3D");
+        showToast("Не удалось снять иконку: убедитесь, что модель видна в 3D");
       }
     });
 
@@ -859,31 +864,32 @@
       const card = document.createElement("div");
       card.className = "link-card";
       card.innerHTML = `
-        <div class="row" style="justify-content:space-between;margin-bottom:6px">
-          <label class="row" style="font-weight:700;font-size:12px;cursor:pointer">
+        <div class="row-between">
+          <label class="row" style="font-weight:600;font-size:12.5px;cursor:pointer">
             <input type="checkbox" data-f="enabled" ${link.enabled ? "checked" : ""}>
             <span>${escapeHtml(link.name)}</span>
           </label>
           <div class="row" style="gap:4px">
             <span class="tag">${combos.length} комбо</span>
-            <button class="btn btn-danger btn-sm" data-act="rm">×</button>
+            <button class="btn btn-danger btn-icon" data-act="rm" title="Удалить связку" aria-label="Удалить связку">${ico("x", "ico-sm")}</button>
           </div>
         </div>
         <div class="grid-3">
-          <select data-f="cat0">${catOptions}</select>
-          <select data-f="cat1">${catOptions}</select>
-          <select data-f="slot">
+          <select class="select-sm" data-f="cat0">${catOptions}</select>
+          <select class="select-sm" data-f="cat1">${catOptions}</select>
+          <select class="select-sm" data-f="slot">
             <option value="HEAD">Слот HEAD</option>
             <option value="CHEST">Слот CHEST</option>
             <option value="LEGS">Слот LEGS</option>
             <option value="FEET">Слот FEET</option>
           </select>
         </div>
-        <div class="row-wrap" style="margin-top:6px;justify-content:space-between">
-          <label class="toggle-chip" style="font-size:10.5px">
-            <input type="checkbox" data-f="strip" ${link.stripFrontStraps ? "checked" : ""}> Убирать передние лямки (strap)
+        <div class="row-between">
+          <label class="toggle-chip">
+            <input type="checkbox" data-f="strip" ${link.stripFrontStraps ? "checked" : ""}>
+            <span>Убирать передние лямки</span>
           </label>
-          <select data-f="secSlot" style="width:125px;padding:3px 6px;font-size:11px">
+          <select class="select-sm" data-f="secSlot" style="width:130px">
             <option value="mask_3d">2-й: mask_3d</option>
             <option value="hair_3d">2-й: hair_3d</option>
             <option value="backpack_3d">2-й: backpack_3d</option>
@@ -947,7 +953,7 @@
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escapeHtml(label)}">
           <span class="tag">${link.slot}</span> ${escapeHtml(label)}
         </span>
-        <button class="btn btn-sm ${isActive ? "btn-green" : ""}">${isActive ? "✓ В 3D" : "Примерить"}</button>
+        <button class="btn btn-sm ${isActive ? "btn-green" : ""}">${isActive ? `${ico("check", "ico-sm")}<span>В 3D</span>` : "Примерить"}</button>
       `;
       row.querySelector("button").addEventListener("click", () => previewCombinedPair(key, link, pair));
       previewEl.appendChild(row);
@@ -990,8 +996,8 @@
         bbmodel: state.activeComboPreview.bbmodel,
         colorRgb: state.activeComboPreview.colorRgb,
       }]);
-      chips.innerHTML = `<span class="tag tag-emis">⚡ Комбо 3D: ${escapeHtml(state.activeComboPreview.name)}</span>`;
-      $("viewerBadge").textContent = `Комбо: ${state.activeComboPreview.name} · ЛКМ — вращение · Колесо — зум`;
+      chips.innerHTML = `<span class="tag tag-emis">${ico("zap", "ico-sm")} Комбо 3D: ${escapeHtml(state.activeComboPreview.name)}</span>`;
+      $("viewerBadge").textContent = `Комбо: ${state.activeComboPreview.name} · ЛКМ: вращение · Колесо: зум`;
       return;
     }
 
@@ -1007,7 +1013,7 @@
       if (isHair && helmetActive && m.hair3d) {
         const mode = m.hair3d.helmetMode || "HIDE_ALL";
         if (mode === "HIDE_ALL") {
-          chipHtml.push(`<span class="tag tag-missing" title="Скрыта шлемом (HIDE_ALL)">${escapeHtml(m.exportId)} [скрыто шлемом]</span>`);
+          chipHtml.push(`<span class="tag tag-missing" title="Скрыта шлемом (HIDE_ALL)">${escapeHtml(m.exportId)} [скрыто]</span>`);
           continue;
         }
         if (mode === "SWAP_MODEL") {
@@ -1023,7 +1029,7 @@
               scale: swapTarget.scale,
               colorRgb: swapTarget.colorRgb || m.colorRgb || null,
             });
-            chipHtml.push(`<span class="tag tag-emis" title="Подмена модели при шлеме (SWAP_MODEL)">🔄 ${escapeHtml(swapTarget.exportId)}</span>`);
+            chipHtml.push(`<span class="tag tag-emis" title="Подмена модели при шлеме (SWAP_MODEL)">${ico("refresh", "ico-sm")} ${escapeHtml(swapTarget.exportId)}</span>`);
             continue;
           }
         }
@@ -1060,20 +1066,20 @@
           scale: demoHelmet.scale,
           colorRgb: demoHelmet.colorRgb || null,
         });
-        chipHtml.push(`<span class="tag tag-lock">🪖 ${escapeHtml(demoHelmet.exportId)} (тест)</span>`);
+        chipHtml.push(`<span class="tag tag-lock">${ico("hard-hat", "ico-sm")} ${escapeHtml(demoHelmet.exportId)} (тест)</span>`);
       }
     }
 
     await viewer.setModels(renderList);
 
     if (!chipHtml.length) {
-      chips.innerHTML = `<span class="hint" style="margin:0">3D-модели сняты — показан 2D-манекен скина</span>`;
-      $("viewerBadge").textContent = "ЛКМ — вращение · Колесо — зум · ПКМ — панорама";
+      chips.innerHTML = `<span class="hint">3D-модели сняты: показан 2D-манекен скина</span>`;
+      $("viewerBadge").textContent = "ЛКМ: вращение · Колесо: зум · ПКМ: панорама";
     } else {
       chips.innerHTML = chipHtml.join("");
-      $("viewerBadge").textContent = helmetActive
-        ? `🪖 Шлем надет (проверка 3D-волос) · Моделей: ${renderList.length}`
-        : `Надето 3D-моделей: ${renderList.length} · ЛКМ — вращение · Колесо — зум`;
+      $("viewerBadge").innerHTML = helmetActive
+        ? `${ico("hard-hat", "ico-sm")}<span>Шлем надет (проверка 3D-волос) · Моделей: ${renderList.length}</span>`
+        : `<span>Надето 3D-моделей: ${renderList.length} · ЛКМ: вращение · Колесо: зум</span>`;
     }
   }
 
@@ -1114,7 +1120,7 @@
     }
     const btn = $("btnExportFullZip");
     btn.disabled = true;
-    btn.textContent = "⏳ Сшиваем модели и собираем ZIP...";
+    btn.innerHTML = `${ico("loader")}<span>Сборка ZIP...</span>`;
 
     try {
       const packName = $("inpPackName").value.trim() || "my_wardrobe_pack";
@@ -1171,13 +1177,13 @@
       });
 
       downloadBlob(blob, `${SE.sanitizeId(packName)}.zip`);
-      $("exportReport").innerHTML = `<span style="color:#ffffff">✓ Готово! В архиве: <b>${summary.modelFiles.length}</b> .bbmodel (из них <b>${summary.comboCount}</b> комбо), <b>${summary.itemCount}</b> команд выдачи + hair-3d.yml + menus.yml + priority.yml.</span>`;
+      $("exportReport").innerHTML = `<span style="color:var(--text)">${ico("check", "ico-sm")} Готово! В архиве: <b>${summary.modelFiles.length}</b> .bbmodel (из них <b>${summary.comboCount}</b> комбо), <b>${summary.itemCount}</b> команд выдачи + hair-3d.yml + menus.yml + priority.yml.</span>`;
       showToast("ZIP-архив собран локально и скачан!");
     } catch (err) {
       showToast(`Ошибка экспорта: ${err.message}`, 5000);
     } finally {
       btn.disabled = false;
-      btn.textContent = "🚀 Собрать и скачать ZIP (офлайн)";
+      btn.innerHTML = `${ico("download")}<span>Собрать и скачать ZIP</span>`;
     }
   }
 
@@ -1274,7 +1280,7 @@
     renderSkinLayersList();
     renderSkinBlockingEditor();
     renderSkinComposite();
-    showToast("☣ Надет Костюм химзащиты — 8 конфликтующих слоёв заблокированы 🔒 и скрыты на 3D-манекене!", 4200);
+    showToast("Надет Костюм химзащиты: 8 конфликтующих слоёв заблокированы и скрыты на 3D-манекене!", 4200);
   }
 
   function renderSkinLayersList() {
@@ -1286,7 +1292,7 @@
     const lockBadge = $("skinBlockedCountBadge");
     if (blockMap.size > 0) {
       lockBadge.style.display = "inline-flex";
-      lockBadge.textContent = `🔒 Заблок.: ${blockMap.size}`;
+      lockBadge.innerHTML = `${ico("lock", "ico-sm")}<span>Заблок.: ${blockMap.size}</span>`;
     } else {
       lockBadge.style.display = "none";
     }
@@ -1302,9 +1308,9 @@
         + (layer.id === state.activeSkinLayerId ? " active-layer" : "")
         + (lockedBy ? " locked-layer" : "");
 
-      const options = [`<option value="">— нет —</option>`];
+      const options = [`<option value="">нет</option>`];
       if (sel && sel.isCustom) {
-        options.push(`<option value="__custom__" selected>★ ${escapeHtml(sel.name)}</option>`);
+        options.push(`<option value="__custom__" selected>* ${escapeHtml(sel.name)}</option>`);
       }
       for (const item of libList) {
         const isSel = sel && !sel.isCustom && sel.name === item.name;
@@ -1312,21 +1318,21 @@
       }
 
       const subLine = lockedBy
-        ? `<span style="font-size:10px;color:#ffffff;font-weight:700">🔒 Заблокировано (${escapeHtml(lockedBy.byLabel)})</span>`
+        ? `<span class="skin-layer-status">${ico("lock", "ico-sm")}<span>Заблок. (${escapeHtml(lockedBy.byLabel)})</span></span>`
         : ownBlocks > 0
-          ? `<span style="font-size:10px;color:#d4d4d4;font-weight:700">🛡 Блокирует ${ownBlocks} сл.</span>`
-          : `<span style="font-size:10px;color:var(--muted)">${escapeHtml(layer.alias)}</span>`;
+          ? `<span class="skin-layer-status">${ico("shield", "ico-sm")}<span>Блокирует ${ownBlocks} сл.</span></span>`
+          : `<span style="font-size:11px;color:var(--muted)">${escapeHtml(layer.alias)}</span>`;
 
       row.innerHTML = `
         <div class="skin-rank">${idx + 1}</div>
-        <div style="cursor:pointer;overflow:hidden" data-act="select">
-          <div style="font-weight:700;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(layer.label)}</div>
+        <div class="skin-layer-meta" style="cursor:pointer" data-act="select">
+          <div class="skin-layer-title">${escapeHtml(layer.label)}</div>
           ${subLine}
         </div>
         <select data-act="pick">${options.join("")}</select>
-        <div class="row" style="gap:2px">
-          <button class="btn btn-sm" data-act="up" ${idx === 0 ? "disabled" : ""} style="padding:3px 5px">▲</button>
-          <button class="btn btn-sm" data-act="dn" ${idx === state.skinLayers.length - 1 ? "disabled" : ""} style="padding:3px 5px">▼</button>
+        <div class="row" style="gap:3px;justify-content:flex-end">
+          <button class="btn btn-icon-xs" data-act="up" ${idx === 0 ? "disabled" : ""} title="Поднять выше" aria-label="Поднять слой выше">${ico("chevron-up", "ico-sm")}</button>
+          <button class="btn btn-icon-xs" data-act="dn" ${idx === state.skinLayers.length - 1 ? "disabled" : ""} title="Опустить ниже" aria-label="Опустить слой ниже">${ico("chevron-down", "ico-sm")}</button>
         </div>
       `;
 
@@ -1574,7 +1580,7 @@
 
   // ==================== TAB 4: VISUAL GUI INVENTORY EDITOR (menus.yml + MC ASSETS) ====================
   const MC_COLOR_MAP = {
-    "0": "#000000", "1": "#0000aa", "2": "#00aa00", "3": "#00aaaa",
+    "0": "#111114", "1": "#0000aa", "2": "#00aa00", "3": "#00aaaa",
     "4": "#aa0000", "5": "#aa00aa", "6": "#ffaa00", "7": "#aaaaaa",
     "8": "#555555", "9": "#5555ff", "a": "#55ff55", "b": "#55ffff",
     "c": "#ff5555", "d": "#ff55ff", "e": "#ffff55", "f": "#ffffff",
@@ -1625,7 +1631,7 @@
       } else if (/^<\/?[a-z_]+>$/i.test(tok)) {
         const tag = tok.slice(1, -1).toLowerCase();
         const mmColors = {
-          white: "#ffffff", gray: "#aaaaaa", dark_gray: "#555555", black: "#000000",
+          white: "#ffffff", gray: "#aaaaaa", dark_gray: "#555555", black: "#111114",
           red: "#ff5555", green: "#55ff55", yellow: "#ffff55", gold: "#ffaa00",
           aqua: "#55ffff", blue: "#5555ff", light_purple: "#ff55ff",
         };
@@ -1709,8 +1715,8 @@
     if (!cell) {
       const f = sc.filler || {};
       box.innerHTML = sc.fillerEnabled !== false
-        ? `<div style="color:#aaaaaa">Слот #${slotIdx} — Заполнитель (<b>${escapeHtml(f.material || "BLACK_STAINED_GLASS_PANE")}</b>)</div><div class="mc-tooltip-meta">Кликните по слоту, чтобы назначить слот гардероба, кнопку или декор</div>`
-        : `<div style="color:#888888">Слот #${slotIdx} — Пустая ячейка (без заполнителя)</div>`;
+        ? `<div style="color:var(--text-2)">Слот #${slotIdx}: Заполнитель (<b>${escapeHtml(f.material || "BLACK_STAINED_GLASS_PANE")}</b>)</div><div class="mc-tooltip-meta">Кликните по слоту, чтобы назначить слот гардероба, кнопку или декор</div>`
+        : `<div style="color:var(--muted)">Слот #${slotIdx}: Пустая ячейка (без заполнителя)</div>`;
       return;
     }
     const spec = cell.kind === "slot" ? (cell.emptyIcon || {}) : cell;
@@ -1758,7 +1764,7 @@
         iconHtml = (hintSprite ? `<img class="mc-slot-sprite-bg" src="${hintSprite}" alt="">` : "")
           + (imgUrl
             ? `<img class="mc-slot-img${glintCls}" src="${imgUrl}" alt="">`
-            : `<div class="mc-slot-icon">◻</div>`);
+            : `<span style="color:var(--muted)">${ico("box", "ico-md")}</span>`);
         labelText = cell.slotId || "slot";
       } else if (kind === "button" || kind === "decor") {
         cmdVal = cell.customModelData || "";
@@ -1766,13 +1772,13 @@
         const glintCls = cell.glint ? " is-glint" : "";
         iconHtml = imgUrl
           ? `<img class="mc-slot-img${glintCls}" src="${imgUrl}" alt="">`
-          : `<div class="mc-slot-icon">◈</div>`;
+          : `<span style="color:var(--muted)">${ico("cube", "ico-md")}</span>`;
         labelText = stripMcFormat(cell.name) || cell.action || "";
       } else {
         if (fillerUrl) {
           iconHtml = `<img class="mc-slot-img is-filler" src="${fillerUrl}" alt="">`;
         } else if (sc.fillerEnabled !== false) {
-          iconHtml = `<div class="mc-slot-icon" style="opacity:0.2">▪</div>`;
+          iconHtml = `<span style="opacity:0.25;width:6px;height:6px;border-radius:1px;background:var(--muted)"></span>`;
         }
       }
 
@@ -2089,7 +2095,7 @@
     const inheritClear = $("cfgInheritClearOuter").checked;
 
     return [
-      "# MythicWardrobe v1.8.0 — Фрагмент config.yml",
+      "# MythicWardrobe v1.8.0 - Фрагмент config.yml",
       "skin:",
       `  debounce-ticks: ${debounce}`,
       `  defer-apply-while-gui-open: ${defer}`,
@@ -2198,7 +2204,7 @@
     try {
       viewer = new window.StudioWebGLViewer($("viewport3d"));
     } catch (err) {
-      $("viewerBadge").textContent = "WebGL недоступен в этом браузере — 2D превью и сборка ZIP работают полностью!";
+      $("viewerBadge").textContent = "WebGL недоступен в этом браузере - 2D превью и сборка ZIP работают полностью!";
     }
 
     // Tabs
@@ -2250,7 +2256,9 @@
       state.testHelmetOn = !state.testHelmetOn;
       const btn = $("btnToggleTestHelmet");
       btn.classList.toggle("active", state.testHelmetOn);
-      btn.textContent = state.testHelmetOn ? "🪖 Шлем НАДЕТ (снять)" : "🪖 Тест: Надеть шлем";
+      btn.innerHTML = state.testHelmetOn
+        ? `${ico("hard-hat")}<span>Шлем надет</span>`
+        : `${ico("hard-hat")}<span>Тест шлема</span>`;
       refresh3dViewport();
     });
     $("btnViewFront").addEventListener("click", () => { if (viewer) viewer.setViewFront(); });
@@ -2261,7 +2269,10 @@
       state.activeComboPreview = null;
       state.testHelmetOn = false;
       const btn = $("btnToggleTestHelmet");
-      if (btn) { btn.classList.remove("active"); btn.textContent = "🪖 Тест: Надеть шлем"; }
+      if (btn) {
+        btn.classList.remove("active");
+        btn.innerHTML = `${ico("hard-hat")}<span>Тест шлема</span>`;
+      }
       renderModelList();
       renderLinksAndCombos();
       refresh3dViewport();
