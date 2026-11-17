@@ -61,11 +61,18 @@ class MenuConfigLoaderTest {
                 .anyMatch(b -> b.action() == MenuAction.OPEN_HEAD && b.activeIcon() != null && b.activeIcon().glint());
         assertTrue(hasActiveGlintTab, "Tabbed menu should define active glint styling for selected tab");
 
-        // 3. Unified menu — must contain every single slot defined in slots.yml with zero overlaps!
+        // 3. Unified menu — must contain all 21 individually separated slots from slots.yml with zero overlaps!
         InputStream slotsIn = getClass().getClassLoader().getResourceAsStream("slots.yml");
         assertNotNull(slotsIn, "slots.yml resource must exist");
         YamlConfiguration slotsYaml = YamlConfiguration.loadConfiguration(new InputStreamReader(slotsIn, StandardCharsets.UTF_8));
         Set<String> allDefinedSlots = slotsYaml.getConfigurationSection("slots").getKeys(false);
+        assertEquals(21, allDefinedSlots.size(), "slots.yml must define all 21 individually separated slots");
+        assertTrue(allDefinedSlots.containsAll(Set.of(
+                "hat", "mask_skin", "hair_3d", "mask_3d", "helmet_real", "helmet_cosmetic",
+                "undershirt", "jacket", "gloves", "chest_real", "chest_cosmetic", "backpack_3d",
+                "pants", "belt_skin", "legs_real", "legs_cosmetic", "belt_3d",
+                "socks", "boots_skin", "boots_real", "boots_cosmetic"
+        )), "All 21 canonical separated slot IDs must exist in slots.yml");
 
         MenuLayoutDef unified = cfg.unifiedMenu();
         assertEquals(5, unified.rows());
@@ -74,12 +81,108 @@ class MenuConfigLoaderTest {
         assertEquals(allDefinedSlots.size(), unified.slotPositions().size(),
                 "Unified menu should map all " + allDefinedSlots.size() + " wardrobe slots from slots.yml");
         for (String slotId : allDefinedSlots) {
+            ArmorSection sec = ArmorSection.valueOf(slotsYaml.getString("slots." + slotId + ".section").toUpperCase());
             assertTrue(unified.slotPositions().containsKey(slotId.toLowerCase()),
                     "Unified menu missing slot " + slotId);
-            assertTrue(tabbed.slotPositions().containsKey(slotId.toLowerCase()),
+            assertTrue(cfg.getTabbedMenu(sec).slotPositions().containsKey(slotId.toLowerCase()),
                     "Tabbed menu missing slot " + slotId);
+            assertTrue(cfg.getCompactMenu(sec).slotPositions().containsKey(slotId.toLowerCase()),
+                    "Compact menu (" + sec + ") missing slot " + slotId);
         }
         assertNoSlotButtonOverlap(unified);
+    }
+
+    @Test
+    void supportsPerSectionTabbedOverridesAndLegacyFeetAliases() {
+        String tabbedYaml = """
+                default-mode: "TABBED"
+                tabbed:
+                  title: "Base <section>"
+                  rows: 3
+                  slot-positions:
+                    helmet_real: 15
+                    helmet_cosmetic: 16
+                    boots_real: 14
+                    boots_cosmetic: 15
+                  buttons:
+                    close:
+                      slots: [26]
+                      action: CLOSE
+                      material: BARRIER
+                  sections:
+                    HEAD:
+                      title: "Custom Head Tab"
+                      rows: 4
+                      slot-positions:
+                        helmet_real: 11
+                        helmet_cosmetic: 12
+                """;
+        YamlConfiguration yaml = new YamlConfiguration();
+        assertDoesNotThrow(() -> yaml.loadFromString(tabbedYaml));
+
+        MenuConfigLoader.ParsedMenusConfig cfg = MenuConfigLoader.load(yaml);
+        assertEquals(MenuMode.TABBED, cfg.defaultMode());
+        assertEquals("Custom Head Tab", cfg.getTabbedTitle(ArmorSection.HEAD));
+        assertEquals(4, cfg.getTabbedMenu(ArmorSection.HEAD).rows());
+        assertEquals(11, cfg.getTabbedMenu(ArmorSection.HEAD).slotPositions().get("helmet_real"));
+        assertEquals(12, cfg.getTabbedMenu(ArmorSection.HEAD).slotPositions().get("helmet_cosmetic"));
+        assertEquals(1, cfg.getTabbedMenu(ArmorSection.HEAD).buttons().size());
+        assertEquals(3, cfg.getTabbedMenu(ArmorSection.FEET).rows());
+        assertEquals(14, cfg.getTabbedMenu(ArmorSection.FEET).slotPositions().get("boots_real"));
+
+        // Legacy FEET slot alias bridge (belt_real <-> boots_real, belt_cosmetic <-> boots_cosmetic)
+        var legacyReal = new dev.mythicwardrobe.model.ItemWardrobeMeta("belt_real", null, null, null, null, null, null, null, null);
+        assertTrue(legacyReal.matchesSlot("boots_real"));
+        assertTrue(legacyReal.matchesSlot("belt_real"));
+        assertFalse(legacyReal.matchesSlot("boots_cosmetic"));
+
+        var newCosmetic = new dev.mythicwardrobe.model.ItemWardrobeMeta("boots_cosmetic", null, null, null, null, null, null, null, null);
+        assertTrue(newCosmetic.matchesSlot("belt_cosmetic"));
+        assertTrue(newCosmetic.matchesSlot("boots_cosmetic"));
+        assertFalse(newCosmetic.matchesSlot("boots_real"));
+
+        // Verify partial custom Studio layout keeps ONLY explicitly placed slots (no leaked slots!)
+        // and verify wearable armor material detection for right-click hand equip blocking
+        String partialUnified = """
+                default-mode: "UNIFIED"
+                unified:
+                  title: "&8Полный Гардероб"
+                  rows: 5
+                  filler:
+                    enabled: false
+                  slot-positions:
+                    mask_skin: 0
+                    hat: 1
+                    helmet_cosmetic: 3
+                    mask_3d: 4
+                    jacket: 9
+                    undershirt: 10
+                    chest_cosmetic: 12
+                    backpack_3d: 13
+                    pants: 18
+                    belt_skin: 19
+                    legs_cosmetic: 21
+                    belt_3d: 22
+                    boots_skin: 27
+                    socks: 28
+                    boots_cosmetic: 30
+                """;
+        YamlConfiguration partialYaml = new YamlConfiguration();
+        assertDoesNotThrow(() -> partialYaml.loadFromString(partialUnified));
+        var partialCfg = MenuConfigLoader.load(partialYaml);
+        assertFalse(partialCfg.unifiedMenu().fillerEnabled());
+        assertEquals(15, partialCfg.unifiedMenu().slotPositions().size());
+        assertNull(partialCfg.unifiedMenu().slotPositions().get("chest_real"));
+        assertNull(partialCfg.unifiedMenu().slotPositions().get("hair_3d"));
+
+        // Hand right-click armor blocking material helper
+        assertTrue(dev.mythicwardrobe.model.ItemWardrobeMeta.isWearableArmorMaterial(Material.DIAMOND_CHESTPLATE));
+        assertTrue(dev.mythicwardrobe.model.ItemWardrobeMeta.isWearableArmorMaterial(Material.LEATHER_BOOTS));
+        assertTrue(dev.mythicwardrobe.model.ItemWardrobeMeta.isWearableArmorMaterial(Material.TURTLE_HELMET));
+        assertTrue(dev.mythicwardrobe.model.ItemWardrobeMeta.isWearableArmorMaterial(Material.ELYTRA));
+        assertFalse(dev.mythicwardrobe.model.ItemWardrobeMeta.isWearableArmorMaterial(Material.PAPER));
+        assertFalse(dev.mythicwardrobe.model.ItemWardrobeMeta.isWearableArmorMaterial(Material.CARVED_PUMPKIN));
+        assertFalse(dev.mythicwardrobe.model.ItemWardrobeMeta.isWearableArmorMaterial(Material.PLAYER_HEAD));
     }
 
     @Test

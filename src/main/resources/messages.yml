@@ -54,3 +54,4 @@ messages:
   equip-auto-unequipped: "<yellow>Снято конфликтующих вещей: <white><count></white> <gray>(возвращены в инвентарь)."
   item-blocks-set: "<green>Для предмета в руке задана блокировка слоёв/слотов: <yellow><blocks></yellow> <gray>(режим: <white><mode></white>)."
   item-blocks-cleared: "<yellow>Блокировки слоёв/слотов сняты с предмета в руке."
+  hand-armor-equip-disabled: "<red>Броню нельзя надевать через ПКМ из руки — используйте меню гардероба <white>/wardrobe</white>!"

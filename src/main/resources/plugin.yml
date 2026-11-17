@@ -28,6 +28,9 @@ permissions:
   mythicwardrobe.quickequip:
     description: Быстрое надевание одежды ПКМ из руки
     default: true
+  mythicwardrobe.bypass.handequip:
+    description: Обход запрета на надевание брони через ПКМ в руке
+    default: false
   mythicwardrobe.admin:
     description: Админ-команды (/wardrobe set, clear, reset, tag, reload, debug)
     default: op

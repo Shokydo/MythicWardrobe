@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,14 +30,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class WardrobeListener implements Listener {
+
+    private static final long HAND_EQUIP_MSG_COOLDOWN_MS = 1500L;
 
     private final JavaPlugin plugin;
     private final WardrobeConfig config;
     private final WardrobeManager manager;
     private final WardrobeGuiManager guiManager;
     private final WardrobeItemResolver resolver;
+    private final Map<UUID, Long> handEquipMsgCooldowns = new ConcurrentHashMap<>();
 
     public WardrobeListener(
             JavaPlugin plugin,
@@ -182,22 +188,62 @@ public final class WardrobeListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (!config.isRightClickQuickEquip()) return;
-        if (event.getHand() != EquipmentSlot.HAND) return;
-        if (event.getAction() != Action.RIGHT_CLICK_AIR) return;
+        Action action = event.getAction();
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
+        EquipmentSlot hand = event.getHand();
+        if (hand != EquipmentSlot.HAND && hand != EquipmentSlot.OFF_HAND) return;
 
         Player player = event.getPlayer();
-        if (!player.hasPermission("mythicwardrobe.quickequip")) return;
-
         ItemStack item = event.getItem();
         if (item == null || item.getType().isAir()) return;
 
         ItemWardrobeMeta meta = resolver.resolve(item);
+
+        // 1. Block equipping armor directly via Right-Click in hand (main or off-hand, air or block)!
+        //    Players must equip armor / 3D MythicArmors through the Wardrobe GUI (/wardrobe).
+        if (config.isDisableHandRightClickArmorEquip()
+                && !player.hasPermission("mythicwardrobe.bypass.handequip")
+                && resolver.isHandRightClickArmor(item, meta)) {
+            boolean interactableBlock = action == Action.RIGHT_CLICK_BLOCK
+                    && event.getClickedBlock() != null
+                    && event.getClickedBlock().getType().isInteractable()
+                    && !player.isSneaking();
+
+            // Always deny using the armor item in hand; only keep block interaction open for chests/doors/etc.
+            event.setUseItemInHand(Event.Result.DENY);
+            if (!interactableBlock) {
+                event.setCancelled(true);
+                long now = System.currentTimeMillis();
+                Long last = handEquipMsgCooldowns.get(player.getUniqueId());
+                if (last == null || (now - last) >= HAND_EQUIP_MSG_COOLDOWN_MS) {
+                    handEquipMsgCooldowns.put(player.getUniqueId(), now);
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.55f, 1.0f);
+                    String msg = config.getPrefixedMessage(
+                            "hand-armor-equip-disabled",
+                            "<red>Броню нельзя надевать через ПКМ из руки — используйте меню гардероба <white>/wardrobe</white>!"
+                    );
+                    if (!msg.isBlank()) {
+                        player.sendMessage(TextUtil.parse(msg));
+                    }
+                }
+            }
+            // Force client inventory resync next tick so no ghost armor flickers on the player
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (player.isOnline()) player.updateInventory();
+            });
+            return;
+        }
+
+        if (!config.isRightClickQuickEquip()) return;
+        if (hand != EquipmentSlot.HAND) return;
+        if (action != Action.RIGHT_CLICK_AIR) return;
+        if (!player.hasPermission("mythicwardrobe.quickequip")) return;
+
         WardrobeSlotDef targetSlot = null;
 
-        // If item is an Equippable 3D armor model (e.g. mask, backpack, helmet, vest):
+        // If item is an Equippable 3D armor model (only reachable when disable-hand-right-click-armor-equip is false):
         //   - When the real vanilla armor slot is EMPTY, let vanilla equip it standalone immediately!
         //   - When the real armor slot is ALREADY OCCUPIED, smartly quick-equip it into an empty
         //     3D overlay slot (mask_3d / backpack_3d) so BOTH 3D models wear simultaneously!
@@ -311,6 +357,7 @@ public final class WardrobeListener implements Listener {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
+        handEquipMsgCooldowns.remove(event.getPlayer().getUniqueId());
         guiManager.clearNavHistory(event.getPlayer().getUniqueId());
         manager.handleQuit(event.getPlayer());
     }

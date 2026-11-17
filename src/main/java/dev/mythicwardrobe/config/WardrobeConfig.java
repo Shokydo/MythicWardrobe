@@ -54,6 +54,7 @@ public final class WardrobeConfig {
     private ClickMode clickMode;
     private boolean smartCursorEquip;
     private boolean rightClickQuickEquip;
+    private boolean disableHandRightClickArmorEquip = true;
 
     // Cosmetic Armor
     private boolean cosmeticArmorEnabled;
@@ -144,6 +145,7 @@ public final class WardrobeConfig {
         this.clickMode = parseEnum(cfg.getString("inventory-trigger.click-mode", "EMPTY_OR_RIGHT"), ClickMode.EMPTY_OR_RIGHT);
         this.smartCursorEquip = cfg.getBoolean("inventory-trigger.smart-cursor-equip", true);
         this.rightClickQuickEquip = cfg.getBoolean("inventory-trigger.right-click-quick-equip", true);
+        this.disableHandRightClickArmorEquip = cfg.getBoolean("inventory-trigger.disable-hand-right-click-armor-equip", true);
 
         this.cosmeticArmorEnabled = cfg.getBoolean("cosmetic-armor.enabled", true);
         this.showCosmeticToSelf = cfg.getBoolean("cosmetic-armor.show-to-self", true);
@@ -359,12 +361,32 @@ public final class WardrobeConfig {
         }
 
         YamlConfiguration yaml = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "slots.yml"));
-        ConfigurationSection root = yaml.getConfigurationSection("slots");
+        parseSlotsSection(yaml.getConfigurationSection("slots"), false);
+
+        // Auto-register any missing canonical slots from bundled default slots.yml so servers upgrading
+        // from older configs (missing hat, gloves, belt_skin, belt_3d, boots_real/boots_cosmetic) match
+        // Studio menus.yml 1-to-1 without requiring manual deletion of slots.yml!
+        try (var defStream = plugin.getResource("slots.yml")) {
+            if (defStream != null) {
+                YamlConfiguration defYaml = YamlConfiguration.loadConfiguration(
+                        new java.io.InputStreamReader(defStream, java.nio.charset.StandardCharsets.UTF_8));
+                parseSlotsSection(defYaml.getConfigurationSection("slots"), true);
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private void parseSlotsSection(ConfigurationSection root, boolean onlyMissing) {
         if (root == null) return;
 
         for (String id : root.getKeys(false)) {
             ConfigurationSection sec = root.getConfigurationSection(id);
             if (sec == null) continue;
+            String normId = id.toLowerCase(Locale.ROOT);
+            if (onlyMissing && getSlot(normId) != null) {
+                // Already defined (directly or via legacy boots_* <-> belt_* alias)
+                continue;
+            }
 
             ArmorSection section = ArmorSection.fromName(sec.getString("section", "CHEST"));
             if (section == null) section = ArmorSection.CHEST;
@@ -381,7 +403,7 @@ public final class WardrobeConfig {
 
             int guiSlot = sec.getInt("gui-slot", 13);
             int priority = sec.getInt("priority", 10);
-            String folder = sec.getString("folder", id.toLowerCase());
+            String folder = sec.getString("folder", normId);
             String displayName = sec.getString("display-name", id);
             Material mat = Material.matchMaterial(sec.getString("placeholder-material", "GRAY_STAINED_GLASS_PANE"));
             if (mat == null) mat = Material.GRAY_STAINED_GLASS_PANE;
@@ -400,7 +422,7 @@ public final class WardrobeConfig {
                     section == ArmorSection.HEAD ? DisplayMountConfig.defaultHead() : DisplayMountConfig.defaultBack());
 
             WardrobeSlotDef def = new WardrobeSlotDef(
-                    id.toLowerCase(Locale.ROOT),
+                    normId,
                     section,
                     kind,
                     eqSlot,
@@ -565,6 +587,7 @@ public final class WardrobeConfig {
     public ClickMode getClickMode() { return clickMode; }
     public boolean isSmartCursorEquip() { return smartCursorEquip; }
     public boolean isRightClickQuickEquip() { return rightClickQuickEquip; }
+    public boolean isDisableHandRightClickArmorEquip() { return disableHandRightClickArmorEquip; }
 
     public boolean isCosmeticArmorEnabled() { return cosmeticArmorEnabled; }
     public boolean isShowCosmeticToSelf() { return showCosmeticToSelf; }
@@ -586,7 +609,20 @@ public final class WardrobeConfig {
     public boolean isDebug() { return debug; }
 
     public Map<String, WardrobeSlotDef> getSlotsById() { return Collections.unmodifiableMap(slotsById); }
-    public WardrobeSlotDef getSlot(String id) { return id == null ? null : slotsById.get(id.toLowerCase(Locale.ROOT)); }
+    public WardrobeSlotDef getSlot(String id) {
+        if (id == null || id.isBlank()) return null;
+        String key = id.trim().toLowerCase(Locale.ROOT);
+        WardrobeSlotDef direct = slotsById.get(key);
+        if (direct != null) return direct;
+        // Backwards-compatible alias bridge for FEET slots (boots_real <-> belt_real, boots_cosmetic <-> belt_cosmetic)
+        return switch (key) {
+            case "belt_real" -> slotsById.get("boots_real");
+            case "boots_real" -> slotsById.get("belt_real");
+            case "belt_cosmetic" -> slotsById.get("boots_cosmetic");
+            case "boots_cosmetic" -> slotsById.get("belt_cosmetic");
+            default -> null;
+        };
+    }
     public List<WardrobeSlotDef> getSlotsForSection(ArmorSection section) {
         return Collections.unmodifiableList(slotsBySection.getOrDefault(section, List.of()));
     }
@@ -695,6 +731,13 @@ public final class WardrobeConfig {
                         if (slotsById != null) {
                             for (WardrobeSlotDef def : slotsById.values()) {
                                 if (def.isCosmeticArmor()) expanded.add(def.id());
+                            }
+                        }
+                    }
+                    case "all_real", "real_armor", "armor_real" -> {
+                        if (slotsById != null) {
+                            for (WardrobeSlotDef def : slotsById.values()) {
+                                if (def.kind() == SlotKind.ARMOR_REAL) expanded.add(def.id());
                             }
                         }
                     }

@@ -12,16 +12,43 @@
     return `<svg class="ico${cls ? " " + cls : ""}" aria-hidden="true"><use href="#ico-${name}"></use></svg>`;
   }
 
+  // All 12 individually separated 3D Wardrobe slots (1-to-1 with plugin slots.yml v1.11.0)
   const CATEGORY_META = {
-    helmets:     { label: "Шлемы",      slot: "HEAD",  tagClass: "tag-head",  defaultWardrobe: "helmet_cosmetic" },
-    mask_3d:     { label: "3D-Маски",   slot: "HEAD",  tagClass: "tag-head",  defaultWardrobe: "mask_3d" },
-    hair_3d:     { label: "3D-Причёски",slot: "HEAD",  tagClass: "tag-head",  defaultWardrobe: "hair_3d" },
-    armor_chest: { label: "Нагрудники", slot: "CHEST", tagClass: "tag-chest", defaultWardrobe: "chest_cosmetic" },
-    backpack_3d: { label: "3D-Рюкзаки", slot: "CHEST", tagClass: "tag-chest", defaultWardrobe: "backpack_3d" },
-    armor_legs:  { label: "Поножи",     slot: "LEGS",  tagClass: "tag-legs",  defaultWardrobe: "legs_cosmetic" },
-    belt_3d:     { label: "3D-Пояса",   slot: "LEGS",  tagClass: "tag-legs",  defaultWardrobe: "belt_3d" },
-    armor_feet:  { label: "Ботинки",    slot: "FEET",  tagClass: "tag-feet",  defaultWardrobe: "boots_cosmetic" },
+    helmet_real:     { label: "Шлем · 3D Броня",       shortLabel: "3D Броня",     slot: "HEAD",  kind: "ARMOR_REAL",     tagClass: "tag-head",  defaultWardrobe: "helmet_real" },
+    helmet_cosmetic: { label: "Шлем · 3D Косметика",   shortLabel: "3D Косметика", slot: "HEAD",  kind: "ARMOR_COSMETIC", tagClass: "tag-head",  defaultWardrobe: "helmet_cosmetic" },
+    hair_3d:         { label: "Причёска · 3D",         shortLabel: "3D Причёска",  slot: "HEAD",  kind: "ARMOR_OVERLAY",  tagClass: "tag-head",  defaultWardrobe: "hair_3d" },
+    mask_3d:         { label: "Маска / Очки · 3D",     shortLabel: "3D Маска",     slot: "HEAD",  kind: "DISPLAY_3D",     tagClass: "tag-head",  defaultWardrobe: "mask_3d" },
+    chest_real:      { label: "Нагрудник · 3D Броня",  shortLabel: "3D Броня",     slot: "CHEST", kind: "ARMOR_REAL",     tagClass: "tag-chest", defaultWardrobe: "chest_real" },
+    chest_cosmetic:  { label: "Нагрудник · 3D Космет.",shortLabel: "3D Косметика", slot: "CHEST", kind: "ARMOR_COSMETIC", tagClass: "tag-chest", defaultWardrobe: "chest_cosmetic" },
+    backpack_3d:     { label: "Рюкзак / Плащ · 3D",    shortLabel: "3D Рюкзак",    slot: "CHEST", kind: "DISPLAY_3D",     tagClass: "tag-chest", defaultWardrobe: "backpack_3d" },
+    legs_real:       { label: "Поножи · 3D Броня",     shortLabel: "3D Броня",     slot: "LEGS",  kind: "ARMOR_REAL",     tagClass: "tag-legs",  defaultWardrobe: "legs_real" },
+    legs_cosmetic:   { label: "Поножи · 3D Косметика", shortLabel: "3D Косметика", slot: "LEGS",  kind: "ARMOR_COSMETIC", tagClass: "tag-legs",  defaultWardrobe: "legs_cosmetic" },
+    belt_3d:         { label: "Пояс / Декор · 3D",     shortLabel: "3D Пояс",      slot: "LEGS",  kind: "ARMOR_OVERLAY",  tagClass: "tag-legs",  defaultWardrobe: "belt_3d" },
+    boots_real:      { label: "Ботинки · 3D Броня",    shortLabel: "3D Броня",     slot: "FEET",  kind: "ARMOR_REAL",     tagClass: "tag-feet",  defaultWardrobe: "boots_real" },
+    boots_cosmetic:  { label: "Ботинки · 3D Космет.",  shortLabel: "3D Косметика", slot: "FEET",  kind: "ARMOR_COSMETIC", tagClass: "tag-feet",  defaultWardrobe: "boots_cosmetic" },
   };
+
+  const LEGACY_CATEGORY_MAP = {
+    helmets:     "helmet_real",
+    armor_chest: "chest_real",
+    armor_legs:  "legs_real",
+    armor_feet:  "boots_real",
+    belt_real:   "boots_real",
+    belt_cosmetic: "boots_cosmetic",
+  };
+
+  function normalizeCategoryKey(rawCat, wardrobeSlot) {
+    if (wardrobeSlot && CATEGORY_META[wardrobeSlot]) return wardrobeSlot;
+    if (rawCat && CATEGORY_META[rawCat]) return rawCat;
+    if (rawCat && LEGACY_CATEGORY_MAP[rawCat]) return LEGACY_CATEGORY_MAP[rawCat];
+    return "chest_real";
+  }
+
+  function getModelSlotKey(m) {
+    if (!m) return "chest_real";
+    if (m.wardrobeSlot && CATEGORY_META[m.wardrobeSlot]) return m.wardrobeSlot;
+    return normalizeCategoryKey(m.category);
+  }
 
   const CANONICAL_BONES = [
     ["head",       "head (Голова)"],
@@ -55,9 +82,12 @@
     showBones: false,
     autoRotate: false,
     links: [
-      { id: "link1", name: "Шлемы × 3D-Маски",       slot: "HEAD",  categories: ["helmets", "mask_3d"],     secondarySlot: "mask_3d",     stripFrontStraps: false, enabled: true },
-      { id: "link2", name: "Нагрудники × 3D-Рюкзаки", slot: "CHEST", categories: ["armor_chest", "backpack_3d"], secondarySlot: "backpack_3d", stripFrontStraps: true,  enabled: true },
-      { id: "link3", name: "Поножи × 3D-Пояса (v1.7)", slot: "LEGS", categories: ["armor_legs", "belt_3d"],   secondarySlot: "belt_3d",     stripFrontStraps: false, enabled: true },
+      { id: "link1", name: "Шлем (Броня) × 3D-Маска",          slot: "HEAD",  categories: ["helmet_real", "mask_3d"],         secondarySlot: "mask_3d",     stripFrontStraps: false, enabled: true },
+      { id: "link2", name: "Шлем (Косметика) × 3D-Маска",      slot: "HEAD",  categories: ["helmet_cosmetic", "mask_3d"],     secondarySlot: "mask_3d",     stripFrontStraps: false, enabled: true },
+      { id: "link3", name: "Нагрудник (Броня) × 3D-Рюкзак",    slot: "CHEST", categories: ["chest_real", "backpack_3d"],      secondarySlot: "backpack_3d", stripFrontStraps: true,  enabled: true },
+      { id: "link4", name: "Нагрудник (Косметика) × 3D-Рюкзак",slot: "CHEST", categories: ["chest_cosmetic", "backpack_3d"],  secondarySlot: "backpack_3d", stripFrontStraps: true,  enabled: true },
+      { id: "link5", name: "Поножи (Броня) × 3D-Пояс",         slot: "LEGS",  categories: ["legs_real", "belt_3d"],           secondarySlot: "belt_3d",     stripFrontStraps: false, enabled: true },
+      { id: "link6", name: "Поножи (Косметика) × 3D-Пояс",     slot: "LEGS",  categories: ["legs_cosmetic", "belt_3d"],       secondarySlot: "belt_3d",     stripFrontStraps: false, enabled: true },
     ],
 
     // 2D Skin Editor State (15 layers, top-to-bottom priority.yml order)
@@ -74,10 +104,10 @@
     // v2.2: Live helmet preview toggle (tests HIDE_ALL & PARTIAL_MODEL hair hiding!)
     testHelmetOn: false,
 
-    // v2.2: Visual Inventory GUI Editor (menus.yml)
+    // v2.6: Visual Inventory GUI Editor (menus.yml — all 21 separated slots across 10 screens)
     menus: SE.createDefaultMenusState(),
-    guiActiveScreen: "tabbed",
-    guiSelectedSlot: 11,
+    guiActiveScreen: "tabbed_HEAD",
+    guiSelectedSlot: 15,
   };
 
   let viewer = null;
@@ -182,8 +212,8 @@
     while (state.models.some(m => m.id === uid)) {
       uid = `${idBase}_${idx++}`;
     }
-    const cat = overrides.category || analysis.suggestedCategory || "armor_chest";
-    const cmeta = CATEGORY_META[cat] || CATEGORY_META.armor_chest;
+    const cat = normalizeCategoryKey(overrides.category || analysis.suggestedCategory, overrides.wardrobeSlot);
+    const cmeta = CATEGORY_META[cat] || CATEGORY_META.chest_real;
 
     const slot = overrides.slot || cmeta.slot;
     const mythicId = overrides.mythicId || SE.toPascalId(uid);
@@ -279,8 +309,8 @@
         colorRgb: item.colorRgb || "",
         hair3d: item.hair3d || null,
       });
-      // Equip showcase set right away including hair_ponytail_3d (demonstrates PARTIAL_MODEL under helmet!)
-      if (["gold_warden_chest", "tactical_backpack", "belt_tactical_3d", "gold_warden_legs", "gold_warden_boots", "hair_ponytail_3d"].includes(m.exportId)) {
+      // Equip showcase set with REAL 3D armor + 3D accessories right away (user can layer 3D cosmetics on top!)
+      if (["tactical_warden_chest", "tactical_warden_legs", "tactical_warden_boots", "tactical_backpack", "belt_tactical_3d", "hair_ponytail_3d"].includes(m.exportId)) {
         state.equippedIds.add(m.id);
       }
     }
@@ -289,7 +319,7 @@
     else if (state.models.length) state.selectedModelId = state.models[0].id;
     renderAll3d();
     refresh3dViewport();
-    showToast(`Загружено ${state.models.length} демо-моделей (включая 3D-причёску с частичным скрытием под шлемом)!`);
+    showToast(`Загружено ${state.models.length} демо-моделей: все 12 раздельных 3D-слотов (Броня + Косметика + Аксессуары)!`);
   }
 
   function getSelectedModel() {
@@ -303,13 +333,13 @@
 
     const list = state.models.filter(m => filter === "all" || m.category === filter);
     if (!list.length) {
-      container.innerHTML = `<div class="hint">Нет моделей в выбранной категории. Перетащите .bbmodel выше или нажмите «Демо (10 моделей)».</div>`;
+      container.innerHTML = `<div class="hint">Нет моделей в выбранном слоте. Перетащите .bbmodel выше или нажмите «Загрузить демо».</div>`;
       return;
     }
 
     container.innerHTML = "";
     for (const m of list) {
-      const cmeta = CATEGORY_META[m.category] || CATEGORY_META.armor_chest;
+      const cmeta = CATEGORY_META[m.category] || CATEGORY_META.chest_real;
       const equipped = state.equippedIds.has(m.id);
       const div = document.createElement("div");
       div.className = "model-item" + (m.id === state.selectedModelId ? " selected" : "");
@@ -649,7 +679,14 @@
         }
       }
     }));
-    $("inpWardrobeSlot").addEventListener("change", e => syncField(m => { m.wardrobeSlot = e.target.value; }));
+    $("inpWardrobeSlot").addEventListener("change", e => syncField(m => {
+      m.wardrobeSlot = e.target.value;
+      if (CATEGORY_META[m.wardrobeSlot]) {
+        m.category = m.wardrobeSlot;
+        m.slot = CATEGORY_META[m.wardrobeSlot].slot;
+        $("inpCategory").value = m.category;
+      }
+    }));
     $("inpMaterial").addEventListener("input", e => syncField(m => {
       m.material = e.target.value.trim().toUpperCase() || SE.SLOT_DEFAULT_MATERIAL[m.slot];
     }));
@@ -1022,14 +1059,39 @@
     }
 
     const eqModels = state.models.filter(m => state.equippedIds.has(m.id));
-    const hasEquippedHelmet = eqModels.some(m => m.category === "helmets" || m.wardrobeSlot === "helmet_cosmetic");
+    const isHelmetModel = (m) => {
+      const sk = getModelSlotKey(m);
+      return sk === "helmet_real" || sk === "helmet_cosmetic";
+    };
+    const hasEquippedHelmet = eqModels.some(isHelmetModel);
     const helmetActive = Boolean(state.testHelmetOn || hasEquippedHelmet);
+
+    // Cosmetic armor overrides the visual render of real armor in the same body section (just like the plugin!)
+    const cosmeticOverrideSections = new Set();
+    for (const m of eqModels) {
+      const sk = getModelSlotKey(m);
+      if (sk === "helmet_cosmetic") cosmeticOverrideSections.add("HEAD");
+      else if (sk === "chest_cosmetic") cosmeticOverrideSections.add("CHEST");
+      else if (sk === "legs_cosmetic") cosmeticOverrideSections.add("LEGS");
+      else if (sk === "boots_cosmetic") cosmeticOverrideSections.add("FEET");
+    }
 
     const renderList = [];
     const chipHtml = [skinBadgeHtml];
 
     for (const m of eqModels) {
-      const isHair = m.category === "hair_3d" || m.wardrobeSlot === "hair_3d";
+      const sk = getModelSlotKey(m);
+      const isRealOverridden = (
+        (sk === "helmet_real" && cosmeticOverrideSections.has("HEAD")) ||
+        (sk === "chest_real"  && cosmeticOverrideSections.has("CHEST")) ||
+        (sk === "legs_real"   && cosmeticOverrideSections.has("LEGS")) ||
+        (sk === "boots_real"  && cosmeticOverrideSections.has("FEET"))
+      );
+      if (isRealOverridden) {
+        chipHtml.push(`<span class="tag" title="Статы активны; внешний вид перекрыт косметикой">${escapeHtml(m.exportId)} [статы]</span>`);
+        continue;
+      }
+      const isHair = sk === "hair_3d";
       if (isHair && helmetActive && m.hair3d) {
         const mode = m.hair3d.helmetMode || "HIDE_ALL";
         if (mode === "HIDE_ALL") {
@@ -1073,11 +1135,13 @@
         scale: m.scale,
         colorRgb: m.colorRgb || null,
       });
-      chipHtml.push(`<span class="tag tag-chest">${escapeHtml(m.exportId)}</span>`);
+      const cmeta = CATEGORY_META[sk] || CATEGORY_META.chest_real;
+      chipHtml.push(`<span class="tag ${cmeta.tagClass}" title="${escapeHtml(cmeta.label)}">${escapeHtml(m.exportId)}</span>`);
     }
 
     if (state.testHelmetOn && !hasEquippedHelmet) {
-      const demoHelmet = state.models.find(m => m.category === "helmets" || m.wardrobeSlot === "helmet_cosmetic");
+      const demoHelmet = state.models.find(m => getModelSlotKey(m) === "helmet_real")
+        || state.models.find(m => getModelSlotKey(m) === "helmet_cosmetic");
       if (demoHelmet) {
         renderList.push({
           bbmodel: demoHelmet.bbmodel,
@@ -1684,7 +1748,7 @@
   }
 
   function getGuiScreen() {
-    return state.menus.screens[state.guiActiveScreen] || state.menus.screens.tabbed;
+    return state.menus.screens[state.guiActiveScreen] || state.menus.screens.tabbed_HEAD || Object.values(state.menus.screens)[0];
   }
 
   function renderGuiScreenList() {
@@ -1694,8 +1758,9 @@
     if (pills) pills.innerHTML = "";
 
     const shortLabels = {
-      tabbed: "TABBED", unified: "UNIFIED", compact_hub: "HUB",
-      compact_HEAD: "HEAD", compact_CHEST: "CHEST", compact_LEGS: "LEGS", compact_FEET: "FEET",
+      tabbed_HEAD: "TAB:HEAD", tabbed_CHEST: "TAB:CHEST", tabbed_LEGS: "TAB:LEGS", tabbed_FEET: "TAB:FEET",
+      unified: "UNIFIED", compact_hub: "HUB",
+      compact_HEAD: "1R:HEAD", compact_CHEST: "1R:CHEST", compact_LEGS: "1R:LEGS", compact_FEET: "1R:FEET",
     };
 
     for (const [key, sc] of Object.entries(state.menus.screens)) {
@@ -1758,7 +1823,7 @@
     const loreHtml = loreLines.map(l => `<div>${renderMcFormattedHtml(l)}</div>`).join("");
     const metaParts = [
       `Слот #${slotIdx}`,
-      cell.kind === "slot" ? `Wardrobe: ${cell.slotId}` : `Action: ${cell.action || "DECOR"}`,
+      cell.kind === "slot" ? `Wardrobe: ${cell.slotId}` : `Action: ${cell.action || "NONE"}`,
       `Material: ${spec.material || "PAPER"}`,
     ];
     if (spec.customModelData) metaParts.push(`CMD: ${spec.customModelData}`);
@@ -1895,9 +1960,8 @@
       if (kind === "button") {
         const act = cell.action || "BACK";
         $("guiCellAction").value = act;
-        $("guiCellSectionRow").style.display = (act === "SWITCH_TAB" || act === "OPEN_SECTION") ? "block" : "none";
+        $("guiCellSectionRow").style.display = "none";
         $("guiCellCommandRow").style.display = act === "RUN_COMMAND" ? "block" : "none";
-        $("guiCellSection").value = cell.section || "HEAD";
         $("guiCellCommand").value = cell.command || "";
       }
       $("guiCellMat").value = cell.material || "PAPER";
@@ -1924,10 +1988,19 @@
   }
 
   function bindGuiEditorEvents() {
-    // Populate dropdown catalogs & datalist with all 149 Minecraft materials
-    $("guiCellWardrobeSlot").innerHTML = SE.GUI_SLOT_CATALOG.map(s =>
-      `<option value="${s.id}">${escapeHtml(s.label)} (${s.id})</option>`
-    ).join("");
+    // Populate grouped 21-slot dropdown catalog & datalist with all 149 Minecraft materials
+    const sectionLabels = {
+      HEAD:  "HEAD — Голова и Шлем (6 слотов)",
+      CHEST: "CHEST — Торс и Нагрудник (6 слотов)",
+      LEGS:  "LEGS — Ноги и Пояса (5 слотов)",
+      FEET:  "FEET — Ступни и Ботинки (4 слота)",
+    };
+    $("guiCellWardrobeSlot").innerHTML = ["HEAD", "CHEST", "LEGS", "FEET"].map(sec => {
+      const items = SE.GUI_SLOT_CATALOG.filter(s => s.section === sec);
+      return `<optgroup label="${escapeHtml(sectionLabels[sec])}">${
+        items.map(s => `<option value="${s.id}">${escapeHtml(s.label)} (${s.id})</option>`).join("")
+      }</optgroup>`;
+    }).join("");
     $("guiCellAction").innerHTML = SE.GUI_BUTTON_ACTIONS.map(a =>
       `<option value="${a.id}">${escapeHtml(a.label)}</option>`
     ).join("");
@@ -2010,7 +2083,7 @@
       } else if (k === "decor") {
         sc.cells[idx] = {
           kind: "decor",
-          action: "DECOR",
+          action: "NONE",
           material: "WHITE_STAINED_GLASS_PANE",
           name: " ",
           lore: [],
@@ -2029,7 +2102,18 @@
       const cell = sc.cells[state.guiSelectedSlot];
       if (!cell || cell.kind !== "slot") return;
       cell.slotId = e.target.value;
+      const catalogEntry = SE.GUI_SLOT_CATALOG.find(s => s.id === cell.slotId);
+      if (catalogEntry) {
+        if (!cell.emptyIcon) {
+          cell.emptyIcon = { material: "PAPER", name: "", lore: ["&7Перетащите предмет сюда"], customModelData: "", itemModel: "", glint: false };
+        }
+        const curName = String(cell.emptyIcon.name || "").trim();
+        if (!curName || /^(&[0-9a-fk-or])*\s*Пустой слот:/i.test(curName)) {
+          cell.emptyIcon.name = `&fПустой слот: ${catalogEntry.label}`;
+        }
+      }
       renderGuiGrid();
+      renderGuiCellInspector();
     });
     $("guiCellAction").addEventListener("change", e => {
       const sc = getGuiScreen();
@@ -2102,10 +2186,10 @@
     });
     $("btnGuiResetAll").addEventListener("click", () => {
       state.menus = SE.createDefaultMenusState();
-      state.guiActiveScreen = "tabbed";
-      state.guiSelectedSlot = 11;
+      state.guiActiveScreen = "tabbed_HEAD";
+      state.guiSelectedSlot = 15;
       renderGuiEditorAll();
-      showToast("GUI меню сброшено к стандартному шаблону");
+      showToast("GUI меню сброшено к шаблону (все 21 раздельных слотов)");
     });
     $("btnGuiCopyYml").addEventListener("click", () => copyTextToClipboard(SE.generateMenusYml(state.menus)));
     $("btnGuiDownloadYml").addEventListener("click", () => {
@@ -2128,12 +2212,15 @@
     const inheritClear = $("cfgInheritClearOuter").checked;
 
     return [
-      "# MythicWardrobe v1.8.0 - Фрагмент config.yml",
+      "# MythicWardrobe v1.11.0 - Фрагмент config.yml",
       "skin:",
       `  debounce-ticks: ${debounce}`,
       `  defer-apply-while-gui-open: ${defer}`,
       `  auto-reopen-gui-after-skin-apply: ${reopen}`,
       `  gui-reopen-delay-ticks: ${reopenTicks}`,
+      "",
+      "inventory-trigger:",
+      "  disable-hand-right-click-armor-equip: true",
       "",
       "menu:",
       `  mode: ${menuMode}`,
@@ -2161,7 +2248,7 @@
     const suitTex = $("cfgSuitTexture").value.trim() || "hazmat_suit.png";
     const suitMode = $("cfgSuitMode").value;
     const rawBlocks = $("cfgSuitBlocks").value.split(/[,;\s]+/).map(s => s.trim()).filter(Boolean);
-    const is3d = suitSlot.endsWith("_cosmetic") || suitSlot.endsWith("_3d");
+    const is3d = suitSlot.endsWith("_real") || suitSlot.endsWith("_cosmetic") || suitSlot.endsWith("_3d");
 
     const mmLines = [
       `# 1) MythicMobs YAML (plugins/MythicMobs/Items/WardrobeSuits.yml):`,
@@ -2216,12 +2303,24 @@
     ta.remove();
   }
 
-  // ==================== TAB 0: FULL 2D + 3D MODEL INSPECTOR ====================
+  // ==================== TAB 0: FULL 2D + 3D MODEL INSPECTOR (ALL 12 SEPARATED 3D SLOTS) ====================
   const PREVIEW_SLOT_ZONES = [
-    { key: "HEAD",  title: "Голова · Шлемы · 3D-Маски · 3D-Причёски", cats: ["helmets", "mask_3d", "hair_3d"] },
-    { key: "CHEST", title: "Торс · Нагрудники · 3D-Рюкзаки",          cats: ["armor_chest", "backpack_3d"] },
-    { key: "LEGS",  title: "Ноги · Поножи · 3D-Пояса",                cats: ["armor_legs", "belt_3d"] },
-    { key: "FEET",  title: "Обувь · Ботинки",                         cats: ["armor_feet"] },
+    // HEAD — 4 отдельных 3D-слота
+    { key: "helmet_real",     section: "HEAD",  title: "Шлем · 3D Броня (Статы)",       badge: "Броня",     slotId: "helmet_real" },
+    { key: "helmet_cosmetic", section: "HEAD",  title: "Шлем · 3D Косметика",           badge: "Косметика", slotId: "helmet_cosmetic" },
+    { key: "hair_3d",         section: "HEAD",  title: "Причёска · 3D",                 badge: "3D",        slotId: "hair_3d" },
+    { key: "mask_3d",         section: "HEAD",  title: "Маска / Очки · 3D",             badge: "3D",        slotId: "mask_3d" },
+    // CHEST — 3 отдельных 3D-слота
+    { key: "chest_real",      section: "CHEST", title: "Нагрудник · 3D Броня (Статы)",  badge: "Броня",     slotId: "chest_real" },
+    { key: "chest_cosmetic",  section: "CHEST", title: "Нагрудник · 3D Косметика",      badge: "Косметика", slotId: "chest_cosmetic" },
+    { key: "backpack_3d",     section: "CHEST", title: "Рюкзак / Плащ · 3D",            badge: "3D",        slotId: "backpack_3d" },
+    // LEGS — 3 отдельных 3D-слота
+    { key: "legs_real",       section: "LEGS",  title: "Поножи · 3D Броня (Статы)",     badge: "Броня",     slotId: "legs_real" },
+    { key: "legs_cosmetic",   section: "LEGS",  title: "Поножи · 3D Косметика",         badge: "Косметика", slotId: "legs_cosmetic" },
+    { key: "belt_3d",         section: "LEGS",  title: "Пояс / Декор · 3D",             badge: "3D",        slotId: "belt_3d" },
+    // FEET — 2 отдельных 3D-слота
+    { key: "boots_real",      section: "FEET",  title: "Ботинки · 3D Броня (Статы)",    badge: "Броня",     slotId: "boots_real" },
+    { key: "boots_cosmetic",  section: "FEET",  title: "Ботинки · 3D Косметика",        badge: "Косметика", slotId: "boots_cosmetic" },
   ];
 
   function syncViewerUiState() {
@@ -2318,7 +2417,7 @@
     }
     state.activeComboPreview = null;
     state.equippedIds.clear();
-    const demoSet = ["gold_warden_chest", "tactical_backpack", "belt_tactical_3d", "gold_warden_legs", "hair_ponytail_3d", "gold_warden_boots"];
+    const demoSet = ["tactical_warden_chest", "tactical_warden_legs", "tactical_warden_boots", "tactical_backpack", "belt_tactical_3d", "hair_ponytail_3d"];
     let matched = 0;
     for (const expId of demoSet) {
       const found = state.models.find(m => m.exportId === expId);
@@ -2384,45 +2483,51 @@
     } else {
       groupsEl.innerHTML = "";
       for (const zone of PREVIEW_SLOT_ZONES) {
-        const modelsInZone = state.models.filter(m => zone.cats.includes(m.category));
-        if (!modelsInZone.length) continue;
-
+        const modelsInZone = state.models.filter(m => getModelSlotKey(m) === zone.slotId);
         const grp = document.createElement("div");
         grp.className = "preview-slot-group";
         const zoneEqCount = modelsInZone.filter(m => state.equippedIds.has(m.id)).length;
         grp.innerHTML = `
           <div class="preview-slot-head">
             <span>${escapeHtml(zone.title)}</span>
-            <span>${zoneEqCount}/${modelsInZone.length}</span>
+            <span><code>${escapeHtml(zone.slotId)}</code> · ${zoneEqCount}/${modelsInZone.length}</span>
           </div>
           <div class="preview-3d-list"></div>
         `;
         const listEl = grp.querySelector(".preview-3d-list");
-        for (const m of modelsInZone) {
-          const isEq = !state.activeComboPreview && state.equippedIds.has(m.id);
-          const cmeta = CATEGORY_META[m.category] || CATEGORY_META.armor_chest;
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "preview-3d-item" + (isEq ? " equipped" : "");
-          btn.innerHTML = `
-            <span class="preview-3d-item-main">
-              ${isEq ? ico("check", "ico-sm") : ico("cube", "ico-sm")}
-              <span class="preview-3d-item-name" title="${escapeHtml(m.filename)}">${escapeHtml(m.exportId)}</span>
-            </span>
-            <span class="preview-3d-item-meta">
-              <span class="tag">${escapeHtml(cmeta.label)}</span>
-              ${m.analysis.hasEmissive ? `<span class="tag">_e</span>` : ""}
-            </span>
-          `;
-          btn.addEventListener("click", () => {
-            state.activeComboPreview = null;
-            if (state.equippedIds.has(m.id)) state.equippedIds.delete(m.id);
-            else state.equippedIds.add(m.id);
-            renderModelList();
-            renderLinksAndCombos();
-            refresh3dViewport();
-          });
-          listEl.appendChild(btn);
+        if (!modelsInZone.length) {
+          listEl.innerHTML = `<div class="hint" style="padding:2px 4px">Пусто (нет моделей для <code>${escapeHtml(zone.slotId)}</code>)</div>`;
+        } else {
+          for (const m of modelsInZone) {
+            const isEq = !state.activeComboPreview && state.equippedIds.has(m.id);
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "preview-3d-item" + (isEq ? " equipped" : "");
+            btn.innerHTML = `
+              <span class="preview-3d-item-main">
+                ${isEq ? ico("check", "ico-sm") : ico("cube", "ico-sm")}
+                <span class="preview-3d-item-name" title="${escapeHtml(m.filename)}">${escapeHtml(m.exportId)}</span>
+              </span>
+              <span class="preview-3d-item-meta">
+                <span class="tag">${escapeHtml(zone.badge)}</span>
+                ${m.analysis.hasEmissive ? `<span class="tag">_e</span>` : ""}
+              </span>
+            `;
+            btn.addEventListener("click", () => {
+              state.activeComboPreview = null;
+              if (state.equippedIds.has(m.id)) {
+                state.equippedIds.delete(m.id);
+              } else {
+                // Keep 1 item per individual wardrobe slot (e.g. switching real chestplate keeps cosmetic chestplate independent!)
+                for (const other of modelsInZone) state.equippedIds.delete(other.id);
+                state.equippedIds.add(m.id);
+              }
+              renderModelList();
+              renderLinksAndCombos();
+              refresh3dViewport();
+            });
+            listEl.appendChild(btn);
+          }
         }
         groupsEl.appendChild(grp);
       }
@@ -2701,9 +2806,9 @@
     $("btnAddLink").addEventListener("click", () => {
       state.links.push({
         id: "link_" + Date.now(),
-        name: "Новая связка",
+        name: "Нагрудник (Броня) × 3D-Рюкзак",
         slot: "CHEST",
-        categories: ["armor_chest", "backpack_3d"],
+        categories: ["chest_real", "backpack_3d"],
         secondarySlot: "backpack_3d",
         stripFrontStraps: false,
         enabled: true,

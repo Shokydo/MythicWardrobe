@@ -1,45 +1,60 @@
 # ==============================================================================
-# MythicWardrobe — Конфигурация разделов и слотов экипировки
+# MythicWardrobe v1.11.0 — Конфигурация разделов и слотов экипировки (21 слот)
 # ==============================================================================
+# Каждый слот полностью отделён и независим (и в плагине, и в MythicWardrobe Studio):
+#   HEAD  (6 слотов): hat, mask_skin, hair_3d, mask_3d, helmet_real, helmet_cosmetic
+#   CHEST (6 слотов): undershirt, jacket, gloves, chest_real, chest_cosmetic, backpack_3d
+#   LEGS  (5 слотов): pants, belt_skin, legs_real, legs_cosmetic, belt_3d
+#   FEET  (4 слота):  socks, boots_skin, boots_real, boots_cosmetic
+#
 # Типы слотов (kind):
 #   SKIN_LAYER     — 2D-слой скина (PNG 64x64 из plugins/MythicWardrobe/overlays/)
-#   ARMOR_REAL     — Реальная броня (синхронизируется с ванильным слотом брони -> статы, защита, MythicArmors, ~onEquip)
-#   ARMOR_COSMETIC — Косметическая броня (подменяет визуал ванильного слота брони -> MythicArmors / ваниль без потери статов!)
-#   DISPLAY_3D     — Одновременная 3D-модель (автоматически принимает ЛЮБУЮ 3D-броню/рюкзак/маску MythicArmors
-#                    и рендерит её ПОВЕРХ основной брони через синхронизированный ArmorStand, а обычные 3D-предметы — через ItemDisplay!)
-#   ARMOR_OVERLAY  — Дополнительный слой 3D-брони MythicArmors (можно добавлять сколько угодно слотов на голову/торс/ноги/пояс!)
-#
-# Приоритет слоёв скина (priority): чем больше число, тем ВЫШЕ (поверх других) рисуется слой.
-# Зоны очистки 2-го слоя базового скина (clear-outer-regions):
-#   HEAD_OUTER, BODY_OUTER, RIGHT_ARM_OUTER, LEFT_ARM_OUTER, RIGHT_LEG_OUTER, LEFT_LEG_OUTER, ALL_OUTER
+#   ARMOR_REAL     — Реальная 3D/ванильная броня (даёт защиту, чары, атрибуты и ~onEquip)
+#   ARMOR_COSMETIC — Косметическая 3D-броня или мультимодальная краска (меняет визуал без потери статов)
+#   DISPLAY_3D     — Самостоятельная 3D-модель поверх брони (маска, рюкзак и т.д.)
+#   ARMOR_OVERLAY  — Дополнительный слой 3D-брони MythicArmors (3D-причёска, 3D-пояс и т.д.)
 # ==============================================================================
 
 slots:
   # ----------------------------------------------------------------------------
-  # РАЗДЕЛ 1: ШЛЕМ / ГОЛОВА (открывается при клике на слот шлема)
+  # РАЗДЕЛ 1: ШЛЕМ / ГОЛОВА (6 отдельных слотов)
   # ----------------------------------------------------------------------------
-  mask_skin:
+  hat:
     section: HEAD
     kind: SKIN_LAYER
     gui-slot: 10
-    priority: 60
-    folder: "masks"
-    display-name: "<#a8dadc>Маска (Скин)"
+    priority: 70
+    folder: "hats"
+    display-name: "<#a8dadc>Шапка (2D Скин)"
     placeholder-material: WHITE_STAINED_GLASS_PANE
     lore:
-      - "<gray>2D-слой маски/лица на скин"
-      - "<dark_gray>Положите сюда предмет с тегом mask_skin"
+      - "<gray>2D-слой шапки / головного убора на скин"
+      - "<dark_gray>Положите сюда предмет со слотом hat"
+    clear-outer-regions:
+      - HEAD_OUTER
+
+  mask_skin:
+    section: HEAD
+    kind: SKIN_LAYER
+    gui-slot: 11
+    priority: 60
+    folder: "masks"
+    display-name: "<#90e0ef>Маска (2D Скин)"
+    placeholder-material: LIGHT_BLUE_STAINED_GLASS_PANE
+    lore:
+      - "<gray>2D-слой маски / банданы / лица на скин"
+      - "<dark_gray>Положите сюда предмет со слотом mask_skin"
     clear-outer-regions: []
 
   hair_3d:
     section: HEAD
     kind: ARMOR_OVERLAY
     equipment-slot: HEAD
-    gui-slot: 11
+    gui-slot: 12
     display-name: "<#f7aef8>Причёска (3D)"
     placeholder-material: MAGENTA_STAINED_GLASS_PANE
     lore:
-      - "<gray>3D-причёска MythicArmors (поддерживает покраску!)"
+      - "<gray>3D-причёска MythicArmors (поддерживает покраску и hair-3d.yml)"
       - "<dark_gray>Носится отдельно ИЛИ одновременно с маской и шлемом!"
     display:
       mount: HEAD
@@ -56,12 +71,12 @@ slots:
   mask_3d:
     section: HEAD
     kind: DISPLAY_3D
-    gui-slot: 12
-    display-name: "<#f4a261>Маска / Шлем-слой (3D)"
+    gui-slot: 13
+    display-name: "<#f4a261>Маска / Очки (3D)"
     placeholder-material: ORANGE_STAINED_GLASS_PANE
     lore:
-      - "<gray>Любая 3D-маска / шлем MythicArmors поверх основного шлема"
-      - "<dark_gray>Можно носить одновременно 2+ 3D-модели на голове!"
+      - "<gray>Самостоятельная 3D-маска / противогаз MythicArmors"
+      - "<dark_gray>Носится отдельно ИЛИ поверх основного шлема!"
     display:
       mount: HEAD
       offset-x: 0.0
@@ -78,26 +93,26 @@ slots:
     section: HEAD
     kind: ARMOR_REAL
     equipment-slot: HEAD
-    gui-slot: 14
-    display-name: "<#52b788>Шлем (Броня / Статы)"
+    gui-slot: 15
+    display-name: "<#52b788>Шлем (3D Броня / Статы)"
     placeholder-material: IRON_HELMET
     lore:
       - "<gray>Реальный слот шлема (3D MythicArmors / Ваниль)"
-      - "<green>Даёт защиту, чары и статы"
+      - "<green>Даёт защиту, чары, атрибуты и статы"
 
   helmet_cosmetic:
     section: HEAD
     kind: ARMOR_COSMETIC
     equipment-slot: HEAD
     gui-slot: 16
-    display-name: "<#c77dff>Шлем (Косметика)"
+    display-name: "<#c77dff>Шлем (3D Косметика)"
     placeholder-material: LEATHER_HELMET
     lore:
-      - "<gray>Перекрывает внешний вид шлема"
-      - "<light_purple>Статы остаются от основного шлема"
+      - "<gray>Косметическая 3D-модель или скин шлема"
+      - "<light_purple>Статы остаются от реального шлема"
 
   # ----------------------------------------------------------------------------
-  # РАЗДЕЛ 2: НАГРУДНИК / ТОРС (открывается при клике на слот нагрудника)
+  # РАЗДЕЛ 2: НАГРУДНИК / ТОРС (6 отдельных слотов)
   # ----------------------------------------------------------------------------
   undershirt:
     section: CHEST
@@ -105,11 +120,11 @@ slots:
     gui-slot: 10
     priority: 20
     folder: "undershirts"
-    display-name: "<#90e0ef>Футболка / Майка (Скин)"
+    display-name: "<#90e0ef>Футболка / Майка (2D Скин)"
     placeholder-material: LIGHT_BLUE_STAINED_GLASS_PANE
     lore:
       - "<gray>Нижний 2D-слой одежды на торс"
-      - "<dark_gray>Надевается под куртку/кофту"
+      - "<dark_gray>Надевается под куртку / кофту"
     clear-outer-regions:
       - BODY_OUTER
       - RIGHT_ARM_OUTER
@@ -121,47 +136,60 @@ slots:
     gui-slot: 11
     priority: 30
     folder: "jackets"
-    display-name: "<#48cae4>Куртка / Кофта (Скин)"
+    display-name: "<#48cae4>Куртка / Костюм (2D Скин)"
     placeholder-material: CYAN_STAINED_GLASS_PANE
     lore:
-      - "<gray>Верхний 2D-слой одежды на торс"
+      - "<gray>Верхний 2D-слой одежды на торс (куртка / химзащита)"
       - "<dark_gray>Рисуется поверх футболки"
     clear-outer-regions:
       - BODY_OUTER
       - RIGHT_ARM_OUTER
       - LEFT_ARM_OUTER
 
+  gloves:
+    section: CHEST
+    kind: SKIN_LAYER
+    gui-slot: 12
+    priority: 40
+    folder: "gloves"
+    display-name: "<#38bdf8>Перчатки (2D Скин)"
+    placeholder-material: BLUE_STAINED_GLASS_PANE
+    lore:
+      - "<gray>2D-слой перчаток на кисти рук"
+      - "<dark_gray>Положите сюда предмет со слотом gloves"
+    clear-outer-regions: []
+
   chest_real:
     section: CHEST
     kind: ARMOR_REAL
     equipment-slot: CHEST
-    gui-slot: 13
-    display-name: "<#52b788>Бронежилет (Броня / Статы)"
+    gui-slot: 14
+    display-name: "<#52b788>Нагрудник (3D Броня / Статы)"
     placeholder-material: IRON_CHESTPLATE
     lore:
-      - "<gray>Реальный слот нагрудника (3D MythicArmors / Ваниль)"
-      - "<green>Даёт защиту, чары и статы"
+      - "<gray>Реальный слот нагрудника / бронежилета (3D MythicArmors / Ваниль)"
+      - "<green>Даёт защиту, чары, атрибуты и статы"
 
   chest_cosmetic:
     section: CHEST
     kind: ARMOR_COSMETIC
     equipment-slot: CHEST
     gui-slot: 15
-    display-name: "<#c77dff>Нагрудник (Косметика)"
+    display-name: "<#c77dff>Нагрудник (3D Косметика)"
     placeholder-material: LEATHER_CHESTPLATE
     lore:
-      - "<gray>Перекрывает внешний вид бронежилета"
-      - "<light_purple>Статы остаются от основного бронежилета"
+      - "<gray>Косметический нагрудник или мультимодальная краска (WhiteVestPaint)"
+      - "<light_purple>Статы остаются от реального нагрудника"
 
   backpack_3d:
     section: CHEST
     kind: DISPLAY_3D
     gui-slot: 16
-    display-name: "<#e9c46a>Рюкзак / Нагрудник-слой (3D)"
+    display-name: "<#e9c46a>Рюкзак / Плащ (3D)"
     placeholder-material: BROWN_STAINED_GLASS_PANE
     lore:
-      - "<gray>Сюда можно положить 3D-рюкзак или ЛЮБОЙ 3D-нагрудник MythicArmors"
-      - "<dark_gray>Отображается ОДНОВРЕМЕННО с основным бронежилетом!"
+      - "<gray>Самостоятельный 3D-рюкзак / плащ MythicArmors"
+      - "<dark_gray>Отображается отдельно ИЛИ поверх нагрудника!"
     display:
       mount: BACK
       offset-x: 0.0
@@ -175,7 +203,7 @@ slots:
       transform: HEAD
 
   # ----------------------------------------------------------------------------
-  # РАЗДЕЛ 3: ПОНОЖИ / НОГИ И ПОЯС (открывается при клике на слот поножей)
+  # РАЗДЕЛ 3: ПОНОЖИ / НОГИ И ПОЯС (5 отдельных слотов)
   # ----------------------------------------------------------------------------
   pants:
     section: LEGS
@@ -183,7 +211,7 @@ slots:
     gui-slot: 10
     priority: 15
     folder: "pants"
-    display-name: "<#4ea8de>Штаны (Скин)"
+    display-name: "<#4ea8de>Штаны (2D Скин)"
     placeholder-material: BLUE_STAINED_GLASS_PANE
     lore:
       - "<gray>Нижний 2D-слой штанов на скин"
@@ -197,7 +225,7 @@ slots:
     gui-slot: 11
     priority: 18
     folder: "belts"
-    display-name: "<#f59e0b>Пояс / Ремень (Скин)"
+    display-name: "<#f59e0b>Пояс / Ремень (2D Скин)"
     placeholder-material: YELLOW_STAINED_GLASS_PANE
     lore:
       - "<gray>2D-слой ремня, кушака или декоративного пояса"
@@ -209,22 +237,22 @@ slots:
     kind: ARMOR_REAL
     equipment-slot: LEGS
     gui-slot: 13
-    display-name: "<#52b788>Поножи (Броня / Статы)"
+    display-name: "<#52b788>Поножи (3D Броня / Статы)"
     placeholder-material: IRON_LEGGINGS
     lore:
       - "<gray>Реальный слот поножей (3D MythicArmors / Ваниль)"
-      - "<green>Даёт защиту, чары и статы"
+      - "<green>Даёт защиту, чары, атрибуты и статы"
 
   legs_cosmetic:
     section: LEGS
     kind: ARMOR_COSMETIC
     equipment-slot: LEGS
-    gui-slot: 15
-    display-name: "<#c77dff>Поножи (Косметика)"
+    gui-slot: 14
+    display-name: "<#c77dff>Поножи (3D Косметика)"
     placeholder-material: LEATHER_LEGGINGS
     lore:
-      - "<gray>Перекрывает внешний вид поножей"
-      - "<light_purple>Статы остаются от основных поножей"
+      - "<gray>Косметическая 3D-модель или скин поножей"
+      - "<light_purple>Статы остаются от реальных поножей"
 
   belt_3d:
     section: LEGS
@@ -249,7 +277,7 @@ slots:
       transform: HEAD
 
   # ----------------------------------------------------------------------------
-  # РАЗДЕЛ 4: БОТИНКИ И ПОЯС (открывается при клике на слот ботинок)
+  # РАЗДЕЛ 4: БОТИНКИ И ОБУВЬ (4 отдельных слота)
   # ----------------------------------------------------------------------------
   socks:
     section: FEET
@@ -257,7 +285,7 @@ slots:
     gui-slot: 10
     priority: 25
     folder: "socks"
-    display-name: "<#ffd166>Носки (Скин)"
+    display-name: "<#ffd166>Носки (2D Скин)"
     placeholder-material: YELLOW_STAINED_GLASS_PANE
     lore:
       - "<gray>Нижний 2D-слой на ступни"
@@ -270,31 +298,31 @@ slots:
     gui-slot: 11
     priority: 35
     folder: "boots"
-    display-name: "<#f4a261>Ботинки (Скин)"
+    display-name: "<#f4a261>Ботинки (2D Скин)"
     placeholder-material: ORANGE_STAINED_GLASS_PANE
     lore:
       - "<gray>Верхний 2D-слой обуви на скин"
       - "<dark_gray>Рисуется поверх носков"
     clear-outer-regions: []
 
-  belt_real:
+  boots_real:
     section: FEET
     kind: ARMOR_REAL
     equipment-slot: FEET
     gui-slot: 14
-    display-name: "<#52b788>Пояс (3D Броня / Статы)"
+    display-name: "<#52b788>Ботинки (3D Броня / Статы)"
     placeholder-material: IRON_BOOTS
     lore:
-      - "<gray>Реальный слот пояса / брони (MythicArmors / Ваниль)"
-      - "<green>Занимает слот FEET — даёт защиту и статы"
+      - "<gray>Реальный слот ботинок (3D MythicArmors / Ваниль)"
+      - "<green>Даёт защиту, чары, атрибуты и статы"
 
-  belt_cosmetic:
+  boots_cosmetic:
     section: FEET
     kind: ARMOR_COSMETIC
     equipment-slot: FEET
-    gui-slot: 16
-    display-name: "<#c77dff>Пояс (Косметика)"
+    gui-slot: 15
+    display-name: "<#c77dff>Ботинки (3D Косметика)"
     placeholder-material: LEATHER_BOOTS
     lore:
-      - "<gray>Перекрывает внешний вид пояса/ботинок"
-      - "<light_purple>Статы остаются от основного пояса"
+      - "<gray>Косметическая 3D-модель или скин ботинок"
+      - "<light_purple>Статы остаются от реальных ботинок"

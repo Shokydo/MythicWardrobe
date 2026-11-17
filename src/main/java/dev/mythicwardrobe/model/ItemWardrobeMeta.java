@@ -74,17 +74,41 @@ public record ItemWardrobeMeta(
     }
 
     /**
-     * Checks whether this item explicitly lists targetSlotId (supports single ID or comma-separated list).
+     * Checks whether this item explicitly lists targetSlotId (supports single ID, comma-separated list,
+     * and legacy FEET slot aliases boots_real <-> belt_real, boots_cosmetic <-> belt_cosmetic).
      */
     public boolean matchesSlot(String targetSlotId) {
         if (!hasSlot() || targetSlotId == null || targetSlotId.isBlank()) return false;
-        String target = targetSlotId.trim().toLowerCase(Locale.ROOT);
+        String target = canonicalSlotAlias(targetSlotId);
         for (String part : slotId.split(",")) {
-            if (part.trim().toLowerCase(Locale.ROOT).equals(target)) {
+            if (canonicalSlotAlias(part).equals(target)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static String canonicalSlotAlias(String raw) {
+        if (raw == null) return "";
+        String norm = raw.trim().toLowerCase(Locale.ROOT);
+        return switch (norm) {
+            case "belt_real" -> "boots_real";
+            case "belt_cosmetic" -> "boots_cosmetic";
+            default -> norm;
+        };
+    }
+
+    /**
+     * Pure material helper: returns true for wearable armor & Elytra (excluding plain placeable heads/skulls/pumpkins).
+     */
+    public static boolean isWearableArmorMaterial(org.bukkit.Material mat) {
+        if (mat == null) return false;
+        if (mat == org.bukkit.Material.ELYTRA || mat == org.bukkit.Material.TURTLE_HELMET) return true;
+        String name = mat.name();
+        return name.endsWith("_HELMET")
+                || name.endsWith("_CHESTPLATE")
+                || name.endsWith("_LEGGINGS")
+                || name.endsWith("_BOOTS");
     }
 
     /**

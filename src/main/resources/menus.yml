@@ -1,49 +1,29 @@
 # ==============================================================================
-# MythicWardrobe — Настройка режимов и визуального оформления всех меню (GUI)
+# MythicWardrobe v1.11.0 — Настройка режимов и визуального оформления всех меню
 # ==============================================================================
-# Доступные режимы меню (default-mode):
-#   COMPACT — отдельные компактные менюшки в 1 строчку (9 слотов) для каждого слота:
-#             Шлем / Нагрудник / Поножи / Ботинки (+ компактный хаб по /wardrobe)
-#   TABBED  — одно меню с вкладками переключения между Шлемом/Нагрудником/Поножами/Ботинками
-#   UNIFIED — одно большое меню со ВСЕМИ 4 разделами сразу в одном окне
+# Все 21 слот полностью разделены и разложены без наложений во всех 3 режимах:
+#   HEAD  (6): hat, mask_skin, hair_3d, mask_3d, helmet_real, helmet_cosmetic
+#   CHEST (6): undershirt, jacket, gloves, chest_real, chest_cosmetic, backpack_3d
+#   LEGS  (5): pants, belt_skin, legs_real, legs_cosmetic, belt_3d
+#   FEET  (4): socks, boots_skin, boots_real, boots_cosmetic
 #
-# Вы можете менять у КАЖДОГО меню:
-#   • title            — название (MiniMessage, hex <#38bdf8>, &-коды, шрифты ресурспака!)
-#   • rows             — размер меню в строчках (от 1 до 6; 1 строчка = 9 слотов, 6 = 54 слота)
-#   • filler           — фоновая рамка (material, custom-model-data, item-model, hide-tooltip)
-#   • slot-positions   — точные номера слотов (0..size-1) для каждого слота одежды/брони
-#   • buttons          — любые кнопки и декоративные элементы!
-#
-# Доступные действия кнопок (action):
-#   OPEN_HEAD, OPEN_CHEST, OPEN_LEGS, OPEN_FEET, OPEN_HUB, OPEN_UNIFIED,
-#   BACK (кнопка «◀ Назад» — возвращает на предыдущий экран или запускает back-command),
-#   RUN_COMMAND (выполнить команду из поля `command:` у кнопки, поддерживается `console:...`),
-#   CYCLE_MODE (переключить режим меню), REFRESH_SKIN, RESET_SKIN,
-#   OPEN_WEB (выдать ссылку на веб-редактор), CLOSE, NONE (просто декор)
-#
-# Поддержка ресурспаков (Nexo / ItemsAdder / Crucible / ванильный 1.21+):
-#   У любой кнопки/фона можно указать:
-#     custom-model-data: 1001
-#     item-model: "mypack:ui_button_helmet"
-#     hide-tooltip: true
+# Доступные режимы (default-mode):
+#   COMPACT — отдельные 1-строчные меню (9 слотов) для каждого раздела брони + хаб
+#   TABBED  — одно меню с 4 вкладками (поддерживает и общие slot-positions, и раздельные sections.{HEAD,CHEST,LEGS,FEET})
+#   UNIFIED — одно большое меню со ВСЕМИ 21 слотами сразу (5 строк = 45 слотов)
 # ==============================================================================
 
 default-mode: "COMPACT"
 allow-player-switch: true
-# Команда для кнопки «◀ Назад», когда игрок находится в корневом меню гардероба
-# (например "dm open main_menu" или "menu"). Если пусто "" — работает back-fallback:
 back-command: ""
-# Что делать при нажатии «◀ Назад» на верхнем экране, если back-command пустой:
-#   INVENTORY — открыть окно «Инвентарь и Экипировка» (инвентарь остаётся открытым!)
-#   CLOSE     — закрыть меню полностью (кнопка CLOSE всегда закрывает полностью)
 back-fallback: "INVENTORY"
 inventory-title: "<#1e293b>Инвентарь и Экипировка"
 
 # ==============================================================================
-# РЕЖИМ 1: COMPACT — Компактные менюшки в 1 строчку для каждого слота брони
+# РЕЖИМ 1: COMPACT — Отдельные 1-строчные меню для каждого раздела брони
 # ==============================================================================
 compact_hub:
-  title: "<#38bdf8>Гардероб <dark_gray>▪ <gray>Выберите слот"
+  title: "<#38bdf8>Гардероб <dark_gray>▪ <gray>Выберите раздел"
   rows: 1
   filler:
     enabled: true
@@ -57,39 +37,39 @@ compact_hub:
       material: ARROW
       name: "<#fbbf24>◀ Назад"
       lore:
-        - "<gray>Вернуться назад / закрыть меню"
+        - "<gray>Вернуться назад / открыть инвентарь"
     head:
       slots: [1]
       action: OPEN_HEAD
       material: IRON_HELMET
       name: "<#f8fafc>Шлем и Голова"
       lore:
-        - "<gray>Открыть 1-строчное меню шлема"
-        - "<dark_gray>Маска 2D • Причёска 3D • Маска 3D • Статы • Косметика"
+        - "<gray>6 слотов: Шапка 2D • Маска 2D • Причёска 3D"
+        - "<dark_gray>Маска 3D • Шлем (Броня) • Шлем (Косметика)"
     chest:
       slots: [2]
       action: OPEN_CHEST
       material: IRON_CHESTPLATE
       name: "<#f8fafc>Нагрудник и Торс"
       lore:
-        - "<gray>Открыть 1-строчное меню нагрудника"
-        - "<dark_gray>Футболка • Куртка • Бронежилет • Косметика • Рюкзак"
+        - "<gray>6 слотов: Футболка • Куртка • Перчатки"
+        - "<dark_gray>Нагрудник (Броня) • Косметика • Рюкзак 3D"
     legs:
       slots: [3]
       action: OPEN_LEGS
       material: IRON_LEGGINGS
       name: "<#f8fafc>Поножи, Штаны и Пояс"
       lore:
-        - "<gray>Открыть 1-строчное меню поножей"
-        - "<dark_gray>Штаны 2D • Пояс 2D • Поножи Статы • Косметика • Пояс 3D"
+        - "<gray>5 слотов: Штаны 2D • Пояс 2D"
+        - "<dark_gray>Поножи (Броня) • Косметика • Пояс 3D"
     feet:
       slots: [4]
       action: OPEN_FEET
       material: IRON_BOOTS
       name: "<#f8fafc>Ботинки и Обувь"
       lore:
-        - "<gray>Открыть 1-строчное меню обуви"
-        - "<dark_gray>Носки • Ботинки 2D • Ботинки Статы • Косметика"
+        - "<gray>4 слота: Носки 2D • Ботинки 2D"
+        - "<dark_gray>Ботинки (Броня) • Ботинки (Косметика)"
     refresh:
       slots: [6]
       action: REFRESH_SKIN
@@ -115,7 +95,7 @@ compact_hub:
 
 compact:
   HEAD:
-    title: "<#38bdf8>Шлем <dark_gray>▪ <gray>Голова и Маски"
+    title: "<#38bdf8>Шлем <dark_gray>▪ <gray>Голова (6 слотов)"
     rows: 1
     filler:
       enabled: true
@@ -123,11 +103,12 @@ compact:
       name: " "
       hide-tooltip: true
     slot-positions:
-      mask_skin: 1
-      hair_3d: 2
-      mask_3d: 3
-      helmet_real: 4
-      helmet_cosmetic: 5
+      hat: 1
+      mask_skin: 2
+      hair_3d: 3
+      mask_3d: 4
+      helmet_real: 5
+      helmet_cosmetic: 6
     buttons:
       back_hub:
         slots: [0]
@@ -150,7 +131,7 @@ compact:
           - "<gray>Сейчас: <white><mode>"
 
   CHEST:
-    title: "<#38bdf8>Нагрудник <dark_gray>▪ <gray>Торс и Рюкзак"
+    title: "<#38bdf8>Нагрудник <dark_gray>▪ <gray>Торс (6 слотов)"
     rows: 1
     filler:
       enabled: true
@@ -160,9 +141,10 @@ compact:
     slot-positions:
       undershirt: 1
       jacket: 2
-      chest_real: 3
-      chest_cosmetic: 4
-      backpack_3d: 5
+      gloves: 3
+      chest_real: 4
+      chest_cosmetic: 5
+      backpack_3d: 6
     buttons:
       back_hub:
         slots: [0]
@@ -185,7 +167,7 @@ compact:
           - "<gray>Сейчас: <white><mode>"
 
   LEGS:
-    title: "<#38bdf8>Поножи <dark_gray>▪ <gray>Штаны и Пояс"
+    title: "<#38bdf8>Поножи <dark_gray>▪ <gray>Штаны и Пояс (5 слотов)"
     rows: 1
     filler:
       enabled: true
@@ -220,7 +202,7 @@ compact:
           - "<gray>Сейчас: <white><mode>"
 
   FEET:
-    title: "<#38bdf8>Ботинки <dark_gray>▪ <gray>Обувь и Пояс"
+    title: "<#38bdf8>Ботинки <dark_gray>▪ <gray>Обувь (4 слота)"
     rows: 1
     filler:
       enabled: true
@@ -230,8 +212,8 @@ compact:
     slot-positions:
       socks: 1
       boots_skin: 2
-      belt_real: 4
-      belt_cosmetic: 5
+      boots_real: 4
+      boots_cosmetic: 5
     buttons:
       back_hub:
         slots: [0]
@@ -254,15 +236,15 @@ compact:
           - "<gray>Сейчас: <white><mode>"
 
 # ==============================================================================
-# РЕЖИМ 2: TABBED — Одно меню с переключением вкладок (Шлем/Нагрудник/Поножи/Ботинки)
+# РЕЖИМ 2: TABBED — Одно меню с 4 отдельными вкладками (Шлем/Нагрудник/Поножи/Ботинки)
 # ==============================================================================
 tabbed:
   title: "<#1e293b>Гардероб <dark_gray>▪ <aqua><section>"
   section-titles:
     HEAD: "<#1e293b>Экипировка: Шлем и Голова"
     CHEST: "<#1e293b>Экипировка: Нагрудник и Торс"
-    LEGS: "<#1e293b>Экипировка: Поножи и Ноги"
-    FEET: "<#1e293b>Экипировка: Ботинки и Пояс"
+    LEGS: "<#1e293b>Экипировка: Поножи и Пояса"
+    FEET: "<#1e293b>Экипировка: Ботинки и Обувь"
   rows: 3
   show-equipped-indicators: true
   filler:
@@ -270,27 +252,33 @@ tabbed:
     material: GRAY_STAINED_GLASS_PANE
     name: " "
     hide-tooltip: true
-  # Позиции слотов для каждой вкладки (если какой-то слот не указан — берётся gui-slot из slots.yml)
+  # Позиции всех 21 слотов (каждая секция отображает только свои слоты, без наложений!)
   slot-positions:
-    mask_skin: 10
-    hair_3d: 11
-    mask_3d: 12
-    helmet_real: 14
+    # HEAD (6 слотов)
+    hat: 10
+    mask_skin: 11
+    hair_3d: 12
+    mask_3d: 13
+    helmet_real: 15
     helmet_cosmetic: 16
+    # CHEST (6 слотов)
     undershirt: 10
     jacket: 11
-    chest_real: 13
+    gloves: 12
+    chest_real: 14
     chest_cosmetic: 15
     backpack_3d: 16
+    # LEGS (5 слотов)
     pants: 10
     belt_skin: 11
     legs_real: 13
-    legs_cosmetic: 15
+    legs_cosmetic: 14
     belt_3d: 16
+    # FEET (4 слота)
     socks: 10
     boots_skin: 11
-    belt_real: 14
-    belt_cosmetic: 16
+    boots_real: 14
+    boots_cosmetic: 15
   buttons:
     tab_head:
       slots: [1]
@@ -318,22 +306,22 @@ tabbed:
       slots: [5]
       action: OPEN_LEGS
       material: IRON_LEGGINGS
-      name: "<#f8fafc>Поножи и Ноги"
+      name: "<#f8fafc>Поножи и Пояса"
       lore: ["<gray>Нажмите для перехода"]
       active:
         material: DIAMOND_LEGGINGS
-        name: "<gold>▶ <#f8fafc>Поножи и Ноги <gold>◀"
+        name: "<gold>▶ <#f8fafc>Поножи и Пояса <gold>◀"
         lore: ["<yellow>Открыт сейчас"]
         glint: true
     tab_feet:
       slots: [7]
       action: OPEN_FEET
       material: IRON_BOOTS
-      name: "<#f8fafc>Ботинки и Пояс"
+      name: "<#f8fafc>Ботинки и Обувь"
       lore: ["<gray>Нажмите для перехода"]
       active:
         material: DIAMOND_BOOTS
-        name: "<gold>▶ <#f8fafc>Ботинки и Пояс <gold>◀"
+        name: "<gold>▶ <#f8fafc>Ботинки и Обувь <gold>◀"
         lore: ["<yellow>Открыт сейчас"]
         glint: true
     back:
@@ -342,7 +330,7 @@ tabbed:
       material: ARROW
       name: "<#fbbf24>◀ Назад"
       lore:
-        - "<gray>Вернуться назад / закрыть меню"
+        - "<gray>Вернуться назад / открыть инвентарь"
     switch_mode:
       slots: [20]
       action: CYCLE_MODE
@@ -369,10 +357,10 @@ tabbed:
       name: "<red>Закрыть"
 
 # ==============================================================================
-# РЕЖИМ 3: UNIFIED — Одно большое меню для ВСЕХ слотов брони и одежды сразу!
+# РЕЖИМ 3: UNIFIED — Одно большое меню со ВСЕМИ 21 отдельными слотами сразу!
 # ==============================================================================
 unified:
-  title: "<#0f172a>Полный Гардероб и Броня"
+  title: "<#0f172a>Полный Гардероб и Броня (21 слот)"
   rows: 5
   show-equipped-indicators: false
   filler:
@@ -381,78 +369,77 @@ unified:
     name: " "
     hide-tooltip: true
   slot-positions:
-    # Строка 1 — Шлем
-    mask_skin: 2
-    hair_3d: 3
-    mask_3d: 4
+    # Строка 1 — Шлем и Голова (6 слотов)
+    hat: 2
+    mask_skin: 3
+    hair_3d: 4
+    mask_3d: 5
     helmet_real: 6
     helmet_cosmetic: 7
-    # Строка 2 — Нагрудник
+    # Строка 2 — Нагрудник и Торс (6 слотов)
     undershirt: 11
     jacket: 12
+    gloves: 13
     chest_real: 14
     chest_cosmetic: 15
     backpack_3d: 16
-    # Строка 3 — Поножи и Пояс
+    # Строка 3 — Поножи и Пояса (5 слотов)
     pants: 20
     belt_skin: 21
     legs_real: 23
     legs_cosmetic: 24
     belt_3d: 25
-    # Строка 4 — Ботинки и Пояс
+    # Строка 4 — Ботинки и Обувь (4 слота)
     socks: 29
     boots_skin: 30
-    belt_real: 32
-    belt_cosmetic: 33
+    boots_real: 32
+    boots_cosmetic: 33
   buttons:
-    # Декоративные ярлыки строк слева
     label_head:
       slots: [0]
       action: NONE
       material: DIAMOND_HELMET
       name: "<#38bdf8>Шлем и Голова"
       lore:
-        - "<gray>Справа слоты:"
-        - "<dark_gray>Маска 2D • Маска 3D • Шлем • Косметика"
+        - "<gray>Справа 6 отдельных слотов:"
+        - "<dark_gray>Шапка • Маска 2D • Причёска 3D • Маска 3D • Шлем Броня • Косметика"
     label_chest:
       slots: [9]
       action: NONE
       material: DIAMOND_CHESTPLATE
       name: "<#38bdf8>Нагрудник и Торс"
       lore:
-        - "<gray>Справа слоты:"
-        - "<dark_gray>Футболка • Куртка • Бронежилет • Косметика • Рюкзак"
+        - "<gray>Справа 6 отдельных слотов:"
+        - "<dark_gray>Футболка • Куртка • Перчатки • Нагрудник Броня • Косметика • Рюкзак"
     label_legs:
       slots: [18]
       action: NONE
       material: DIAMOND_LEGGINGS
-      name: "<#38bdf8>Поножи, Штаны и Пояс"
+      name: "<#38bdf8>Поножи и Пояса"
       lore:
-        - "<gray>Справа слоты:"
-        - "<dark_gray>Штаны 2D • Пояс 2D • Поножи • Косметика • Пояс 3D"
+        - "<gray>Справа 5 отдельных слотов:"
+        - "<dark_gray>Штаны • Пояс 2D • Поножи Броня • Косметика • Пояс 3D"
     label_feet:
       slots: [27]
       action: NONE
       material: DIAMOND_BOOTS
       name: "<#38bdf8>Ботинки и Обувь"
       lore:
-        - "<gray>Справа слоты:"
-        - "<dark_gray>Носки • Ботинки 2D • Ботинки • Косметика"
-    # Разделительная полоса между ярлыками и слотами
+        - "<gray>Справа 4 отдельных слота:"
+        - "<dark_gray>Носки • Ботинки 2D • Ботинки Броня • Косметика"
     divider:
       slots: [1, 10, 19, 28, 37, 39, 41, 43]
       action: NONE
       material: GRAY_STAINED_GLASS_PANE
       name: " "
       hide-tooltip: true
-    # Нижняя панель кнопок (строка 5)
     back:
       slots: [36]
       action: BACK
       material: ARROW
       name: "<#fbbf24>◀ Назад"
       lore:
-        - "<gray>Вернуться назад / закрыть меню"
+        - "<gray>Вернуться назад / открыть инвентарь"
     switch_mode:
       slots: [38]
       action: CYCLE_MODE

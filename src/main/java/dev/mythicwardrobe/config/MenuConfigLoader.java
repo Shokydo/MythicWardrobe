@@ -26,8 +26,25 @@ public final class MenuConfigLoader {
             Map<ArmorSection, MenuLayoutDef> compactMenus,
             MenuLayoutDef tabbedBase,
             Map<ArmorSection, String> tabbedSectionTitles,
+            Map<ArmorSection, MenuLayoutDef> tabbedSections,
             MenuLayoutDef unifiedMenu
     ) {
+        public ParsedMenusConfig(
+                MenuMode defaultMode,
+                boolean allowPlayerSwitch,
+                String backCommand,
+                String backFallback,
+                String inventoryTitle,
+                MenuLayoutDef compactHub,
+                Map<ArmorSection, MenuLayoutDef> compactMenus,
+                MenuLayoutDef tabbedBase,
+                Map<ArmorSection, String> tabbedSectionTitles,
+                MenuLayoutDef unifiedMenu
+        ) {
+            this(defaultMode, allowPlayerSwitch, backCommand, backFallback, inventoryTitle,
+                    compactHub, compactMenus, tabbedBase, tabbedSectionTitles, Map.of(), unifiedMenu);
+        }
+
         public ParsedMenusConfig(
                 MenuMode defaultMode,
                 boolean allowPlayerSwitch,
@@ -40,7 +57,7 @@ public final class MenuConfigLoader {
         ) {
             this(defaultMode, allowPlayerSwitch, backCommand, "INVENTORY",
                     "<#1e293b>Инвентарь и Экипировка",
-                    compactHub, compactMenus, tabbedBase, tabbedSectionTitles, unifiedMenu);
+                    compactHub, compactMenus, tabbedBase, tabbedSectionTitles, Map.of(), unifiedMenu);
         }
 
         public boolean openInventoryOnBack() {
@@ -51,7 +68,24 @@ public final class MenuConfigLoader {
             return compactMenus.getOrDefault(section, compactHub);
         }
 
+        /**
+         * Returns the per-section TABBED layout if configured under `tabbed.sections.<SECTION>`,
+         * otherwise falls back to the shared `tabbedBase` layout.
+         */
+        public MenuLayoutDef getTabbedMenu(ArmorSection section) {
+            if (section != null && tabbedSections != null && tabbedSections.containsKey(section)) {
+                return tabbedSections.get(section);
+            }
+            return tabbedBase;
+        }
+
         public String getTabbedTitle(ArmorSection section) {
+            if (section != null && tabbedSections != null && tabbedSections.containsKey(section)) {
+                MenuLayoutDef secLayout = tabbedSections.get(section);
+                if (secLayout.title() != null && !secLayout.title().isBlank()) {
+                    return secLayout.title().replace("<section>", section.getRussianTitle());
+                }
+            }
             if (section != null && tabbedSectionTitles.containsKey(section)) {
                 return tabbedSectionTitles.get(section);
             }
@@ -121,6 +155,42 @@ public final class MenuConfigLoader {
             }
         }
 
+        // Optional fully-separated per-tab layouts under `tabbed.sections.<HEAD|CHEST|LEGS|FEET>`
+        Map<ArmorSection, MenuLayoutDef> tabbedSections = new EnumMap<>(ArmorSection.class);
+        if (tabbedSec != null && tabbedSec.isConfigurationSection("sections")) {
+            ConfigurationSection secsRoot = tabbedSec.getConfigurationSection("sections");
+            for (ArmorSection sec : ArmorSection.values()) {
+                ConfigurationSection sCfg = secsRoot.getConfigurationSection(sec.name());
+                if (sCfg == null) sCfg = secsRoot.getConfigurationSection(sec.name().toLowerCase(Locale.ROOT));
+                if (sCfg == null) continue;
+                String secTitle = sCfg.getString("title", tabbedTitles.getOrDefault(sec, tabbedBase.title()));
+                MenuLayoutDef parsedSec = parseLayout(
+                        "tabbed_" + sec.name().toLowerCase(Locale.ROOT),
+                        sCfg,
+                        secTitle,
+                        tabbedBase.rows(),
+                        tabbedBase.showEquippedIndicators(),
+                        tabbedBase.emptySlots()
+                );
+                // Inherit base buttons/positions ONLY when section override does not declare its own!
+                List<MenuButtonDef> effButtons = sCfg.isConfigurationSection("buttons") ? parsedSec.buttons() : tabbedBase.buttons();
+                Map<String, Integer> effPositions = sCfg.isConfigurationSection("slot-positions")
+                        ? parsedSec.slotPositions()
+                        : tabbedBase.slotPositions();
+                tabbedSections.put(sec, new MenuLayoutDef(
+                        parsedSec.id(),
+                        parsedSec.title(),
+                        parsedSec.rows(),
+                        sCfg.isConfigurationSection("filler") ? parsedSec.fillerEnabled() : tabbedBase.fillerEnabled(),
+                        sCfg.isConfigurationSection("filler") ? parsedSec.filler() : tabbedBase.filler(),
+                        sCfg.contains("show-equipped-indicators") ? parsedSec.showEquippedIndicators() : tabbedBase.showEquippedIndicators(),
+                        Collections.unmodifiableMap(new LinkedHashMap<>(effPositions)),
+                        effButtons,
+                        parsedSec.emptySlots()
+                ));
+            }
+        }
+
         MenuLayoutDef unified = parseLayout(
                 "unified",
                 yaml.getConfigurationSection("unified"),
@@ -140,6 +210,7 @@ public final class MenuConfigLoader {
                 Collections.unmodifiableMap(compactMenus),
                 tabbedBase,
                 Collections.unmodifiableMap(tabbedTitles),
+                Collections.unmodifiableMap(tabbedSections),
                 unified
         );
     }

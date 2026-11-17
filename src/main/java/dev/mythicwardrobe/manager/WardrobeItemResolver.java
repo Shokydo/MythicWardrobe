@@ -133,11 +133,22 @@ public final class WardrobeItemResolver {
         }
 
         // 2. Explicit slot match (supports single slot OR comma-separated multi-slot list!)
-        if (meta.hasSlot() && meta.matchesSlot(slot.id())) {
-            return true;
+        if (meta.hasSlot()) {
+            if (meta.matchesSlot(slot.id())) {
+                return true;
+            }
+            // Multimodal cosmetics can also declare additional allowed ARMOR_COSMETIC slots in cosmetic-variants.yml
+            CosmeticVariantConfig variantCfg = config.getCosmeticVariantConfig();
+            if (variantCfg != null && variantCfg.isMultimodalCosmetic(meta.mythicId(), meta.inlineCosmeticSkin())
+                    && variantCfg.canPlaceInSlot(meta.mythicId(), meta.inlineCosmeticSkin(), slot)) {
+                return true;
+            }
+            // Strictly keep explicitly bound items separated to their declared slot(s):
+            // e.g. a chest_cosmetic item cannot slip into chest_real, and a chest_real item cannot slip into backpack_3d!
+            return false;
         }
 
-        // 2b. Multimodal cosmetic skin (cosmetic-variants.yml or inline Wardrobe.Variants:):
+        // 2b. Multimodal cosmetic skin (cosmetic-variants.yml without explicit Wardrobe.Slot):
         //     Allows ANY item material (e.g. WHITE_DYE, PAPER, BRUSH) to be placed into its
         //     allowed ARMOR_COSMETIC slots while preventing paint items from entering ARMOR_REAL!
         CosmeticVariantConfig variantCfg = config.getCosmeticVariantConfig();
@@ -150,16 +161,8 @@ public final class WardrobeItemResolver {
             }
         }
 
-        // If item is explicitly bound to a 2D SKIN_LAYER slot (e.g. leather chestplate used as 2D jacket),
-        // never let it accidentally slip into 3D armor/overlay slots.
-        if (meta.hasSlot() && isBoundToSkinLayerSlot(meta)) {
-            return false;
-        }
-
-        // 3. ARMOR_REAL, ARMOR_COSMETIC, AND DISPLAY_3D/ARMOR_OVERLAY slots all accept any Equippable /
-        //    MythicArmors / vanilla armor piece matching the section's EquipmentSlot!
-        //    This allows wearing ANY 3D MythicArmors model (backpack, gas mask, armor piece) BOTH
-        //    standalone in its armor slot AND simultaneously layered in a 3D overlay slot!
+        // 3. Unbound vanilla / MythicArmors items (without explicit Wardrobe.Slot):
+        //    Accepted into ARMOR_REAL / ARMOR_COSMETIC / DISPLAY_3D / ARMOR_OVERLAY slots matching EquipmentSlot.
         EquipmentSlot targetEq = slot.equipmentSlot() != null
                 ? slot.equipmentSlot()
                 : (slot.section() != null ? slot.section().getEquipmentSlot() : null);
@@ -199,6 +202,47 @@ public final class WardrobeItemResolver {
             WardrobeSlotDef bound = config.getSlot(part.trim());
             if (bound != null && bound.isSkinLayer()) {
                 return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true when right-clicking this item in hand (main or off-hand) would equip armor
+     * (vanilla armor, Elytra, or any MythicArmors / 1.21+ Equippable 3D armor/accessory piece).
+     * Plain placeable blocks (e.g. untagged CARVED_PUMPKIN or PLAYER_HEAD without Equippable component)
+     * return false so normal block placement is never broken.
+     */
+    public boolean isHandRightClickArmor(ItemStack item, ItemWardrobeMeta meta) {
+        if (item == null || item.getType().isAir()) return false;
+
+        // 1. Explicit 1.21.4+ Equippable component on armor slots (covers ALL MythicArmors 3D armor,
+        //    masks, backpacks, belts, hair, AND vanilla armor items that carry Equippable data)
+        try {
+            Equippable eq = item.getData(DataComponentTypes.EQUIPPABLE);
+            if (eq != null && eq.slot() != null) {
+                EquipmentSlot s = eq.slot();
+                if (s == EquipmentSlot.HEAD || s == EquipmentSlot.CHEST
+                        || s == EquipmentSlot.LEGS || s == EquipmentSlot.FEET) {
+                    return true;
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // 2. Vanilla armor materials & Elytra (excluding plain placeable heads/skulls/pumpkins)
+        Material mat = item.getType();
+        if (ItemWardrobeMeta.isWearableArmorMaterial(mat)) {
+            return true;
+        }
+
+        // 3. Explicit Wardrobe 3D/armor slot tag (helmet/chest/legs/boots real/cosmetic, mask_3d, hair_3d, backpack_3d, belt_3d)
+        if (meta != null && meta.hasSlot()) {
+            for (String part : meta.slotId().split(",")) {
+                WardrobeSlotDef bound = config.getSlot(part.trim());
+                if (bound != null && !bound.isSkinLayer()) {
+                    return true;
+                }
             }
         }
         return false;

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#09090b">
-  <title>MythicWardrobe Studio v2.5 : Полный осмотр 2D+3D, .bbmodel, 3D-волосы, 2D-скины и GUI</title>
+  <title>MythicWardrobe Studio v2.6 : Полный осмотр 2D+3D (21 слот), 3D Броня + Косметика, 2D-скины и GUI</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -239,8 +239,8 @@
         <svg class="ico ico-md"><use href="#ico-brand"></use></svg>
       </span>
       <span>MythicWardrobe Studio</span>
-      <span class="brand-badge">v1.9.2</span>
-      <span class="brand-offline" title="Работает полностью в браузере без Python и без сервера">Offline HTML</span>
+      <span class="brand-badge">v1.11.0</span>
+      <span class="brand-offline" title="Работает полностью в браузере без Python и без сервера">21 слот · Offline</span>
     </div>
 
     <nav class="tabs" aria-label="Разделы студии">
@@ -267,7 +267,7 @@
     </nav>
 
     <div class="topbar-actions">
-      <button class="btn btn-sm" id="btnLoadDemo" title="Загрузить все 14 демо .bbmodel (включая 3D-пояса, ботинки и 3D-причёски) и 68 стартовых 2D-скинов">
+      <button class="btn btn-sm" id="btnLoadDemo" title="Загрузить все 20 демо .bbmodel (реальная 3D-броня + 3D-косметика + 3D-аксессуары во всех 12 слотах) и 68 стартовых 2D-скинов">
         <svg class="ico" aria-hidden="true"><use href="#ico-sparkles"></use></svg>
         <span>Загрузить демо</span>
       </button>
@@ -519,21 +519,31 @@
             <span id="modelCountBadge" class="tag">0</span>
           </div>
           <div class="field">
-            <label class="field-label" for="filterCategory">Фильтр по категории</label>
+            <label class="field-label" for="filterCategory">Фильтр по слоту / категории (12 3D-слотов)</label>
             <select id="filterCategory">
-              <option value="all">Все категории</option>
-              <option value="helmets">Шлемы (HEAD)</option>
-              <option value="mask_3d">3D-Маски и очки (HEAD)</option>
-              <option value="hair_3d">3D-Причёски (HEAD)</option>
-              <option value="armor_chest">Нагрудники (CHEST)</option>
-              <option value="backpack_3d">3D-Рюкзаки и плащи (CHEST)</option>
-              <option value="armor_legs">Поножи (LEGS)</option>
-              <option value="belt_3d">3D-Пояса и декор (LEGS)</option>
-              <option value="armor_feet">Ботинки (FEET)</option>
+              <option value="all">Все 12 3D-слотов</option>
+              <optgroup label="Реальная 3D Броня (Статы)">
+                <option value="helmet_real">Шлем — 3D Броня (helmet_real)</option>
+                <option value="chest_real">Нагрудник — 3D Броня (chest_real)</option>
+                <option value="legs_real">Поножи — 3D Броня (legs_real)</option>
+                <option value="boots_real">Ботинки — 3D Броня (boots_real)</option>
+              </optgroup>
+              <optgroup label="3D Косметика (Скины / Краски)">
+                <option value="helmet_cosmetic">Шлем — 3D Косметика (helmet_cosmetic)</option>
+                <option value="chest_cosmetic">Нагрудник — 3D Косметика (chest_cosmetic)</option>
+                <option value="legs_cosmetic">Поножи — 3D Косметика (legs_cosmetic)</option>
+                <option value="boots_cosmetic">Ботинки — 3D Косметика (boots_cosmetic)</option>
+              </optgroup>
+              <optgroup label="3D Аксессуары и Причёски">
+                <option value="hair_3d">3D-Причёски (hair_3d)</option>
+                <option value="mask_3d">3D-Маски и очки (mask_3d)</option>
+                <option value="backpack_3d">3D-Рюкзаки и плащи (backpack_3d)</option>
+                <option value="belt_3d">3D-Пояса и декор (belt_3d)</option>
+              </optgroup>
             </select>
           </div>
           <div id="modelList" class="model-list-stack">
-            <div class="hint">Загрузите свои файлы .bbmodel или нажмите «Демо (10 моделей)»: в демо вшиты 3D-причёски, 3D-пояса, рюкзак, противогаз и броня.</div>
+            <div class="hint">Загрузите свои файлы .bbmodel или нажмите «Загрузить демо»: в демо вшиты все 12 3D-слотов (реальная 3D-броня, 3D-косметика, 3D-причёски, маски, рюкзак и пояса).</div>
           </div>
         </div>
       </aside>
@@ -569,30 +579,50 @@
 
             <div class="grid-2">
               <div class="field">
-                <label class="field-label" for="inpCategory">Категория</label>
+                <label class="field-label" for="inpCategory">Категория (3D-слот)</label>
                 <select id="inpCategory">
-                  <option value="helmets">Шлем (HEAD)</option>
-                  <option value="mask_3d">3D-Маска / Очки (HEAD)</option>
-                  <option value="hair_3d">3D-Причёска (HEAD)</option>
-                  <option value="armor_chest">Нагрудник (CHEST)</option>
-                  <option value="backpack_3d">3D-Рюкзак / Плащ (CHEST)</option>
-                  <option value="armor_legs">Поножи (LEGS)</option>
-                  <option value="belt_3d">3D-Пояс / Декор (LEGS)</option>
-                  <option value="armor_feet">Ботинки (FEET)</option>
+                  <optgroup label="Реальная 3D Броня (Статы)">
+                    <option value="helmet_real">Шлем — 3D Броня (HEAD)</option>
+                    <option value="chest_real">Нагрудник — 3D Броня (CHEST)</option>
+                    <option value="legs_real">Поножи — 3D Броня (LEGS)</option>
+                    <option value="boots_real">Ботинки — 3D Броня (FEET)</option>
+                  </optgroup>
+                  <optgroup label="3D Косметика (Скины)">
+                    <option value="helmet_cosmetic">Шлем — 3D Косметика (HEAD)</option>
+                    <option value="chest_cosmetic">Нагрудник — 3D Косметика (CHEST)</option>
+                    <option value="legs_cosmetic">Поножи — 3D Косметика (LEGS)</option>
+                    <option value="boots_cosmetic">Ботинки — 3D Косметика (FEET)</option>
+                  </optgroup>
+                  <optgroup label="3D Аксессуары и Причёски">
+                    <option value="hair_3d">3D-Причёска (HEAD)</option>
+                    <option value="mask_3d">3D-Маска / Очки (HEAD)</option>
+                    <option value="backpack_3d">3D-Рюкзак / Плащ (CHEST)</option>
+                    <option value="belt_3d">3D-Пояс / Декор (LEGS)</option>
+                  </optgroup>
                 </select>
               </div>
               <div class="field">
-                <label class="field-label" for="inpWardrobeSlot">Слот гардероба</label>
+                <label class="field-label" for="inpWardrobeSlot">Слот гардероба (slots.yml)</label>
                 <select id="inpWardrobeSlot">
-                  <option value="">Стандартная броня</option>
-                  <option value="mask_3d">mask_3d (3D Маска)</option>
-                  <option value="hair_3d">hair_3d (3D Причёска)</option>
-                  <option value="backpack_3d">backpack_3d (3D Рюкзак)</option>
-                  <option value="belt_3d">belt_3d (3D Пояс)</option>
-                  <option value="helmet_cosmetic">helmet_cosmetic</option>
-                  <option value="chest_cosmetic">chest_cosmetic</option>
-                  <option value="legs_cosmetic">legs_cosmetic</option>
-                  <option value="boots_cosmetic">boots_cosmetic</option>
+                  <optgroup label="Реальная 3D Броня (ARMOR_REAL)">
+                    <option value="helmet_real">helmet_real (3D Шлем — Броня)</option>
+                    <option value="chest_real">chest_real (3D Нагрудник — Броня)</option>
+                    <option value="legs_real">legs_real (3D Поножи — Броня)</option>
+                    <option value="boots_real">boots_real (3D Ботинки — Броня)</option>
+                  </optgroup>
+                  <optgroup label="3D Косметика (ARMOR_COSMETIC)">
+                    <option value="helmet_cosmetic">helmet_cosmetic (3D Шлем — Космет.)</option>
+                    <option value="chest_cosmetic">chest_cosmetic (3D Нагрудник — Космет.)</option>
+                    <option value="legs_cosmetic">legs_cosmetic (3D Поножи — Космет.)</option>
+                    <option value="boots_cosmetic">boots_cosmetic (3D Ботинки — Космет.)</option>
+                  </optgroup>
+                  <optgroup label="3D Аксессуары (DISPLAY_3D / OVERLAY)">
+                    <option value="hair_3d">hair_3d (3D Причёска)</option>
+                    <option value="mask_3d">mask_3d (3D Маска / Очки)</option>
+                    <option value="backpack_3d">backpack_3d (3D Рюкзак / Плащ)</option>
+                    <option value="belt_3d">belt_3d (3D Пояс / Декор)</option>
+                  </optgroup>
+                  <option value="">Без привязки (любой слот своей секции)</option>
                 </select>
               </div>
             </div>
@@ -1132,9 +1162,9 @@
             <div class="field">
               <label class="field-label" for="guiDefaultMode">Режим по умолчанию</label>
               <select id="guiDefaultMode">
+                <option value="COMPACT">COMPACT (1-рядные)</option>
                 <option value="TABBED">TABBED (Вкладки)</option>
-                <option value="UNIFIED">UNIFIED (Общее)</option>
-                <option value="PER_SLOT">PER_SLOT (Узкие)</option>
+                <option value="UNIFIED">UNIFIED (Все 21 слотов)</option>
               </select>
             </div>
             <div class="field">
@@ -1432,9 +1462,9 @@
             <div class="field">
               <label class="field-label" for="cfgMenuMode">Режим меню (menu.mode)</label>
               <select id="cfgMenuMode">
+                <option value="COMPACT">COMPACT (1-рядные)</option>
                 <option value="TABBED">TABBED (Вкладки)</option>
-                <option value="UNIFIED">UNIFIED (Всё сразу)</option>
-                <option value="PER_SLOT">PER_SLOT (1-рядные)</option>
+                <option value="UNIFIED">UNIFIED (Все 21 слотов)</option>
               </select>
             </div>
             <div class="field">
@@ -1487,11 +1517,35 @@
             <div class="field">
               <label class="field-label" for="cfgSuitSlot">Слот-носитель</label>
               <select id="cfgSuitSlot">
-                <option value="jacket">jacket (Куртка / Костюм)</option>
-                <option value="pants">pants (Штаны)</option>
-                <option value="hat">hat (Шапка)</option>
-                <option value="chest_cosmetic">chest_cosmetic (3D Нагрудник)</option>
-                <option value="helmet_cosmetic">helmet_cosmetic (3D Шлем)</option>
+                <optgroup label="2D-Слои скина">
+                  <option value="jacket">jacket (Куртка / Костюм 2D)</option>
+                  <option value="undershirt">undershirt (Футболка 2D)</option>
+                  <option value="gloves">gloves (Перчатки 2D)</option>
+                  <option value="pants">pants (Штаны 2D)</option>
+                  <option value="belt_skin">belt_skin (Пояс 2D)</option>
+                  <option value="socks">socks (Носки 2D)</option>
+                  <option value="boots_skin">boots_skin (Ботинки 2D)</option>
+                  <option value="hat">hat (Шапка 2D)</option>
+                  <option value="mask_skin">mask_skin (Маска 2D)</option>
+                </optgroup>
+                <optgroup label="Реальная 3D Броня">
+                  <option value="helmet_real">helmet_real (3D Шлем — Броня)</option>
+                  <option value="chest_real">chest_real (3D Нагрудник — Броня)</option>
+                  <option value="legs_real">legs_real (3D Поножи — Броня)</option>
+                  <option value="boots_real">boots_real (3D Ботинки — Броня)</option>
+                </optgroup>
+                <optgroup label="3D Косметика">
+                  <option value="helmet_cosmetic">helmet_cosmetic (3D Шлем — Космет.)</option>
+                  <option value="chest_cosmetic">chest_cosmetic (3D Нагрудник — Космет.)</option>
+                  <option value="legs_cosmetic">legs_cosmetic (3D Поножи — Космет.)</option>
+                  <option value="boots_cosmetic">boots_cosmetic (3D Ботинки — Космет.)</option>
+                </optgroup>
+                <optgroup label="3D Аксессуары">
+                  <option value="hair_3d">hair_3d (3D Причёска)</option>
+                  <option value="mask_3d">mask_3d (3D Маска / Очки)</option>
+                  <option value="backpack_3d">backpack_3d (3D Рюкзак)</option>
+                  <option value="belt_3d">belt_3d (3D Пояс)</option>
+                </optgroup>
               </select>
             </div>
           </div>

@@ -164,7 +164,7 @@ public final class WardrobeGuiManager {
 
     private void openTabbedInternal(Player player, ArmorSection section) {
         MenuConfigLoader.ParsedMenusConfig menus = config.getMenusConfig();
-        MenuLayoutDef layout = menus.tabbedBase();
+        MenuLayoutDef layout = menus.getTabbedMenu(section);
         String title = menus.getTabbedTitle(section);
         WardrobeGuiHolder holder = new WardrobeGuiHolder(player.getUniqueId(), MenuMode.TABBED, section, false);
         Inventory inv = createInventory(player, holder, layout, title, section, MenuMode.TABBED);
@@ -227,14 +227,52 @@ public final class WardrobeGuiManager {
     private void populateInteractiveSlots(Player player, Inventory inv, WardrobeGuiHolder holder,
                                           MenuLayoutDef layout, List<WardrobeSlotDef> slots) {
         int size = inv.getSize();
+        boolean hasExplicitPositions = layout != null
+                && layout.slotPositions() != null
+                && !layout.slotPositions().isEmpty();
+
         for (WardrobeSlotDef def : slots) {
-            Integer configuredPos = layout.slotPositions().get(def.id());
+            Integer configuredPos = resolveSlotPosition(layout, def.id());
+            // When menus.yml explicitly defines `slot-positions:` for this screen, ONLY render
+            // slots placed by the admin/Studio — never fall back to def.guiSlot() and overwrite
+            // other cells or inject unwanted slots!
+            if (hasExplicitPositions && configuredPos == null) {
+                continue;
+            }
             int rawSlot = configuredPos != null ? configuredPos : def.guiSlot();
             if (rawSlot < 0 || rawSlot >= size) continue;
 
             holder.registerInteractiveSlot(rawSlot, def);
             renderSingleInteractiveSlot(player, inv, layout, rawSlot, def);
         }
+    }
+
+    private static Integer resolveSlotPosition(MenuLayoutDef layout, String slotId) {
+        if (layout == null || layout.slotPositions() == null || slotId == null) return null;
+        String key = slotId.toLowerCase(Locale.ROOT);
+        Integer direct = layout.slotPositions().get(key);
+        if (direct != null) return direct;
+        return switch (key) {
+            case "boots_real" -> layout.slotPositions().get("belt_real");
+            case "belt_real" -> layout.slotPositions().get("boots_real");
+            case "boots_cosmetic" -> layout.slotPositions().get("belt_cosmetic");
+            case "belt_cosmetic" -> layout.slotPositions().get("boots_cosmetic");
+            default -> null;
+        };
+    }
+
+    private static MenuIconSpec resolveEmptySlotIcon(MenuLayoutDef layout, String slotId) {
+        if (layout == null || layout.emptySlots() == null || slotId == null) return null;
+        String key = slotId.toLowerCase(Locale.ROOT);
+        MenuIconSpec direct = layout.emptySlots().get(key);
+        if (direct != null) return direct;
+        return switch (key) {
+            case "boots_real" -> layout.emptySlots().get("belt_real");
+            case "belt_real" -> layout.emptySlots().get("boots_real");
+            case "boots_cosmetic" -> layout.emptySlots().get("belt_cosmetic");
+            case "belt_cosmetic" -> layout.emptySlots().get("boots_cosmetic");
+            default -> null;
+        };
     }
 
     public void refreshView(Player player, WardrobeGuiHolder holder) {
@@ -313,7 +351,7 @@ public final class WardrobeGuiManager {
     private MenuLayoutDef resolveLayout(WardrobeGuiHolder holder) {
         MenuConfigLoader.ParsedMenusConfig menus = config.getMenusConfig();
         if (holder.getMenuMode() == MenuMode.UNIFIED) return menus.unifiedMenu();
-        if (holder.getMenuMode() == MenuMode.TABBED) return menus.tabbedBase();
+        if (holder.getMenuMode() == MenuMode.TABBED) return menus.getTabbedMenu(holder.getSection());
         if (holder.isHubView() || holder.getSection() == null) return menus.compactHub();
         return menus.getCompactMenu(holder.getSection());
     }
@@ -806,9 +844,7 @@ public final class WardrobeGuiManager {
     }
 
     private ItemStack createSlotPlaceholder(MenuLayoutDef layout, WardrobeSlotDef def, Player player) {
-        MenuIconSpec custom = (layout != null && layout.emptySlots() != null)
-                ? layout.emptySlots().get(def.id().toLowerCase(Locale.ROOT))
-                : null;
+        MenuIconSpec custom = resolveEmptySlotIcon(layout, def.id());
         if (custom != null) {
             String effectiveName = (custom.name() != null && !custom.name().isEmpty())
                     ? custom.name()

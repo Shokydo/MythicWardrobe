@@ -74,31 +74,36 @@
   const REAL_ARMOR_SLOT_IDS = ["helmet_real", "chest_real", "legs_real", "boots_real"];
 
   const BLOCKABLE_CHOICES = [
-    { id: "undershirt",      label: "Футболка (2D)",      group: "2D" },
-    { id: "pants",           label: "Штаны (2D)",         group: "2D" },
-    { id: "belt_skin",       label: "Пояс (2D)",          group: "2D" },
-    { id: "gloves",          label: "Перчатки (2D)",      group: "2D" },
-    { id: "socks",           label: "Носки (2D)",         group: "2D" },
-    { id: "boots_skin",      label: "Ботинки (2D)",       group: "2D" },
-    { id: "mask_skin",       label: "Маска (2D)",         group: "2D" },
-    { id: "hat",             label: "Шапка (2D)",         group: "2D" },
-    { id: "jacket",          label: "Куртка (2D)",        group: "2D" },
-    { id: "hair",            label: "Волосы (2D)",        group: "2D" },
-    { id: "belt_3d",         label: "Пояс / Декор (3D)",  group: "3D" },
-    { id: "backpack_3d",     label: "Рюкзак (3D)",        group: "3D" },
-    { id: "mask_3d",         label: "Маска (3D)",         group: "3D" },
-    { id: "hair_3d",         label: "Причёска (3D)",      group: "3D" },
-    { id: "helmet_cosmetic", label: "Шлем (Космет.)",     group: "Броня" },
-    { id: "chest_cosmetic",  label: "Нагруд. (Космет.)",  group: "Броня" },
-    { id: "legs_cosmetic",   label: "Поножи (Космет.)",   group: "Броня" },
-    { id: "boots_cosmetic",  label: "Ботинки (Космет.)",  group: "Броня" },
+    { id: "undershirt",      label: "Футболка (2D)",         group: "2D" },
+    { id: "pants",           label: "Штаны (2D)",            group: "2D" },
+    { id: "belt_skin",       label: "Пояс (2D)",             group: "2D" },
+    { id: "gloves",          label: "Перчатки (2D)",         group: "2D" },
+    { id: "socks",           label: "Носки (2D)",            group: "2D" },
+    { id: "boots_skin",      label: "Ботинки (2D)",          group: "2D" },
+    { id: "mask_skin",       label: "Маска (2D)",            group: "2D" },
+    { id: "hat",             label: "Шапка (2D)",            group: "2D" },
+    { id: "jacket",          label: "Куртка (2D)",           group: "2D" },
+    { id: "hair",            label: "Волосы (2D)",           group: "2D" },
+    { id: "helmet_real",     label: "Шлем (3D Броня)",       group: "3D Броня" },
+    { id: "chest_real",      label: "Нагрудник (3D Броня)",  group: "3D Броня" },
+    { id: "legs_real",       label: "Поножи (3D Броня)",     group: "3D Броня" },
+    { id: "boots_real",      label: "Ботинки (3D Броня)",    group: "3D Броня" },
+    { id: "helmet_cosmetic", label: "Шлем (3D Космет.)",     group: "3D Космет." },
+    { id: "chest_cosmetic",  label: "Нагрудник (3D Космет.)",group: "3D Космет." },
+    { id: "legs_cosmetic",   label: "Поножи (3D Космет.)",   group: "3D Космет." },
+    { id: "boots_cosmetic",  label: "Ботинки (3D Космет.)",  group: "3D Космет." },
+    { id: "hair_3d",         label: "Причёска (3D)",         group: "3D Аксесс." },
+    { id: "mask_3d",         label: "Маска (3D)",            group: "3D Аксесс." },
+    { id: "backpack_3d",     label: "Рюкзак (3D)",           group: "3D Аксесс." },
+    { id: "belt_3d",         label: "Пояс / Декор (3D)",     group: "3D Аксесс." },
   ];
 
   const BLOCK_SHORTCUTS = [
     { id: "all_clothing", label: "all_clothing (Вся 2D-одежда)" },
     { id: "suit",         label: "suit (Комбинезон: торс+ноги+руки)" },
     { id: "all_3d",       label: "all_3d (Все 3D-аксессуары)" },
-    { id: "all_cosmetic", label: "all_cosmetic (Вся косметика)" },
+    { id: "all_real",     label: "all_real (Вся реальная 3D-броня)" },
+    { id: "all_cosmetic", label: "all_cosmetic (Вся 3D-косметика)" },
     { id: "all",          label: "all (Все остальные слоты)" },
   ];
 
@@ -526,15 +531,16 @@
       : detectedSlots.has("LEGS") ? "LEGS"
       : detectedSlots.has("FEET") ? "FEET" : "HEAD";
 
-    let suggestedCategory = "armor_chest";
+    const looksCosmetic = /(cosmetic|skin|paint|gold|white|camo|recolor|ornament)/i.test(cleanId);
+    let suggestedCategory = looksCosmetic ? "chest_cosmetic" : "chest_real";
     if (cleanId.includes("hair")) suggestedCategory = "hair_3d";
     else if (cleanId.includes("mask") || cleanId.includes("gasmask") || cleanId.includes("glasses")) suggestedCategory = "mask_3d";
     else if (cleanId.includes("belt") || cleanId.includes("holster") || cleanId.includes("sash") || cleanId.includes("pouch")) suggestedCategory = "belt_3d";
     else if (cleanId.includes("backpack") || cleanId.includes("bag") || cleanId.includes("cape") || cleanId.includes("wing")) suggestedCategory = "backpack_3d";
-    else if (primarySlot === "HEAD") suggestedCategory = "helmets";
-    else if (primarySlot === "CHEST") suggestedCategory = "armor_chest";
-    else if (primarySlot === "LEGS") suggestedCategory = "armor_legs";
-    else if (primarySlot === "FEET") suggestedCategory = "armor_feet";
+    else if (primarySlot === "HEAD") suggestedCategory = looksCosmetic ? "helmet_cosmetic" : "helmet_real";
+    else if (primarySlot === "CHEST") suggestedCategory = looksCosmetic ? "chest_cosmetic" : "chest_real";
+    else if (primarySlot === "LEGS") suggestedCategory = looksCosmetic ? "legs_cosmetic" : "legs_real";
+    else if (primarySlot === "FEET") suggestedCategory = looksCosmetic ? "boots_cosmetic" : "boots_real";
 
     return {
       id: cleanId,
@@ -846,7 +852,10 @@
     if (finalEmis) addTex(`${cleanName}_main_e.png`, finalEmis);
     if (finalTint) addTex(`${cleanName}_main_t.png`, finalTint);
     if (autoLayers || layer1Canvas) addTex(`${cleanName}_layer_1.png`, layer1Canvas || blankCanvas(64, 32));
-    if (autoLayers || layer2Canvas) addTex(`${cleanName}_layer_2.png`, layer2Canvas || blankCanvas(64, 32));
+    // Only emit _layer_2.png for LEGS models (or when source already had layer_2) to keep CHEST models clean
+    if (layer2Canvas || (autoLayers && targetSlot === "LEGS")) {
+      addTex(`${cleanName}_layer_2.png`, layer2Canvas || blankCanvas(64, 32));
+    }
     for (const kw of ICON_KEYWORDS) {
       const role = `icon_${kw}`;
       if (iconsByRole[role]) addTex(`${cleanName}_${kw}.png`, iconsByRole[role]);
@@ -1120,6 +1129,18 @@
     lines.push("    Unbreakable: true");
     lines.push("    HideFlags: true");
 
+    const isRealArmor = Boolean(wardrobeSlot && String(wardrobeSlot).endsWith("_real"));
+    const REAL_ATTR_SLOT = { HEAD: "Head", CHEST: "Chest", LEGS: "Legs", FEET: "Feet" };
+    const REAL_DEF_ARMOR = { HEAD: 3, CHEST: 8, LEGS: 6, FEET: 3 };
+    if (isRealArmor) {
+      const attrSlot = REAL_ATTR_SLOT[slot] || "Chest";
+      const defArmor = REAL_DEF_ARMOR[slot] || 4;
+      lines.push("  Attributes:");
+      lines.push(`    ${attrSlot}:`);
+      lines.push(`      Armor: ${defArmor}`);
+      lines.push("      ArmorToughness: 2");
+    }
+
     const hasBlocks = Array.isArray(blocks) && blocks.length > 0;
     if (wardrobeSlot || hasBlocks) {
       lines.push("  Wardrobe:");
@@ -1347,170 +1368,320 @@
     return lines.join("\n");
   }
 
-  // ==================== GUI INVENTORY EDITOR (menus.yml) ====================
+  // ==================== GUI INVENTORY EDITOR (menus.yml — ALL 21 SEPARATED SLOTS) ====================
   const GUI_SLOT_CATALOG = [
-    { id: "helmet_cosmetic", label: "3D Шлем (косметика)", section: "HEAD", defaultMat: "IRON_HELMET" },
-    { id: "mask_3d", label: "3D Маска / Очки", section: "HEAD", defaultMat: "CARVED_PUMPKIN" },
-    { id: "hair_3d", label: "3D Причёска", section: "HEAD", defaultMat: "LEAD" },
-    { id: "hat", label: "2D Шапка", section: "HEAD", defaultMat: "LEATHER_HELMET" },
-    { id: "mask_skin", label: "2D Маска", section: "HEAD", defaultMat: "PAPER" },
-    { id: "chest_cosmetic", label: "3D Нагрудник (косметика)", section: "CHEST", defaultMat: "IRON_CHESTPLATE" },
-    { id: "backpack_3d", label: "3D Рюкзак / Плащ", section: "CHEST", defaultMat: "BUNDLE" },
-    { id: "jacket", label: "2D Куртка / Костюм", section: "CHEST", defaultMat: "LEATHER_CHESTPLATE" },
-    { id: "undershirt", label: "2D Футболка", section: "CHEST", defaultMat: "WHITE_WOOL" },
-    { id: "gloves", label: "2D Перчатки", section: "CHEST", defaultMat: "RABBIT_HIDE" },
-    { id: "legs_cosmetic", label: "3D Поножи (косметика)", section: "LEGS", defaultMat: "IRON_LEGGINGS" },
-    { id: "belt_3d", label: "3D Пояс / Декор", section: "LEGS", defaultMat: "SADDLE" },
-    { id: "pants", label: "2D Штаны", section: "LEGS", defaultMat: "LEATHER_LEGGINGS" },
-    { id: "belt_skin", label: "2D Пояс", section: "LEGS", defaultMat: "LEAD" },
-    { id: "boots_cosmetic", label: "3D Ботинки (косметика)", section: "FEET", defaultMat: "IRON_BOOTS" },
-    { id: "boots_skin", label: "2D Ботинки", section: "FEET", defaultMat: "LEATHER_BOOTS" },
-    { id: "socks", label: "2D Носки", section: "FEET", defaultMat: "STRING" },
+    // HEAD (6 отдельных слотов)
+    { id: "hat",             label: "2D Шапка",                    section: "HEAD",  group: "2D Скин",       defaultMat: "WHITE_STAINED_GLASS_PANE" },
+    { id: "mask_skin",       label: "2D Маска",                    section: "HEAD",  group: "2D Скин",       defaultMat: "LIGHT_BLUE_STAINED_GLASS_PANE" },
+    { id: "hair_3d",         label: "3D Причёска",                 section: "HEAD",  group: "3D Аксессуар",  defaultMat: "MAGENTA_STAINED_GLASS_PANE" },
+    { id: "mask_3d",         label: "3D Маска / Очки",             section: "HEAD",  group: "3D Аксессуар",  defaultMat: "ORANGE_STAINED_GLASS_PANE" },
+    { id: "helmet_real",     label: "3D Шлем (Броня / Статы)",     section: "HEAD",  group: "3D Броня",      defaultMat: "IRON_HELMET" },
+    { id: "helmet_cosmetic", label: "3D Шлем (Косметика)",         section: "HEAD",  group: "3D Косметика",  defaultMat: "LEATHER_HELMET" },
+    // CHEST (6 отдельных слотов)
+    { id: "undershirt",      label: "2D Футболка / Майка",         section: "CHEST", group: "2D Скин",       defaultMat: "LIGHT_BLUE_STAINED_GLASS_PANE" },
+    { id: "jacket",          label: "2D Куртка / Костюм",          section: "CHEST", group: "2D Скин",       defaultMat: "CYAN_STAINED_GLASS_PANE" },
+    { id: "gloves",          label: "2D Перчатки",                 section: "CHEST", group: "2D Скин",       defaultMat: "BLUE_STAINED_GLASS_PANE" },
+    { id: "chest_real",      label: "3D Нагрудник (Броня / Статы)",section: "CHEST", group: "3D Броня",      defaultMat: "IRON_CHESTPLATE" },
+    { id: "chest_cosmetic",  label: "3D Нагрудник (Косметика)",    section: "CHEST", group: "3D Косметика",  defaultMat: "LEATHER_CHESTPLATE" },
+    { id: "backpack_3d",     label: "3D Рюкзак / Плащ",            section: "CHEST", group: "3D Аксессуар",  defaultMat: "BROWN_STAINED_GLASS_PANE" },
+    // LEGS (5 отдельных слотов)
+    { id: "pants",           label: "2D Штаны",                    section: "LEGS",  group: "2D Скин",       defaultMat: "BLUE_STAINED_GLASS_PANE" },
+    { id: "belt_skin",       label: "2D Пояс / Ремень",            section: "LEGS",  group: "2D Скин",       defaultMat: "YELLOW_STAINED_GLASS_PANE" },
+    { id: "legs_real",       label: "3D Поножи (Броня / Статы)",   section: "LEGS",  group: "3D Броня",      defaultMat: "IRON_LEGGINGS" },
+    { id: "legs_cosmetic",   label: "3D Поножи (Косметика)",       section: "LEGS",  group: "3D Косметика",  defaultMat: "LEATHER_LEGGINGS" },
+    { id: "belt_3d",         label: "3D Пояс / Кобура / Декор",    section: "LEGS",  group: "3D Аксессуар",  defaultMat: "ORANGE_STAINED_GLASS_PANE" },
+    // FEET (4 отдельных слота)
+    { id: "socks",           label: "2D Носки",                    section: "FEET",  group: "2D Скин",       defaultMat: "YELLOW_STAINED_GLASS_PANE" },
+    { id: "boots_skin",      label: "2D Ботинки",                  section: "FEET",  group: "2D Скин",       defaultMat: "ORANGE_STAINED_GLASS_PANE" },
+    { id: "boots_real",      label: "3D Ботинки (Броня / Статы)",  section: "FEET",  group: "3D Броня",      defaultMat: "IRON_BOOTS" },
+    { id: "boots_cosmetic",  label: "3D Ботинки (Косметика)",      section: "FEET",  group: "3D Косметика",  defaultMat: "LEATHER_BOOTS" },
   ];
 
   const GUI_BUTTON_ACTIONS = [
-    { id: "BACK", label: "BACK - Назад (открывает инвентарь / команду)" },
-    { id: "OPEN_INVENTORY", label: "OPEN_INVENTORY - Открыть Инвентарь и Экипировку" },
-    { id: "RUN_COMMAND", label: "RUN_COMMAND - Выполнить команду" },
-    { id: "SWITCH_TAB", label: "SWITCH_TAB - Переключить вкладку" },
-    { id: "OPEN_SECTION", label: "OPEN_SECTION - Открыть секцию (PER_SLOT)" },
-    { id: "SWITCH_MODE", label: "SWITCH_MODE - Сменить режим меню" },
-    { id: "CLOSE", label: "CLOSE - Полностью закрыть меню" },
-    { id: "DECOR", label: "DECOR - Декоративный предмет" },
+    { id: "BACK",           label: "BACK — Назад (открывает инвентарь / команду)" },
+    { id: "OPEN_HEAD",      label: "OPEN_HEAD — Открыть раздел «Шлем / Голова»" },
+    { id: "OPEN_CHEST",     label: "OPEN_CHEST — Открыть раздел «Нагрудник / Торс»" },
+    { id: "OPEN_LEGS",      label: "OPEN_LEGS — Открыть раздел «Поножи / Пояса»" },
+    { id: "OPEN_FEET",      label: "OPEN_FEET — Открыть раздел «Ботинки / Обувь»" },
+    { id: "OPEN_HUB",       label: "OPEN_HUB — Открыть хаб выбора разделов (COMPACT)" },
+    { id: "OPEN_UNIFIED",   label: "OPEN_UNIFIED — Открыть полное меню (UNIFIED)" },
+    { id: "OPEN_INVENTORY", label: "OPEN_INVENTORY — Открыть Инвентарь и Экипировку" },
+    { id: "CYCLE_MODE",     label: "CYCLE_MODE — Переключить режим (COMPACT/TABBED/UNIFIED)" },
+    { id: "REFRESH_SKIN",   label: "REFRESH_SKIN — Пересобрать 2D-скин и 3D-броню" },
+    { id: "RESET_SKIN",     label: "RESET_SKIN — Сбросить временные слои скина" },
+    { id: "RUN_COMMAND",    label: "RUN_COMMAND — Выполнить команду" },
+    { id: "CLOSE",          label: "CLOSE — Полностью закрыть меню" },
+    { id: "NONE",           label: "NONE — Декоративный предмет (без действия)" },
   ];
 
-  function createDefaultMenusState() {
+  function makeGuiSlotCell(slotId, material, name, lore) {
     return {
-      defaultMode: "TABBED",
+      kind: "slot",
+      slotId,
+      emptyIcon: {
+        material,
+        name,
+        lore: lore || [],
+        customModelData: "",
+        itemModel: "",
+        glint: false,
+      },
+    };
+  }
+
+  function makeGuiBtnCell(action, material, name, lore, extra = {}) {
+    return {
+      kind: action === "NONE" ? "decor" : "button",
+      action,
+      material,
+      name,
+      lore: lore || [],
+      customModelData: "",
+      itemModel: "",
+      glint: Boolean(extra.glint),
+      hideTooltip: Boolean(extra.hideTooltip),
+      command: extra.command || "",
+    };
+  }
+
+  function makeTabbedNavCells(activeSec) {
+    return {
+      1: makeGuiBtnCell("OPEN_HEAD",  activeSec === "HEAD"  ? "DIAMOND_HELMET"     : "IRON_HELMET",     activeSec === "HEAD"  ? "&6▶ &fШлем и Голова &6◀"     : "&fШлем и Голова",     ["&76 слотов: 2D + 3D Броня + Косметика"], { glint: activeSec === "HEAD" }),
+      3: makeGuiBtnCell("OPEN_CHEST", activeSec === "CHEST" ? "DIAMOND_CHESTPLATE" : "IRON_CHESTPLATE", activeSec === "CHEST" ? "&6▶ &fНагрудник и Торс &6◀"  : "&fНагрудник и Торс",  ["&76 слотов: 2D + 3D Броня + Косметика"], { glint: activeSec === "CHEST" }),
+      5: makeGuiBtnCell("OPEN_LEGS",  activeSec === "LEGS"  ? "DIAMOND_LEGGINGS"   : "IRON_LEGGINGS",   activeSec === "LEGS"  ? "&6▶ &fПоножи и Пояса &6◀"    : "&fПоножи и Пояса",    ["&75 слотов: 2D + 3D Броня + Косметика"], { glint: activeSec === "LEGS" }),
+      7: makeGuiBtnCell("OPEN_FEET",  activeSec === "FEET"  ? "DIAMOND_BOOTS"      : "IRON_BOOTS",      activeSec === "FEET"  ? "&6▶ &fБотинки и Обувь &6◀"   : "&fБотинки и Обувь",   ["&74 слота: 2D + 3D Броня + Косметика"],  { glint: activeSec === "FEET" }),
+      18: makeGuiBtnCell("BACK",         "ARROW",      "&e◀ Назад",        ["&7Открыть инвентарь / назад"]),
+      20: makeGuiBtnCell("CYCLE_MODE",   "COMPARATOR", "&eВид меню",       ["&7Переключить COMPACT / TABBED / UNIFIED"]),
+      22: makeGuiBtnCell("REFRESH_SKIN", "LIME_DYE",   "&aОбновить скин",  ["&7Пересобрать 2D-слои и 3D-броню"]),
+      24: makeGuiBtnCell("RESET_SKIN",   "RED_DYE",    "&cСбросить слои",  ["&7Сбросить слои от команд/скиллов"]),
+      26: makeGuiBtnCell("CLOSE",        "BARRIER",    "&cЗакрыть",        ["&7Полностью закрыть меню"]),
+    };
+  }
+
+  function createDefaultMenusState() {
+    const darkFiller = () => ({ material: "BLACK_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true });
+    const grayFiller = () => ({ material: "GRAY_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true });
+
+    return {
+      defaultMode: "COMPACT",
       backCommand: "",
       backFallback: "INVENTORY",
       inventoryTitle: "&8Инвентарь и Экипировка",
       screens: {
-        tabbed: {
-          label: "TABBED (1 меню + вкладки)",
-          title: "&8Гардероб &7▪ &f<section>",
+        tabbed_HEAD: {
+          label: "TABBED: Голова (6 слотов)",
+          title: "&8Экипировка: Шлем и Голова",
           rows: 3,
           fillerEnabled: true,
-          filler: { material: "BLACK_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true },
+          filler: grayFiller(),
           showIndicators: true,
-          sectionTitles: {
-            HEAD: "&8Гардероб &7▪ &fГолова и Причёски",
-            CHEST: "&8Гардероб &7▪ &fТорс и Рюкзаки",
-            LEGS: "&8Гардероб &7▪ &fНоги и Пояса",
-            FEET: "&8Гардероб &7▪ &fОбувь",
-          },
           cells: {
-            1: { kind: "button", action: "SWITCH_TAB", section: "HEAD", material: "IRON_HELMET", name: "&fГолова", lore: ["&7Шлем, 3D-маска, 3D-причёска"], customModelData: "", itemModel: "", glint: false },
-            3: { kind: "button", action: "SWITCH_TAB", section: "CHEST", material: "IRON_CHESTPLATE", name: "&fТорс", lore: ["&7Нагрудник, 3D-рюкзак, куртка"], customModelData: "", itemModel: "", glint: false },
-            5: { kind: "button", action: "SWITCH_TAB", section: "LEGS", material: "IRON_LEGGINGS", name: "&fНоги и Пояса", lore: ["&7Поножи, 3D-пояс, 2D-пояс"], customModelData: "", itemModel: "", glint: false },
-            7: { kind: "button", action: "SWITCH_TAB", section: "FEET", material: "IRON_BOOTS", name: "&fБотинки", lore: ["&7Косметические и 2D-ботинки"], customModelData: "", itemModel: "", glint: false },
-            11: { kind: "slot", slotId: "helmet_cosmetic", emptyIcon: { material: "LEATHER_HELMET", name: "&fСлот: Косметический шлем", lore: ["&7Перетащите шлем сюда"], customModelData: "", itemModel: "", glint: false } },
-            13: { kind: "slot", slotId: "mask_3d", emptyIcon: { material: "CARVED_PUMPKIN", name: "&fСлот: 3D Маска / Очки", lore: ["&7Работает без шлема"], customModelData: "", itemModel: "", glint: false } },
-            15: { kind: "slot", slotId: "hair_3d", emptyIcon: { material: "ECHO_SHARD", name: "&fСлот: 3D Причёска", lore: ["&7Автопривязка к 2D или вручную"], customModelData: "", itemModel: "", glint: false } },
-            18: { kind: "button", action: "BACK", material: "ARROW", name: "&f← Назад (Инвентарь)", lore: ["&7Открыть инвентарь и экипировку"], customModelData: "", itemModel: "", glint: false },
-            22: { kind: "button", action: "SWITCH_MODE", material: "COMPARATOR", name: "&7Режим меню", lore: ["&7Переключить TABBED / UNIFIED / PER_SLOT"], customModelData: "", itemModel: "", glint: false },
-            26: { kind: "button", action: "CLOSE", material: "BARRIER", name: "&cЗакрыть", lore: ["&7Полностью закрыть меню"], customModelData: "", itemModel: "", glint: false },
+            ...makeTabbedNavCells("HEAD"),
+            10: makeGuiSlotCell("hat",             "WHITE_STAINED_GLASS_PANE",      "&fШапка (2D Скин)",           ["&72D-слой шапки на скин"]),
+            11: makeGuiSlotCell("mask_skin",       "LIGHT_BLUE_STAINED_GLASS_PANE", "&fМаска (2D Скин)",           ["&72D-слой маски / лица"]),
+            12: makeGuiSlotCell("hair_3d",         "MAGENTA_STAINED_GLASS_PANE",    "&dПричёска (3D)",             ["&73D-причёска MythicArmors"]),
+            13: makeGuiSlotCell("mask_3d",         "ORANGE_STAINED_GLASS_PANE",     "&6Маска / Очки (3D)",         ["&73D-маска поверх шлема"]),
+            15: makeGuiSlotCell("helmet_real",     "IRON_HELMET",                   "&aШлем (3D Броня / Статы)",   ["&aДаёт защиту, чары и статы"]),
+            16: makeGuiSlotCell("helmet_cosmetic", "LEATHER_HELMET",                "&dШлем (3D Косметика)",       ["&7Визуальный скин шлема"]),
+          },
+        },
+        tabbed_CHEST: {
+          label: "TABBED: Торс (6 слотов)",
+          title: "&8Экипировка: Нагрудник и Торс",
+          rows: 3,
+          fillerEnabled: true,
+          filler: grayFiller(),
+          showIndicators: true,
+          cells: {
+            ...makeTabbedNavCells("CHEST"),
+            10: makeGuiSlotCell("undershirt",     "LIGHT_BLUE_STAINED_GLASS_PANE", "&fФутболка (2D Скин)",          ["&7Нижний 2D-слой торса"]),
+            11: makeGuiSlotCell("jacket",         "CYAN_STAINED_GLASS_PANE",       "&bКуртка / Костюм (2D Скин)",   ["&7Верхний 2D-слой торса"]),
+            12: makeGuiSlotCell("gloves",         "BLUE_STAINED_GLASS_PANE",       "&9Перчатки (2D Скин)",          ["&72D-слой перчаток"]),
+            14: makeGuiSlotCell("chest_real",     "IRON_CHESTPLATE",               "&aНагрудник (3D Броня / Статы)",["&aДаёт защиту, чары и статы"]),
+            15: makeGuiSlotCell("chest_cosmetic", "LEATHER_CHESTPLATE",            "&dНагрудник (3D Косметика)",    ["&7Скин / мультимодальная краска"]),
+            16: makeGuiSlotCell("backpack_3d",    "BROWN_STAINED_GLASS_PANE",      "&eРюкзак / Плащ (3D)",          ["&73D-рюкзак поверх брони"]),
+          },
+        },
+        tabbed_LEGS: {
+          label: "TABBED: Ноги (5 слотов)",
+          title: "&8Экипировка: Поножи и Пояса",
+          rows: 3,
+          fillerEnabled: true,
+          filler: grayFiller(),
+          showIndicators: true,
+          cells: {
+            ...makeTabbedNavCells("LEGS"),
+            10: makeGuiSlotCell("pants",         "BLUE_STAINED_GLASS_PANE",   "&9Штаны (2D Скин)",           ["&7Нижний 2D-слой на ноги"]),
+            11: makeGuiSlotCell("belt_skin",     "YELLOW_STAINED_GLASS_PANE", "&eПояс / Ремень (2D Скин)",   ["&72D-слой пояса"]),
+            13: makeGuiSlotCell("legs_real",     "IRON_LEGGINGS",             "&aПоножи (3D Броня / Статы)", ["&aДаёт защиту, чары и статы"]),
+            14: makeGuiSlotCell("legs_cosmetic", "LEATHER_LEGGINGS",          "&dПоножи (3D Косметика)",     ["&7Визуальный скин поножей"]),
+            16: makeGuiSlotCell("belt_3d",       "ORANGE_STAINED_GLASS_PANE", "&6Пояс / Кобура (3D)",        ["&73D-пояс поверх поножей"]),
+          },
+        },
+        tabbed_FEET: {
+          label: "TABBED: Обувь (4 слота)",
+          title: "&8Экипировка: Ботинки и Обувь",
+          rows: 3,
+          fillerEnabled: true,
+          filler: grayFiller(),
+          showIndicators: true,
+          cells: {
+            ...makeTabbedNavCells("FEET"),
+            10: makeGuiSlotCell("socks",          "YELLOW_STAINED_GLASS_PANE", "&eНоски (2D Скин)",            ["&7Нижний 2D-слой ступней"]),
+            11: makeGuiSlotCell("boots_skin",     "ORANGE_STAINED_GLASS_PANE", "&6Ботинки (2D Скин)",          ["&7Верхний 2D-слой обуви"]),
+            14: makeGuiSlotCell("boots_real",     "IRON_BOOTS",                "&aБотинки (3D Броня / Статы)", ["&aДаёт защиту, чары и статы"]),
+            15: makeGuiSlotCell("boots_cosmetic", "LEATHER_BOOTS",             "&dБотинки (3D Косметика)",     ["&7Визуальный скин ботинок"]),
           },
         },
         unified: {
-          label: "UNIFIED (Всё в одном меню)",
-          title: "&8Полный Гардероб",
+          label: "UNIFIED (Все 21 слотов)",
+          title: "&8Полный Гардероб и Броня (21 слот)",
           rows: 5,
           fillerEnabled: true,
-          filler: { material: "GRAY_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true },
+          filler: darkFiller(),
           showIndicators: false,
           cells: {
-            10: { kind: "slot", slotId: "helmet_cosmetic", emptyIcon: { material: "IRON_HELMET", name: "&fКосметический шлем", lore: ["&7Слот шлема"], customModelData: "", itemModel: "", glint: false } },
-            11: { kind: "slot", slotId: "mask_3d", emptyIcon: { material: "CARVED_PUMPKIN", name: "&f3D Маска", lore: ["&7Слот 3D-маски"], customModelData: "", itemModel: "", glint: false } },
-            12: { kind: "slot", slotId: "hair_3d", emptyIcon: { material: "LEAD", name: "&f3D Причёска", lore: ["&7Слот 3D-причёски"], customModelData: "", itemModel: "", glint: false } },
-            19: { kind: "slot", slotId: "chest_cosmetic", emptyIcon: { material: "IRON_CHESTPLATE", name: "&fНагрудник", lore: ["&7Слот нагрудника"], customModelData: "", itemModel: "", glint: false } },
-            20: { kind: "slot", slotId: "backpack_3d", emptyIcon: { material: "BUNDLE", name: "&f3D Рюкзак", lore: ["&7Слот 3D-рюкзака"], customModelData: "", itemModel: "", glint: false } },
-            21: { kind: "slot", slotId: "jacket", emptyIcon: { material: "LEATHER_CHESTPLATE", name: "&f2D Куртка / Костюм", lore: ["&7Слот куртки"], customModelData: "", itemModel: "", glint: false } },
-            28: { kind: "slot", slotId: "legs_cosmetic", emptyIcon: { material: "IRON_LEGGINGS", name: "&fПоножи", lore: ["&7Слот поножей"], customModelData: "", itemModel: "", glint: false } },
-            29: { kind: "slot", slotId: "belt_3d", emptyIcon: { material: "SADDLE", name: "&f3D Пояс", lore: ["&7Слот 3D-пояса"], customModelData: "", itemModel: "", glint: false } },
-            30: { kind: "slot", slotId: "belt_skin", emptyIcon: { material: "LEAD", name: "&f2D Пояс", lore: ["&7Слот 2D-пояса"], customModelData: "", itemModel: "", glint: false } },
-            37: { kind: "slot", slotId: "boots_cosmetic", emptyIcon: { material: "IRON_BOOTS", name: "&fБотинки", lore: ["&7Слот ботинок"], customModelData: "", itemModel: "", glint: false } },
-            36: { kind: "button", action: "BACK", material: "ARROW", name: "&f← Назад", lore: [], customModelData: "", itemModel: "", glint: false },
-            44: { kind: "button", action: "CLOSE", material: "BARRIER", name: "&cЗакрыть", lore: [], customModelData: "", itemModel: "", glint: false },
+            // Row 1: HEAD (6)
+            0: makeGuiBtnCell("NONE", "DIAMOND_HELMET",     "&bШлем и Голова",    ["&76 отдельных слотов справа"]),
+            2: makeGuiSlotCell("hat",             "WHITE_STAINED_GLASS_PANE",      "&fШапка (2D)"),
+            3: makeGuiSlotCell("mask_skin",       "LIGHT_BLUE_STAINED_GLASS_PANE", "&fМаска (2D)"),
+            4: makeGuiSlotCell("hair_3d",         "MAGENTA_STAINED_GLASS_PANE",    "&dПричёска (3D)"),
+            5: makeGuiSlotCell("mask_3d",         "ORANGE_STAINED_GLASS_PANE",     "&6Маска (3D)"),
+            6: makeGuiSlotCell("helmet_real",     "IRON_HELMET",                   "&aШлем (3D Броня)"),
+            7: makeGuiSlotCell("helmet_cosmetic", "LEATHER_HELMET",                "&dШлем (3D Косметика)"),
+            // Row 2: CHEST (6)
+            9:  makeGuiBtnCell("NONE", "DIAMOND_CHESTPLATE", "&bНагрудник и Торс", ["&76 отдельных слотов справа"]),
+            11: makeGuiSlotCell("undershirt",     "LIGHT_BLUE_STAINED_GLASS_PANE", "&fФутболка (2D)"),
+            12: makeGuiSlotCell("jacket",         "CYAN_STAINED_GLASS_PANE",       "&bКуртка (2D)"),
+            13: makeGuiSlotCell("gloves",         "BLUE_STAINED_GLASS_PANE",       "&9Перчатки (2D)"),
+            14: makeGuiSlotCell("chest_real",     "IRON_CHESTPLATE",               "&aНагрудник (3D Броня)"),
+            15: makeGuiSlotCell("chest_cosmetic", "LEATHER_CHESTPLATE",            "&dНагрудник (3D Косметика)"),
+            16: makeGuiSlotCell("backpack_3d",    "BROWN_STAINED_GLASS_PANE",      "&eРюкзак (3D)"),
+            // Row 3: LEGS (5)
+            18: makeGuiBtnCell("NONE", "DIAMOND_LEGGINGS",   "&bПоножи и Пояса",   ["&75 отдельных слотов справа"]),
+            20: makeGuiSlotCell("pants",         "BLUE_STAINED_GLASS_PANE",   "&9Штаны (2D)"),
+            21: makeGuiSlotCell("belt_skin",     "YELLOW_STAINED_GLASS_PANE", "&eПояс (2D)"),
+            23: makeGuiSlotCell("legs_real",     "IRON_LEGGINGS",             "&aПоножи (3D Броня)"),
+            24: makeGuiSlotCell("legs_cosmetic", "LEATHER_LEGGINGS",          "&dПоножи (3D Косметика)"),
+            25: makeGuiSlotCell("belt_3d",       "ORANGE_STAINED_GLASS_PANE", "&6Пояс (3D)"),
+            // Row 4: FEET (4)
+            27: makeGuiBtnCell("NONE", "DIAMOND_BOOTS",      "&bБотинки и Обувь",  ["&74 отдельных слота справа"]),
+            29: makeGuiSlotCell("socks",          "YELLOW_STAINED_GLASS_PANE", "&eНоски (2D)"),
+            30: makeGuiSlotCell("boots_skin",     "ORANGE_STAINED_GLASS_PANE", "&6Ботинки (2D)"),
+            32: makeGuiSlotCell("boots_real",     "IRON_BOOTS",                "&aБотинки (3D Броня)"),
+            33: makeGuiSlotCell("boots_cosmetic", "LEATHER_BOOTS",             "&dБотинки (3D Косметика)"),
+            // Row 5: Controls
+            36: makeGuiBtnCell("BACK",         "ARROW",      "&e◀ Назад",       ["&7Инвентарь / назад"]),
+            38: makeGuiBtnCell("CYCLE_MODE",   "COMPARATOR", "&eВид меню",      ["&7Сменить COMPACT / TABBED / UNIFIED"]),
+            40: makeGuiBtnCell("REFRESH_SKIN", "LIME_DYE",   "&aОбновить скин", ["&7Пересобрать скин и броню"]),
+            42: makeGuiBtnCell("RESET_SKIN",   "RED_DYE",    "&cСбросить слои", ["&7Очистить слои от скиллов"]),
+            44: makeGuiBtnCell("CLOSE",        "BARRIER",    "&cЗакрыть",       ["&7Полностью закрыть меню"]),
           },
         },
         compact_hub: {
-          label: "COMPACT HUB (Выбор секции)",
-          title: "&8Гардероб &7▪ &fВыберите слот",
+          label: "COMPACT HUB (Выбор раздела)",
+          title: "&8Гардероб &7▪ &fВыберите раздел",
           rows: 1,
           fillerEnabled: true,
-          filler: { material: "BLACK_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true },
+          filler: darkFiller(),
           showIndicators: false,
           cells: {
-            0: { kind: "button", action: "BACK", material: "ARROW", name: "&f← Назад", lore: [], customModelData: "", itemModel: "", glint: false },
-            2: { kind: "button", action: "OPEN_SECTION", section: "HEAD", material: "IRON_HELMET", name: "&fШлем и Причёска", lore: ["&7Открыть слоты головы"], customModelData: "", itemModel: "", glint: false },
-            3: { kind: "button", action: "OPEN_SECTION", section: "CHEST", material: "IRON_CHESTPLATE", name: "&fНагрудник и Рюкзак", lore: ["&7Открыть слоты торса"], customModelData: "", itemModel: "", glint: false },
-            5: { kind: "button", action: "OPEN_SECTION", section: "LEGS", material: "IRON_LEGGINGS", name: "&fПоножи и Пояса", lore: ["&7Открыть слоты ног"], customModelData: "", itemModel: "", glint: false },
-            6: { kind: "button", action: "OPEN_SECTION", section: "FEET", material: "IRON_BOOTS", name: "&fБотинки", lore: ["&7Открыть слоты обуви"], customModelData: "", itemModel: "", glint: false },
-            8: { kind: "button", action: "CLOSE", material: "BARRIER", name: "&cЗакрыть", lore: [], customModelData: "", itemModel: "", glint: false },
+            0: makeGuiBtnCell("BACK",         "ARROW",           "&e◀ Назад",        ["&7Открыть инвентарь"]),
+            1: makeGuiBtnCell("OPEN_HEAD",    "IRON_HELMET",     "&fШлем и Голова",  ["&76 отдельных слотов"]),
+            2: makeGuiBtnCell("OPEN_CHEST",   "IRON_CHESTPLATE", "&fНагрудник",      ["&76 отдельных слотов"]),
+            3: makeGuiBtnCell("OPEN_LEGS",    "IRON_LEGGINGS",   "&fПоножи и Пояса", ["&75 отдельных слотов"]),
+            4: makeGuiBtnCell("OPEN_FEET",    "IRON_BOOTS",      "&fБотинки",        ["&74 отдельных слота"]),
+            6: makeGuiBtnCell("REFRESH_SKIN", "LIME_DYE",        "&aОбновить скин",  []),
+            7: makeGuiBtnCell("RESET_SKIN",   "RED_DYE",         "&cСбросить слои",  []),
+            8: makeGuiBtnCell("CYCLE_MODE",   "COMPARATOR",      "&eВид меню",       []),
           },
         },
         compact_HEAD: {
-          label: "COMPACT: Шлем (HEAD)",
-          title: "&8Гардероб &7▪ &fГолова",
+          label: "COMPACT: Голова (6 слотов)",
+          title: "&8Шлем &7▪ &fГолова (6 слотов)",
           rows: 1,
           fillerEnabled: true,
-          filler: { material: "BLACK_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true },
+          filler: grayFiller(),
           showIndicators: false,
           cells: {
-            0: { kind: "button", action: "BACK", material: "ARROW", name: "&f← Назад", lore: [], customModelData: "", itemModel: "", glint: false },
-            2: { kind: "slot", slotId: "helmet_cosmetic", emptyIcon: { material: "PAPER", name: "&fПустой слот: Шлем", lore: ["&7Положите шлем"], customModelData: "", itemModel: "", glint: false } },
-            4: { kind: "slot", slotId: "mask_3d", emptyIcon: { material: "PAPER", name: "&fПустой слот: 3D Маска", lore: ["&7Положите маску"], customModelData: "", itemModel: "", glint: false } },
-            6: { kind: "slot", slotId: "hair_3d", emptyIcon: { material: "PAPER", name: "&fПустой слот: 3D Причёска", lore: ["&7Положите причёску"], customModelData: "", itemModel: "", glint: false } },
-            8: { kind: "button", action: "CLOSE", material: "BARRIER", name: "&cЗакрыть", lore: [], customModelData: "", itemModel: "", glint: false },
+            0: makeGuiBtnCell("BACK", "ARROW", "&e◀ Назад", []),
+            1: makeGuiSlotCell("hat",             "WHITE_STAINED_GLASS_PANE",      "&fШапка (2D)"),
+            2: makeGuiSlotCell("mask_skin",       "LIGHT_BLUE_STAINED_GLASS_PANE", "&fМаска (2D)"),
+            3: makeGuiSlotCell("hair_3d",         "MAGENTA_STAINED_GLASS_PANE",    "&dПричёска (3D)"),
+            4: makeGuiSlotCell("mask_3d",         "ORANGE_STAINED_GLASS_PANE",     "&6Маска (3D)"),
+            5: makeGuiSlotCell("helmet_real",     "IRON_HELMET",                   "&aШлем (3D Броня)"),
+            6: makeGuiSlotCell("helmet_cosmetic", "LEATHER_HELMET",                "&dШлем (3D Косметика)"),
+            7: makeGuiBtnCell("REFRESH_SKIN", "LIME_DYE",   "&aОбновить", []),
+            8: makeGuiBtnCell("CYCLE_MODE",   "COMPARATOR", "&eРежим",    []),
           },
         },
         compact_CHEST: {
-          label: "COMPACT: Нагрудник (CHEST)",
-          title: "&8Гардероб &7▪ &fТорс",
+          label: "COMPACT: Торс (6 слотов)",
+          title: "&8Нагрудник &7▪ &fТорс (6 слотов)",
           rows: 1,
           fillerEnabled: true,
-          filler: { material: "BLACK_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true },
+          filler: grayFiller(),
           showIndicators: false,
           cells: {
-            0: { kind: "button", action: "BACK", material: "ARROW", name: "&f← Назад", lore: [], customModelData: "", itemModel: "", glint: false },
-            2: { kind: "slot", slotId: "chest_cosmetic", emptyIcon: { material: "PAPER", name: "&fПустой слот: Нагрудник", lore: [], customModelData: "", itemModel: "", glint: false } },
-            4: { kind: "slot", slotId: "backpack_3d", emptyIcon: { material: "PAPER", name: "&fПустой слот: 3D Рюкзак", lore: [], customModelData: "", itemModel: "", glint: false } },
-            6: { kind: "slot", slotId: "jacket", emptyIcon: { material: "PAPER", name: "&fПустой слот: Куртка", lore: [], customModelData: "", itemModel: "", glint: false } },
-            8: { kind: "button", action: "CLOSE", material: "BARRIER", name: "&cЗакрыть", lore: [], customModelData: "", itemModel: "", glint: false },
+            0: makeGuiBtnCell("BACK", "ARROW", "&e◀ Назад", []),
+            1: makeGuiSlotCell("undershirt",     "LIGHT_BLUE_STAINED_GLASS_PANE", "&fФутболка (2D)"),
+            2: makeGuiSlotCell("jacket",         "CYAN_STAINED_GLASS_PANE",       "&bКуртка (2D)"),
+            3: makeGuiSlotCell("gloves",         "BLUE_STAINED_GLASS_PANE",       "&9Перчатки (2D)"),
+            4: makeGuiSlotCell("chest_real",     "IRON_CHESTPLATE",               "&aНагрудник (3D Броня)"),
+            5: makeGuiSlotCell("chest_cosmetic", "LEATHER_CHESTPLATE",            "&dНагрудник (3D Косметика)"),
+            6: makeGuiSlotCell("backpack_3d",    "BROWN_STAINED_GLASS_PANE",      "&eРюкзак (3D)"),
+            7: makeGuiBtnCell("REFRESH_SKIN", "LIME_DYE",   "&aОбновить", []),
+            8: makeGuiBtnCell("CYCLE_MODE",   "COMPARATOR", "&eРежим",    []),
           },
         },
         compact_LEGS: {
-          label: "COMPACT: Поножи и Пояса (LEGS)",
-          title: "&8Гардероб &7▪ &fНоги и Пояса",
+          label: "COMPACT: Ноги (5 слотов)",
+          title: "&8Поножи &7▪ &fНоги и Пояса (5 слотов)",
           rows: 1,
           fillerEnabled: true,
-          filler: { material: "BLACK_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true },
+          filler: grayFiller(),
           showIndicators: false,
           cells: {
-            0: { kind: "button", action: "BACK", material: "ARROW", name: "&f← Назад", lore: [], customModelData: "", itemModel: "", glint: false },
-            2: { kind: "slot", slotId: "legs_cosmetic", emptyIcon: { material: "PAPER", name: "&fПустой слот: Поножи", lore: [], customModelData: "", itemModel: "", glint: false } },
-            4: { kind: "slot", slotId: "belt_3d", emptyIcon: { material: "PAPER", name: "&fПустой слот: 3D Пояс", lore: [], customModelData: "", itemModel: "", glint: false } },
-            6: { kind: "slot", slotId: "belt_skin", emptyIcon: { material: "PAPER", name: "&fПустой слот: 2D Пояс", lore: [], customModelData: "", itemModel: "", glint: false } },
-            8: { kind: "button", action: "CLOSE", material: "BARRIER", name: "&cЗакрыть", lore: [], customModelData: "", itemModel: "", glint: false },
+            0: makeGuiBtnCell("BACK", "ARROW", "&e◀ Назад", []),
+            1: makeGuiSlotCell("pants",         "BLUE_STAINED_GLASS_PANE",   "&9Штаны (2D)"),
+            2: makeGuiSlotCell("belt_skin",     "YELLOW_STAINED_GLASS_PANE", "&eПояс (2D)"),
+            3: makeGuiSlotCell("legs_real",     "IRON_LEGGINGS",             "&aПоножи (3D Броня)"),
+            4: makeGuiSlotCell("legs_cosmetic", "LEATHER_LEGGINGS",          "&dПоножи (3D Косметика)"),
+            5: makeGuiSlotCell("belt_3d",       "ORANGE_STAINED_GLASS_PANE", "&6Пояс (3D)"),
+            7: makeGuiBtnCell("REFRESH_SKIN", "LIME_DYE",   "&aОбновить", []),
+            8: makeGuiBtnCell("CYCLE_MODE",   "COMPARATOR", "&eРежим",    []),
           },
         },
         compact_FEET: {
-          label: "COMPACT: Ботинки (FEET)",
-          title: "&8Гардероб &7▪ &fОбувь",
+          label: "COMPACT: Обувь (4 слота)",
+          title: "&8Ботинки &7▪ &fОбувь (4 слота)",
           rows: 1,
           fillerEnabled: true,
-          filler: { material: "BLACK_STAINED_GLASS_PANE", name: " ", customModelData: "", itemModel: "", hideTooltip: true },
+          filler: grayFiller(),
           showIndicators: false,
           cells: {
-            0: { kind: "button", action: "BACK", material: "ARROW", name: "&f← Назад", lore: [], customModelData: "", itemModel: "", glint: false },
-            3: { kind: "slot", slotId: "boots_cosmetic", emptyIcon: { material: "PAPER", name: "&fПустой слот: 3D Ботинки", lore: [], customModelData: "", itemModel: "", glint: false } },
-            5: { kind: "slot", slotId: "boots_skin", emptyIcon: { material: "PAPER", name: "&fПустой слот: 2D Ботинки", lore: [], customModelData: "", itemModel: "", glint: false } },
-            8: { kind: "button", action: "CLOSE", material: "BARRIER", name: "&cЗакрыть", lore: [], customModelData: "", itemModel: "", glint: false },
+            0: makeGuiBtnCell("BACK", "ARROW", "&e◀ Назад", []),
+            1: makeGuiSlotCell("socks",          "YELLOW_STAINED_GLASS_PANE", "&eНоски (2D)"),
+            2: makeGuiSlotCell("boots_skin",     "ORANGE_STAINED_GLASS_PANE", "&6Ботинки (2D)"),
+            4: makeGuiSlotCell("boots_real",     "IRON_BOOTS",                "&aБотинки (3D Броня)"),
+            5: makeGuiSlotCell("boots_cosmetic", "LEATHER_BOOTS",             "&dБотинки (3D Косметика)"),
+            7: makeGuiBtnCell("REFRESH_SKIN", "LIME_DYE",   "&aОбновить", []),
+            8: makeGuiBtnCell("CYCLE_MODE",   "COMPARATOR", "&eРежим",    []),
           },
         },
       },
     };
+  }
+
+  function normalizeMenuActionForPlugin(rawAct, section) {
+    const a = String(rawAct || "NONE").trim().toUpperCase();
+    const sec = String(section || "HEAD").trim().toUpperCase();
+    if (a === "DECOR") return "NONE";
+    if (a === "SWITCH_MODE") return "CYCLE_MODE";
+    if (a === "SWITCH_TAB" || a === "OPEN_SECTION") {
+      return ["HEAD", "CHEST", "LEGS", "FEET"].includes(sec) ? `OPEN_${sec}` : "OPEN_HEAD";
+    }
+    return a;
   }
 
   function writeIconYamlProps(lines, indent, spec) {
@@ -1594,13 +1765,10 @@
       buttons.sort((a, b) => a.slotIdx - b.slotIdx);
       for (let i = 0; i < buttons.length; i++) {
         const { slotIdx, cell } = buttons[i];
-        const act = cell.kind === "decor" ? "DECOR" : (cell.action || "DECOR");
+        const act = cell.kind === "decor" ? "NONE" : normalizeMenuActionForPlugin(cell.action, cell.section);
         lines.push(`${ind}  btn_${slotIdx}:`);
-        lines.push(`${ind}    slot: ${slotIdx}`);
+        lines.push(`${ind}    slots: [${slotIdx}]`);
         lines.push(`${ind}    action: ${act}`);
-        if ((act === "SWITCH_TAB" || act === "OPEN_SECTION") && cell.section) {
-          lines.push(`${ind}    section: ${cell.section}`);
-        }
         if (act === "RUN_COMMAND" && cell.command) {
           lines.push(`${ind}    command: '${yamlEscape(cell.command)}'`);
         }
@@ -1611,22 +1779,93 @@
 
   function generateMenusYml(menusState) {
     const st = menusState || createDefaultMenusState();
+    const rawMode = String(st.defaultMode || "COMPACT").trim().toUpperCase();
+    const mode = rawMode === "PER_SLOT" ? "COMPACT" : rawMode;
     const lines = [
       "# ==============================================================================",
-      "# MythicWardrobe v1.9.0 - Визуальная настройка GUI инвентаря",
-      "# Сгенерировано в MythicWardrobe Studio v2.2 (Визуальный GUI Редактор)",
+      "# MythicWardrobe v1.11.0 - Визуальная настройка GUI инвентаря (все 21 слотов)",
+      "# Сгенерировано в MythicWardrobe Studio v2.6 (Визуальный GUI Редактор)",
       "# Положите в: plugins/MythicWardrobe/menus.yml и выполните /wardrobe reload",
       "# ==============================================================================",
       "",
-      `default-mode: ${st.defaultMode || "TABBED"}`,
+      `default-mode: '${mode}'`,
+      "allow-player-switch: true",
       `back-command: '${yamlEscape(st.backCommand || "")}'`,
-      `back-fallback: ${st.backFallback || "INVENTORY"}`,
+      `back-fallback: '${st.backFallback || "INVENTORY"}'`,
       `inventory-title: '${yamlEscape(st.inventoryTitle || "&8Инвентарь и Экипировка")}'`,
       "",
     ];
 
     const sc = st.screens || {};
-    if (sc.tabbed) {
+    const tabbedSecs = ["HEAD", "CHEST", "LEGS", "FEET"].filter(s => Boolean(sc[`tabbed_${s}`]));
+    if (tabbedSecs.length) {
+      const baseTab = sc.tabbed_HEAD || sc[`tabbed_${tabbedSecs[0]}`];
+      const mergedPositions = {};
+      const mergedEmpty = {};
+      const sectionTitles = {};
+      for (const sec of tabbedSecs) {
+        const sObj = sc[`tabbed_${sec}`];
+        sectionTitles[sec] = sObj.title || `&8Экипировка: ${sec}`;
+        const maxS = Math.max(1, Math.min(6, parseInt(sObj.rows || 3, 10) || 3)) * 9 - 1;
+        for (const [idxStr, cell] of Object.entries(sObj.cells || {})) {
+          const idx = parseInt(idxStr, 10);
+          if (!Number.isFinite(idx) || idx < 0 || idx > maxS || !cell) continue;
+          if (cell.kind === "slot" && cell.slotId) {
+            mergedPositions[cell.slotId] = idx;
+            if (cell.emptyIcon && !mergedEmpty[cell.slotId]) mergedEmpty[cell.slotId] = cell.emptyIcon;
+          }
+        }
+      }
+      lines.push("tabbed:");
+      lines.push("  title: '&8Гардероб &7▪ &f<section>'");
+      lines.push(`  rows: ${Math.max(1, Math.min(6, parseInt(baseTab.rows || 3, 10) || 3))}`);
+      if (baseTab.showIndicators !== false) lines.push("  show-equipped-indicators: true");
+      lines.push("  filler:");
+      lines.push(`    enabled: ${baseTab.fillerEnabled !== false}`);
+      writeIconYamlProps(lines, "    ", baseTab.filler || { material: "GRAY_STAINED_GLASS_PANE", name: " ", hideTooltip: true });
+      lines.push("  section-titles:");
+      for (const [sec, title] of Object.entries(sectionTitles)) {
+        lines.push(`    ${sec}: '${yamlEscape(title)}'`);
+      }
+      if (Object.keys(mergedPositions).length) {
+        lines.push("  slot-positions:");
+        for (const [sid, pos] of Object.entries(mergedPositions)) {
+          lines.push(`    ${sid}: ${pos}`);
+        }
+      }
+      if (Object.keys(mergedEmpty).length) {
+        lines.push("  empty-slots:");
+        for (const [sid, icon] of Object.entries(mergedEmpty)) {
+          lines.push(`    ${sid}:`);
+          writeIconYamlProps(lines, "      ", icon);
+        }
+      }
+      // Base navigation buttons from HEAD tab
+      const baseBtns = Object.entries(baseTab.cells || {})
+        .map(([idxStr, cell]) => ({ slotIdx: parseInt(idxStr, 10), cell }))
+        .filter(x => Number.isFinite(x.slotIdx) && x.cell && (x.cell.kind === "button" || x.cell.kind === "decor"))
+        .sort((a, b) => a.slotIdx - b.slotIdx);
+      if (baseBtns.length) {
+        lines.push("  buttons:");
+        for (const { slotIdx, cell } of baseBtns) {
+          const act = cell.kind === "decor" ? "NONE" : normalizeMenuActionForPlugin(cell.action, cell.section);
+          lines.push(`    btn_${slotIdx}:`);
+          lines.push(`      slots: [${slotIdx}]`);
+          lines.push(`      action: ${act}`);
+          if (act === "RUN_COMMAND" && cell.command) {
+            lines.push(`      command: '${yamlEscape(cell.command)}'`);
+          }
+          writeIconYamlProps(lines, "      ", cell);
+        }
+      }
+      // Per-section separated tabbed overrides (supported natively by MythicWardrobe v1.11.0+)
+      lines.push("  sections:");
+      for (const sec of tabbedSecs) {
+        lines.push(`    ${sec}:`);
+        renderMenuLayoutYaml(lines, "      ", sc[`tabbed_${sec}`]);
+      }
+      lines.push("");
+    } else if (sc.tabbed) {
       lines.push("tabbed:");
       renderMenuLayoutYaml(lines, "  ", sc.tabbed);
       lines.push("");
@@ -1742,7 +1981,7 @@
           }));
           giveCommands.push(`/mm i give @s ${itemId}`);
 
-          if (["mask_3d", "hair_3d", "backpack_3d", "belt_3d"].includes(m.wardrobeSlot) || blocks.length) {
+          if (m.wardrobeSlot || blocks.length) {
             const wLines = [`  ${itemId}:`];
             if (m.wardrobeSlot) wLines.push(`    slot: ${m.wardrobeSlot}`);
             if (blocks.length) {
