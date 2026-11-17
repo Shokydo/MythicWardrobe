@@ -38,7 +38,7 @@ LightMilitaryVest:
     Chest:
       Armor: 6
       ArmorToughness: 1
-      MovementSpeed: 0.02 ADDITIVE
+      MovementSpeed: 0.02
 
 # 2. РЕАЛЬНАЯ БРОНЯ #2 — ТЯЖЁЛЫЙ ВОЕННЫЙ БРОНЕЖИЛЕТ
 HeavyMilitaryVest:
@@ -76,9 +76,7 @@ WhiteVestPaint:
     - '&f• На Кожаной броне       &7→ &fПерекраска в белый'
     - '&8Если жилет снят — краска не отображается.'
   Options:
-    Glow: true
     HideFlags: true
-  # Работает И через cosmetic-variants.yml, И напрямую через этот блок Wardrobe.Variants:
   Wardrobe:
     Slot: chest_cosmetic
     UnmatchedMode: KEEP_REAL

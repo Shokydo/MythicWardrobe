@@ -1,8 +1,8 @@
 ================================================================================
-  MythicWardrobe v1.9.0 + MythicArmors — Готовый тестовый 3D-пак (v1.8)
+  MythicWardrobe v1.10.0 + MythicArmors — Готовый тестовый 3D-пак (v1.10)
 ================================================================================
 
-ЧТО ВНУТРИ АРХИВА (17 готовых 3D-моделей .bbmodel):
+ЧТО ВНУТРИ АРХИВА (21 готовая 3D-модель .bbmodel):
  1. tactical_warden.bbmodel           — Боевая 3D-броня «Стража» (4 части)
  2. gold_warden_cosmetic.bbmodel      — Косметическая Золотая 3D-броня «Стража»
  3. tactical_gasmask.bbmodel          — Самостоятельный 3D-противогаз (носится БЕЗ шлема!)
@@ -20,26 +20,38 @@
 15. belt_chains_3d.bbmodel            — 3D Королевский кушак (_t.png перекрашиваемый) + золотые цепи + рубин!
 16. tactical_warden_belt.bbmodel      — КОМБО: Тактические поножи + Тактический 3D-пояс (0 лага!)
 17. gold_warden_belt.bbmodel          — КОМБО: Золотые поножи + Королевский пояс с цепями (0 лага!)
+18. light_military_vest.bbmodel       — Лёгкий военный бронежилет (олива/хаки, JPC плитник)
+19. light_military_vest_white.bbmodel — Лёгкий военный бронежилет (БЕЛЫЙ арктический скин)
+20. heavy_military_vest.bbmodel       — Тяжёлый военный бронежилет (олива/хаки, джаггернаут с воротником и наплечниками)
+21. heavy_military_vest_white.bbmodel — Тяжёлый военный бронежилет (БЕЛЫЙ арктический скин)
 
 Плюс конфиги:
   • plugins/MythicMobs/Items/MythicWardrobe_TestArmorPack.yml
+  • plugins/MythicMobs/Items/MilitaryWhitePaint_Example.yml  (LightMilitaryVest, HeavyMilitaryVest, WhiteVestPaint)
   • plugins/MythicWardrobe/items.yml
   • plugins/MythicWardrobe/combo-overrides.yml
   • plugins/MythicWardrobe/hair-3d.yml  (автопривязка 2D -> 3D волос + частичное отключение под шлемом!)
+  • plugins/MythicWardrobe/cosmetic-variants.yml  (мультимодальная косметика v1.10.0!)
 
 --------------------------------------------------------------------------------
 БЫСТРАЯ УСТАНОВКА (4 шага):
 --------------------------------------------------------------------------------
-1. Обновите плагин до MythicWardrobe-1.7.0.jar и распакуйте архив в корень сервера.
-2. Перезагрузите плагины:
+1. Обновите плагин до MythicWardrobe-1.10.0.jar и распакуйте архив в корень сервера.
+2. Перезагрузите плагины (строго в этом порядке!):
      /ma reload
      /mm reload
      /wardrobe reload
-3. Соберите БЕЗЛИМИТНЫЙ 3D-пак головы (Minecraft 1.21.4+ minecraft:composite):
-     /wardrobe buildheadpack
-   Подключите в клиент/сервер готовый объединённый ресурспак:
-     plugins/MythicWardrobe/merged_pack.zip
-4. Выдайте тестовые предметы (включая новые пояса и декор на талию!) и откройте /wardrobe open:
+3. Обновите ресурспак (из plugins/MythicArmors/output/ или через /wardrobe buildheadpack
+   для объединённого plugins/MythicWardrobe/merged_pack.zip).
+4. Выдайте тестовые предметы мультимодальной косметики (v1.10.0):
+     /mm i give @s LightMilitaryVest
+     /mm i give @s HeavyMilitaryVest
+     /mm i give @s WhiteVestPaint
+   Откройте /wardrobe open → положите WhiteVestPaint в слот «Косметика Нагрудника».
+   Меняйте бронежилет на себе (LightMilitaryVest ↔ HeavyMilitaryVest ↔ снять) —
+   один предмет WhiteVestPaint автоматически подстраивает 3D-модель под надетый жилет!
+
+   Остальные тестовые предметы:
      /mm i give @s TacticalUtilityBelt3D
      /mm i give @s AdventurerPouchBelt3D
      /mm i give @s RoyalChainBelt3D

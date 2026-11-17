@@ -44,14 +44,13 @@ PREVIEW_PNG = os.path.join(EXAMPLE_DIR, "_multimodal_preview.png")
 def build_light_military_vest(model_id: str, primary, dark, trim, glow, pouch, boot):
     """Compact JPC plate carrier: slim torso plates, 3 mag pouches, shoulder straps, radio + antenna, light arm patches."""
     main_tex, emis_tex = paint_armor_atlas(primary, dark, trim, glow, pouch, boot)
-    l1, l2 = paint_fallback_layers(primary, dark, trim, glow)
+    l1, _ = paint_fallback_layers(primary, dark, trim, glow)
     icons = paint_icons(primary, dark, trim, glow)
 
     b = BBModelBuilder(model_id, model_id)
     b.add_texture(f"{model_id}_main.png", main_tex, 64, 64)
     b.add_texture(f"{model_id}_main_e.png", emis_tex, 64, 64)
     b.add_texture(f"{model_id}_layer_1.png", l1, 64, 32)
-    b.add_texture(f"{model_id}_layer_2.png", l2, 64, 32)
     b.add_texture(f"{model_id}_chestplate.png", icons["chestplate"], 16, 16)
 
     # Canonical CHEST bones
@@ -94,14 +93,13 @@ def build_heavy_military_vest(model_id: str, primary, dark, trim, glow, pouch, b
     """Heavy Juggernaut Assault Vest: high armored blast collar, thick multi-layer chest plates,
     groin/lower-back armor flaps, double pouches, and massive segmented pauldrons on arms!"""
     main_tex, emis_tex = paint_armor_atlas(primary, dark, trim, glow, pouch, boot)
-    l1, l2 = paint_fallback_layers(primary, dark, trim, glow)
+    l1, _ = paint_fallback_layers(primary, dark, trim, glow)
     icons = paint_icons(primary, dark, trim, glow)
 
     b = BBModelBuilder(model_id, model_id)
     b.add_texture(f"{model_id}_main.png", main_tex, 64, 64)
     b.add_texture(f"{model_id}_main_e.png", emis_tex, 64, 64)
     b.add_texture(f"{model_id}_layer_1.png", l1, 64, 32)
-    b.add_texture(f"{model_id}_layer_2.png", l2, 64, 32)
     b.add_texture(f"{model_id}_chestplate.png", icons["chestplate"], 16, 16)
 
     body = b.add_bone("body", (0, 24, 0))
@@ -193,7 +191,7 @@ LightMilitaryVest:
     Chest:
       Armor: 6
       ArmorToughness: 1
-      MovementSpeed: 0.02 ADDITIVE
+      MovementSpeed: 0.02
 
 # 2. РЕАЛЬНАЯ БРОНЯ #2 — ТЯЖЁЛЫЙ ВОЕННЫЙ БРОНЕЖИЛЕТ
 HeavyMilitaryVest:
@@ -231,9 +229,7 @@ WhiteVestPaint:
     - '&f• На Кожаной броне       &7→ &fПерекраска в белый'
     - '&8Если жилет снят — краска не отображается.'
   Options:
-    Glow: true
     HideFlags: true
-  # Работает И через cosmetic-variants.yml, И напрямую через этот блок Wardrobe.Variants:
   Wardrobe:
     Slot: chest_cosmetic
     UnmatchedMode: KEEP_REAL
@@ -430,7 +426,7 @@ def main():
     canvas.save(PREVIEW_PNG)
     print(f"Wrote preview image: {PREVIEW_PNG}")
 
-    # Build clean ZIP (delete old first so no duplicates)
+    # Build clean standalone example ZIP (delete old first so no duplicates)
     if os.path.exists(ZIP_PATH):
         os.remove(ZIP_PATH)
     with zipfile.ZipFile(ZIP_PATH, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
@@ -442,6 +438,38 @@ def main():
                 rel = os.path.relpath(full, EXAMPLE_DIR)
                 zf.write(full, rel)
     print(f"Wrote ZIP: {ZIP_PATH} ({os.path.getsize(ZIP_PATH)/1024:.1f} KB)")
+
+    # ALSO include all 4 models, MilitaryWhitePaint_Example.yml, and cosmetic-variants.yml
+    # directly inside the main MythicWardrobe_MythicArmors_TestPack.zip so users who install
+    # the main Test Pack immediately have LightMilitaryVest, HeavyMilitaryVest & WhiteVestPaint!
+    test_pack_dir = os.path.join(ROOT, "mythicarmors-test-pack")
+    test_pack_zip = os.path.join(ROOT, "releases", "MythicWardrobe_MythicArmors_TestPack.zip")
+    tp_models = os.path.join(test_pack_dir, "plugins", "MythicArmors", "models")
+    tp_items = os.path.join(test_pack_dir, "plugins", "MythicMobs", "Items")
+    tp_mw = os.path.join(test_pack_dir, "plugins", "MythicWardrobe")
+    os.makedirs(tp_models, exist_ok=True)
+    os.makedirs(tp_items, exist_ok=True)
+    os.makedirs(tp_mw, exist_ok=True)
+
+    for mid, bb, _ in models:
+        with open(os.path.join(tp_models, f"{mid}.bbmodel"), "w", encoding="utf-8") as f:
+            json.dump(bb, f, indent=2)
+    with open(os.path.join(tp_items, "MilitaryWhitePaint_Example.yml"), "w", encoding="utf-8") as f:
+        f.write(MYTHICMOBS_EXAMPLE_YML)
+    with open(os.path.join(tp_mw, "cosmetic-variants.yml"), "w", encoding="utf-8") as f:
+        f.write(COSMETIC_VARIANTS_EXAMPLE_YML)
+
+    if os.path.exists(test_pack_zip):
+        os.remove(test_pack_zip)
+    with zipfile.ZipFile(test_pack_zip, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
+        for base, _, files in os.walk(test_pack_dir):
+            for fn in sorted(files):
+                if fn.startswith("_"):
+                    continue
+                full = os.path.join(base, fn)
+                rel = os.path.relpath(full, test_pack_dir)
+                zf.write(full, rel)
+    print(f"Updated Main TestPack ZIP: {test_pack_zip} ({os.path.getsize(test_pack_zip)/1024:.1f} KB)")
 
 
 if __name__ == "__main__":
