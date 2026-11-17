@@ -108,6 +108,9 @@
     menus: SE.createDefaultMenusState(),
     guiActiveScreen: "tabbed_HEAD",
     guiSelectedSlot: 15,
+    guiClipboard: null,
+    guiDragFromIdx: null,
+    guiUndoStack: [],
   };
 
   let viewer = null;
@@ -1831,6 +1834,137 @@
     box.innerHTML = `<div>${titleHtml}</div>${loreHtml}<div class="mc-tooltip-meta">${escapeHtml(metaParts.join(" · "))}</div>`;
   }
 
+  function cloneGuiCell(cell) {
+    return cell ? JSON.parse(JSON.stringify(cell)) : null;
+  }
+
+  function describeGuiCell(cell) {
+    if (!cell) return "пусто";
+    if (cell.kind === "slot") return cell.slotId || "slot";
+    const name = stripMcFormat(cell.name);
+    if (name) return name;
+    return cell.action || cell.material || cell.kind;
+  }
+
+  function renderGuiClipboardBadge() {
+    const badge = $("guiClipboardTag");
+    if (!badge) return;
+    if (!state.guiClipboard) {
+      badge.textContent = "Буфер: пусто";
+      badge.classList.add("is-empty");
+    } else {
+      badge.textContent = `Буфер: ${describeGuiCell(state.guiClipboard)}`;
+      badge.classList.remove("is-empty");
+    }
+  }
+
+  function pushGuiUndo() {
+    state.guiUndoStack.push({
+      menus: JSON.parse(JSON.stringify(state.menus)),
+      screen: state.guiActiveScreen,
+      slot: state.guiSelectedSlot,
+    });
+    if (state.guiUndoStack.length > 30) state.guiUndoStack.shift();
+  }
+
+  function undoGuiEdit() {
+    if (!state.guiUndoStack.length) {
+      showToast("Нечего отменять");
+      return;
+    }
+    const snap = state.guiUndoStack.pop();
+    state.menus = snap.menus;
+    state.guiActiveScreen = snap.screen;
+    state.guiSelectedSlot = snap.slot;
+    renderGuiEditorAll();
+    if (state.activeTab === "configs") renderConfigOutputs();
+    showToast("Действие отменено (Ctrl+Z)");
+  }
+
+  function guiCopySelectedCell() {
+    const sc = getGuiScreen();
+    const cell = sc.cells && sc.cells[state.guiSelectedSlot];
+    if (!cell) {
+      showToast(`Слот #${state.guiSelectedSlot} пустой — нечего копировать`);
+      return;
+    }
+    state.guiClipboard = cloneGuiCell(cell);
+    renderGuiClipboardBadge();
+    showToast(`Скопировано (#${state.guiSelectedSlot}: ${describeGuiCell(cell)})`);
+  }
+
+  function guiCutSelectedCell() {
+    const sc = getGuiScreen();
+    const cell = sc.cells && sc.cells[state.guiSelectedSlot];
+    if (!cell) {
+      showToast(`Слот #${state.guiSelectedSlot} пустой — нечего вырезать`);
+      return;
+    }
+    pushGuiUndo();
+    state.guiClipboard = cloneGuiCell(cell);
+    delete sc.cells[state.guiSelectedSlot];
+    renderGuiClipboardBadge();
+    renderGuiGrid();
+    renderGuiCellInspector();
+    showToast(`Вырезано (#${state.guiSelectedSlot}: ${describeGuiCell(state.guiClipboard)})`);
+  }
+
+  function guiPasteToSelectedCell() {
+    if (!state.guiClipboard) {
+      showToast("Буфер обмена пуст — сначала скопируйте ячейку (Ctrl+C)");
+      return;
+    }
+    const sc = getGuiScreen();
+    if (!sc.cells) sc.cells = {};
+    pushGuiUndo();
+    sc.cells[state.guiSelectedSlot] = cloneGuiCell(state.guiClipboard);
+    renderGuiGrid();
+    renderGuiCellInspector();
+    showToast(`Вставлено в слот #${state.guiSelectedSlot} (${describeGuiCell(state.guiClipboard)})`);
+  }
+
+  function guiDeleteSelectedCell() {
+    const sc = getGuiScreen();
+    const cell = sc.cells && sc.cells[state.guiSelectedSlot];
+    if (!cell) return;
+    pushGuiUndo();
+    const label = describeGuiCell(cell);
+    delete sc.cells[state.guiSelectedSlot];
+    renderGuiGrid();
+    renderGuiCellInspector();
+    showToast(`Удалён слот #${state.guiSelectedSlot} (${label})`);
+  }
+
+  function guiMoveOrSwapCell(fromIdx, toIdx, isCopy = false) {
+    const sc = getGuiScreen();
+    const maxSlot = Math.max(1, Math.min(6, parseInt(sc.rows || 3, 10) || 3)) * 9 - 1;
+    if (!Number.isFinite(fromIdx) || !Number.isFinite(toIdx)) return;
+    if (fromIdx < 0 || fromIdx > maxSlot || toIdx < 0 || toIdx > maxSlot) return;
+    if (fromIdx === toIdx) return;
+    if (!sc.cells || !sc.cells[fromIdx]) return;
+
+    pushGuiUndo();
+    const src = sc.cells[fromIdx];
+    const dst = sc.cells[toIdx];
+    const srcLabel = describeGuiCell(src);
+
+    if (isCopy) {
+      sc.cells[toIdx] = cloneGuiCell(src);
+      showToast(`Скопировано #${fromIdx} → #${toIdx} (${srcLabel})`);
+    } else if (dst) {
+      sc.cells[toIdx] = src;
+      sc.cells[fromIdx] = dst;
+      showToast(`Поменяли местами #${fromIdx} ↔ #${toIdx}`);
+    } else {
+      sc.cells[toIdx] = src;
+      delete sc.cells[fromIdx];
+      showToast(`Перемещено #${fromIdx} → #${toIdx} (${srcLabel})`);
+    }
+    state.guiSelectedSlot = toIdx;
+    renderGuiGrid();
+    renderGuiCellInspector();
+  }
+
   function renderGuiGrid() {
     const sc = getGuiScreen();
     const grid = $("guiInvGrid");
@@ -1848,6 +1982,8 @@
       const el = document.createElement("div");
       const kind = cell ? cell.kind : "empty";
       el.className = `mc-slot kind-${kind}` + (state.guiSelectedSlot === i ? " selected" : "");
+      el.dataset.slotIdx = String(i);
+      el.draggable = (kind !== "empty");
 
       let cmdVal = "";
       let iconHtml = "";
@@ -1859,9 +1995,9 @@
         const imgUrl = iconSpec.previewDataUri || getMcAssetUrl(iconSpec.material);
         const hintSprite = getSlotHintSprite(cell.slotId);
         const glintCls = iconSpec.glint ? " is-glint" : "";
-        iconHtml = (hintSprite ? `<img class="mc-slot-sprite-bg" src="${hintSprite}" alt="">` : "")
+        iconHtml = (hintSprite ? `<img class="mc-slot-sprite-bg" draggable="false" src="${hintSprite}" alt="">` : "")
           + (imgUrl
-            ? `<img class="mc-slot-img${glintCls}" src="${imgUrl}" alt="">`
+            ? `<img class="mc-slot-img${glintCls}" draggable="false" src="${imgUrl}" alt="">`
             : `<span style="color:var(--muted)">${ico("box", "ico-md")}</span>`);
         labelText = cell.slotId || "slot";
       } else if (kind === "button" || kind === "decor") {
@@ -1869,12 +2005,12 @@
         const imgUrl = cell.previewDataUri || getMcAssetUrl(cell.material);
         const glintCls = cell.glint ? " is-glint" : "";
         iconHtml = imgUrl
-          ? `<img class="mc-slot-img${glintCls}" src="${imgUrl}" alt="">`
+          ? `<img class="mc-slot-img${glintCls}" draggable="false" src="${imgUrl}" alt="">`
           : `<span style="color:var(--muted)">${ico("cube", "ico-md")}</span>`;
         labelText = stripMcFormat(cell.name) || cell.action || "";
       } else {
         if (fillerUrl) {
-          iconHtml = `<img class="mc-slot-img is-filler" src="${fillerUrl}" alt="">`;
+          iconHtml = `<img class="mc-slot-img is-filler" draggable="false" src="${fillerUrl}" alt="">`;
         } else if (sc.fillerEnabled !== false) {
           iconHtml = `<span style="opacity:0.25;width:6px;height:6px;border-radius:1px;background:var(--muted)"></span>`;
         }
@@ -1889,14 +2025,66 @@
       `;
       el.addEventListener("mouseenter", () => renderGuiTooltip(i));
       el.addEventListener("click", () => {
+        // Blur any active text input so Ctrl+C / Ctrl+V / Delete immediately act on this grid cell!
+        const active = document.activeElement;
+        if (active && active !== document.body && /^(INPUT|TEXTAREA|SELECT)$/i.test(active.tagName)) {
+          if (typeof active.blur === "function") active.blur();
+        }
         state.guiSelectedSlot = i;
         renderGuiGrid();
         renderGuiCellInspector();
         renderGuiTooltip(i);
       });
+
+      // Drag & Drop move / swap / Ctrl+Drag copy
+      el.addEventListener("dragstart", (e) => {
+        if (kind === "empty") {
+          e.preventDefault();
+          return;
+        }
+        state.guiDragFromIdx = i;
+        state.guiSelectedSlot = i;
+        el.classList.add("is-dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "copyMove";
+          e.dataTransfer.setData("text/plain", String(i));
+        }
+      });
+      el.addEventListener("dragover", (e) => {
+        if (state.guiDragFromIdx === null) return;
+        e.preventDefault();
+        const isCopy = Boolean(e.ctrlKey || e.altKey || e.metaKey);
+        if (e.dataTransfer) e.dataTransfer.dropEffect = isCopy ? "copy" : "move";
+        el.classList.toggle("drag-over", !isCopy);
+        el.classList.toggle("drag-over-copy", isCopy);
+      });
+      el.addEventListener("dragleave", () => {
+        el.classList.remove("drag-over", "drag-over-copy");
+      });
+      el.addEventListener("drop", (e) => {
+        e.preventDefault();
+        el.classList.remove("drag-over", "drag-over-copy");
+        let fromIdx = state.guiDragFromIdx;
+        if (fromIdx === null && e.dataTransfer) {
+          const parsed = parseInt(e.dataTransfer.getData("text/plain"), 10);
+          if (Number.isFinite(parsed)) fromIdx = parsed;
+        }
+        state.guiDragFromIdx = null;
+        if (fromIdx === null) return;
+        const isCopy = Boolean(e.ctrlKey || e.altKey || e.metaKey);
+        guiMoveOrSwapCell(fromIdx, i, isCopy);
+      });
+      el.addEventListener("dragend", () => {
+        state.guiDragFromIdx = null;
+        grid.querySelectorAll(".is-dragging, .drag-over, .drag-over-copy").forEach(node => {
+          node.classList.remove("is-dragging", "drag-over", "drag-over-copy");
+        });
+      });
+
       grid.appendChild(el);
     }
 
+    renderGuiClipboardBadge();
     renderGuiTooltip(state.guiSelectedSlot);
     const yml = SE.generateMenusYml(state.menus);
     const livePre = $("guiLiveMenusYml");
@@ -2179,12 +2367,10 @@
     });
 
     $("btnGuiClearCell").addEventListener("click", () => {
-      const sc = getGuiScreen();
-      delete sc.cells[state.guiSelectedSlot];
-      renderGuiGrid();
-      renderGuiCellInspector();
+      guiDeleteSelectedCell();
     });
     $("btnGuiResetAll").addEventListener("click", () => {
+      pushGuiUndo();
       state.menus = SE.createDefaultMenusState();
       state.guiActiveScreen = "tabbed_HEAD";
       state.guiSelectedSlot = 15;
@@ -2196,6 +2382,67 @@
       const yml = SE.generateMenusYml(state.menus);
       downloadBlob(new Blob([yml], { type: "text/yaml;charset=utf-8" }), "menus.yml");
       showToast("Скачан готовый plugins/MythicWardrobe/menus.yml!");
+    });
+
+    // Global keyboard shortcuts for the GUI Inventory Editor (EN + RU layouts via e.code!)
+    document.addEventListener("keydown", (e) => {
+      if (state.activeTab !== "gui") return;
+      const target = e.target;
+      if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/i.test(target.tagName))) {
+        return;
+      }
+
+      const mod = Boolean(e.ctrlKey || e.metaKey);
+      const code = e.code || "";
+
+      if (mod && !e.altKey) {
+        if (code === "KeyC") {
+          const selText = (window.getSelection && String(window.getSelection())) || "";
+          if (selText.trim().length > 0) return; // Allow copying highlighted YAML text normally
+          e.preventDefault();
+          guiCopySelectedCell();
+          return;
+        }
+        if (code === "KeyX") {
+          e.preventDefault();
+          guiCutSelectedCell();
+          return;
+        }
+        if (code === "KeyV") {
+          e.preventDefault();
+          guiPasteToSelectedCell();
+          return;
+        }
+        if (code === "KeyZ") {
+          e.preventDefault();
+          undoGuiEdit();
+          return;
+        }
+      }
+
+      if (!mod && !e.altKey && (code === "Delete" || code === "Backspace")) {
+        e.preventDefault();
+        guiDeleteSelectedCell();
+        return;
+      }
+
+      if (!mod && !e.altKey && (code === "ArrowLeft" || code === "ArrowRight" || code === "ArrowUp" || code === "ArrowDown")) {
+        const sc = getGuiScreen();
+        const rows = Math.max(1, Math.min(6, parseInt(sc.rows || 3, 10) || 3));
+        const total = rows * 9;
+        let next = state.guiSelectedSlot;
+        if (code === "ArrowLeft") next = (next > 0) ? next - 1 : total - 1;
+        else if (code === "ArrowRight") next = (next + 1) % total;
+        else if (code === "ArrowUp") next = (next - 9 >= 0) ? next - 9 : next;
+        else if (code === "ArrowDown") next = (next + 9 < total) ? next + 9 : next;
+        if (next !== state.guiSelectedSlot) {
+          e.preventDefault();
+          state.guiSelectedSlot = next;
+          renderGuiGrid();
+          renderGuiCellInspector();
+          renderGuiTooltip(next);
+        }
+      }
     });
   }
 
