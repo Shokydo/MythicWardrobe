@@ -10,6 +10,7 @@ import dev.mythicwardrobe.manager.WardrobeManager;
 import dev.mythicwardrobe.model.ArmorSection;
 import dev.mythicwardrobe.model.ItemWardrobeMeta;
 import dev.mythicwardrobe.model.WardrobeSlotDef;
+import dev.mythicwardrobe.visual.ArmorVisualManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -22,6 +23,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
@@ -169,6 +171,144 @@ public final class WardrobeListener implements Listener {
                 guiManager.openSection(player, section);
             }
         });
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onInventoryCreative(InventoryCreativeEvent event) {
+        if (event.getView().getTopInventory().getHolder() instanceof WardrobeGuiHolder) {
+            return;
+        }
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+
+        ItemStack cursor = event.getCursor();
+        boolean cursorEmpty = (cursor == null || cursor.getType().isAir());
+
+        // 1. Never allow a packet-level visual_proxy item to overwrite any slot or enter player inventory
+        if (!cursorEmpty && ArmorVisualManager.isVisualProxyItem(cursor)) {
+            event.setCancelled(true);
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!player.isOnline()) return;
+                manager.getArmorVisualManager().clearClientCursor(player);
+                player.updateInventory();
+                manager.getArmorVisualManager().syncSelfArmor(player);
+            });
+            return;
+        }
+
+        if (event.getSlotType() != InventoryType.SlotType.ARMOR) return;
+        ArmorSection section = ArmorSection.fromBukkitArmorSlot(event.getSlot());
+        if (section == null) return;
+        EquipmentSlot eqSlot = section.getEquipmentSlot();
+
+        ArmorVisualManager.PlayerVisualSnapshot snap =
+                manager.getArmorVisualManager().getSnapshotByUuid(player.getUniqueId());
+        boolean hasOverride = snap != null && snap.hasOverrideFor(eqSlot);
+
+        // 2. Armor slot currently displays a cosmetic / combo / 3D visual override in Creative
+        if (hasOverride) {
+            if (cursorEmpty) {
+                // Prevent accidental deletion of real armor or clearing visual armor slot
+                event.setCancelled(true);
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    if (!player.isOnline()) return;
+                    manager.getArmorVisualManager().clearClientCursor(player);
+                    manager.getArmorVisualManager().syncSelfArmor(player);
+                });
+                return;
+            }
+
+            // Guard blocked real armor slot (e.g. full suit)
+            WardrobeSlotDef realSlot = config.findSlotByKindAndEquipment(
+                    dev.mythicwardrobe.model.SlotKind.ARMOR_REAL, eqSlot);
+            if (realSlot != null) {
+                var blocker = manager.getBlockerFor(player, realSlot.id());
+                if (blocker.isPresent() && !blocker.get().sourceId().equalsIgnoreCase(realSlot.id())) {
+                    event.setCancelled(true);
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.65f, 0.9f);
+                    player.sendMessage(TextUtil.parse(config.getPrefixedMessage("slot-blocked-by",
+                                    "<red>Слот <white><slot></white> <red>заблокирован предметом <yellow><blocker></yellow><red>!")
+                            .replace("<slot>", realSlot.displayName().replaceAll("<[^>]+>", ""))
+                            .replace("<blocker>", blocker.get().blockerName())));
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (!player.isOnline()) return;
+                        manager.getArmorVisualManager().clearClientCursor(player);
+                        manager.getArmorVisualManager().syncSelfArmor(player);
+                    });
+                    return;
+                }
+            }
+
+            // Preserve any existing real armor so placing a new armor piece in Creative NEVER deletes the old one!
+            ItemStack oldReal = player.getInventory().getItem(eqSlot);
+            boolean hasOldReal = oldReal != null && !oldReal.getType().isAir() && !oldReal.isSimilar(cursor);
+            if (hasOldReal) {
+                if (player.getInventory().firstEmpty() == -1) {
+                    event.setCancelled(true);
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.65f, 0.9f);
+                    player.sendMessage(TextUtil.parse(config.getPrefixedMessage(
+                            "creative-armor-protected",
+                            "<yellow>Инвентарь полон — чтобы старая броня не удалилась, снимите её через <white>/wardrobe</white>!"
+                    )));
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        if (!player.isOnline()) return;
+                        manager.getArmorVisualManager().clearClientCursor(player);
+                        manager.getArmorVisualManager().syncSelfArmor(player);
+                    });
+                    return;
+                }
+                player.getInventory().addItem(oldReal.clone());
+            }
+
+            ItemStack oldCopy = (oldReal == null || oldReal.getType().isAir()) ? null : oldReal.clone();
+            ItemStack newCopy = cursor.clone();
+            manager.handleRealArmorTransition(player, oldCopy, newCopy);
+
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!player.isOnline()) return;
+                manager.getArmorVisualManager().clearClientCursor(player);
+                player.updateInventory();
+                manager.getArmorVisualManager().refreshPlayerArmorVisuals(player);
+                manager.getDisplayAccessoryManager().syncPlayerDisplays(player);
+            });
+            return;
+        }
+
+        // 3. No visual override on this armor slot — still respect full-suit slot blocking and refresh visuals
+        if (!cursorEmpty) {
+            WardrobeSlotDef realSlot = config.findSlotByKindAndEquipment(
+                    dev.mythicwardrobe.model.SlotKind.ARMOR_REAL, eqSlot);
+            if (realSlot != null) {
+                var blocker = manager.getBlockerFor(player, realSlot.id());
+                if (blocker.isPresent() && !blocker.get().sourceId().equalsIgnoreCase(realSlot.id())) {
+                    event.setCancelled(true);
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.65f, 0.9f);
+                    player.sendMessage(TextUtil.parse(config.getPrefixedMessage("slot-blocked-by",
+                                    "<red>Слот <white><slot></white> <red>заблокирован предметом <yellow><blocker></yellow><red>!")
+                            .replace("<slot>", realSlot.displayName().replaceAll("<[^>]+>", ""))
+                            .replace("<blocker>", blocker.get().blockerName())));
+                    return;
+                }
+            }
+        }
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!player.isOnline()) return;
+            manager.getArmorVisualManager().refreshPlayerArmorVisuals(player);
+            manager.getDisplayAccessoryManager().syncPlayerDisplays(player);
+        });
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+        if (ArmorVisualManager.isVisualProxyItem(event.getItemDrop().getItemStack())) {
+            event.getItemDrop().remove();
+            Player player = event.getPlayer();
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                if (!player.isOnline()) return;
+                manager.getArmorVisualManager().clearClientCursor(player);
+                player.updateInventory();
+                manager.getArmorVisualManager().syncSelfArmor(player);
+            });
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -382,13 +522,9 @@ public final class WardrobeListener implements Listener {
         Player player = event.getPlayer();
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (!player.isOnline()) return;
-            if (player.getGameMode() == GameMode.CREATIVE) {
-                // Rebuild snapshot (clears Survival-only self-promotion) and restore true inventory view
-                manager.getArmorVisualManager().rebuildSnapshot(player);
-                player.updateInventory();
-            } else {
-                manager.getArmorVisualManager().refreshPlayerArmorVisuals(player);
-            }
+            // Cosmetic & 3D armor visuals stay active in Creative identically to Survival
+            // (CreativeArmorGuard prevents real armor from ever being deleted or overwritten).
+            manager.getArmorVisualManager().refreshPlayerArmorVisuals(player);
             manager.getDisplayAccessoryManager().syncPlayerDisplays(player);
         }, 2L);
     }

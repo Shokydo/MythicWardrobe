@@ -63,7 +63,7 @@
 
 ### 3. Интеграция с MythicArmors и одновременные 3D-слоты
 - Любые 3D-предметы **MythicArmors** (с компонентом `Equippable`) и ванильная броня работают в слотах «Статы» и «Косметика».
-- Через **PacketEvents** подменяются `ENTITY_EQUIPMENT` (для других игроков) и `SET_SLOT`/`WINDOW_ITEMS` (для F5-вида у самого игрока, с автозащитой в Creative). Без PacketEvents работает fallback через Paper `sendEquipmentChange`.
+- Через **PacketEvents** подменяются `ENTITY_EQUIPMENT` (для других игроков) и `SET_SLOT`/`WINDOW_ITEMS` (для F5-вида у самого игрока — работает одинаково в Выживании и в Креативе; `CreativeArmorGuard` защищает слоты от удаления/перезаписи настоящей брони и дублирования визуальных пакетов). Без PacketEvents работает fallback через Paper `sendEquipmentChange`.
 - **`combo-overrides.yml`**: при одновременном ношении Шлема + 3D-маски можно подставлять совмещённую 3D-модель MythicArmors и автоматически скрывать `ItemDisplay` маски.
 - **`DISPLAY_3D`**: одновременный рендер **Рюкзака** поверх Бронежилета и **3D-маски** поверх Шлема через плавные несохраняемые `ItemDisplay`-сущности.
 

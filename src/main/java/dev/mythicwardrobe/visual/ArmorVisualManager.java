@@ -11,7 +11,6 @@ import io.papermc.paper.datacomponent.item.Equippable;
 import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -19,6 +18,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
@@ -32,16 +32,33 @@ import java.util.function.Function;
  */
 public final class ArmorVisualManager {
 
+    public static final NamespacedKey VISUAL_PROXY_KEY = new NamespacedKey("mythicwardrobe", "visual_proxy");
+
     public record PlayerVisualSnapshot(
             UUID playerId,
             int entityId,
-            boolean creativeMode,
             boolean wardrobeGuiOpen,
             Map<EquipmentSlot, ItemStack> overrides
     ) {
         public boolean hasOverrides() {
             return overrides != null && !overrides.isEmpty();
         }
+
+        public boolean hasOverrideFor(EquipmentSlot slot) {
+            return slot != null && overrides != null && overrides.containsKey(slot);
+        }
+    }
+
+    /**
+     * Checks whether a Bukkit ItemStack carries the visual_proxy PDC marker stamped onto
+     * packet-level cosmetic/3D self-view items. Such items must never enter real inventories
+     * or overwrite real armor in Creative mode.
+     */
+    public static boolean isVisualProxyItem(ItemStack item) {
+        if (item == null || item.getType().isAir() || !item.hasItemMeta()) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        return meta.getPersistentDataContainer().has(VISUAL_PROXY_KEY, PersistentDataType.BYTE);
     }
 
     private final JavaPlugin plugin;
@@ -175,9 +192,10 @@ public final class ArmorVisualManager {
 
                 ItemStack resolvedOverride = null;
 
+                // Identical native self-rendering in Survival AND Creative (Creative slots are protected
+                // against deletion/overwrite by CreativeArmorGuard in PacketEventsArmorBridge + WardrobeListener).
                 boolean canNativeSelfPromote = packetBridge != null
-                        && config.isShowCosmeticToSelf()
-                        && player.getGameMode() != GameMode.CREATIVE;
+                        && config.isShowCosmeticToSelf();
 
                 // 0. Native Minecraft 1.21.4+ `minecraft:composite` unlimited HEAD 3D stacking!
                 //    Combines 3D Hair (`hair_3d`) + 3D Mask (`mask_3d`) + 3D Helmet (`helmet_*`) + any extra
@@ -258,7 +276,6 @@ public final class ArmorVisualManager {
         PlayerVisualSnapshot snapshot = new PlayerVisualSnapshot(
                 uuid,
                 player.getEntityId(),
-                player.getGameMode() == GameMode.CREATIVE,
                 openWardrobeGuis.contains(uuid),
                 overrides.isEmpty() ? Map.of() : Collections.unmodifiableMap(overrides)
         );
@@ -673,6 +690,20 @@ public final class ArmorVisualManager {
                     viewer.sendEquipmentChange(player, visuals);
                 }
             }
+        }
+    }
+
+    public void syncSelfArmor(Player player) {
+        if (player == null || !player.isOnline()) return;
+        if (packetBridge != null) {
+            packetBridge.syncSelfArmor(player);
+        }
+    }
+
+    public void clearClientCursor(Player player) {
+        if (player == null || !player.isOnline()) return;
+        if (packetBridge != null) {
+            packetBridge.clearClientCursor(player);
         }
     }
 

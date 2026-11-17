@@ -549,6 +549,16 @@ public final class WardrobeGuiManager {
         Inventory clickedInv = event.getClickedInventory();
         if (clickedInv == null) return;
 
+        // Safety guard: never allow a Creative visual_proxy item to enter Wardrobe GUI slots
+        if (dev.mythicwardrobe.visual.ArmorVisualManager.isVisualProxyItem(event.getCursor())
+                || dev.mythicwardrobe.visual.ArmorVisualManager.isVisualProxyItem(event.getCurrentItem())) {
+            event.setCancelled(true);
+            player.setItemOnCursor(null);
+            wardrobeManager.getArmorVisualManager().clearClientCursor(player);
+            wardrobeManager.getArmorVisualManager().syncSelfArmor(player);
+            return;
+        }
+
         // Prevent collect-to-cursor pulling placeholders from top GUI
         if (event.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
             event.setCancelled(true);
