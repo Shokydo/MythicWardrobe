@@ -2,8 +2,11 @@ package dev.mythicwardrobe.manager;
 
 import dev.mythicwardrobe.config.WardrobeConfig;
 import dev.mythicwardrobe.hook.MythicMobsHook;
+import dev.mythicwardrobe.model.ArmorSection;
 import dev.mythicwardrobe.model.BlockBehaviorMode;
+import dev.mythicwardrobe.model.CosmeticVariantConfig;
 import dev.mythicwardrobe.model.ItemWardrobeMeta;
+import dev.mythicwardrobe.model.SlotKind;
 import dev.mythicwardrobe.model.WardrobeSlotDef;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Equippable;
@@ -104,7 +107,8 @@ public final class WardrobeItemResolver {
                         resolved.onUnequipSkill(),
                         resolved.mythicId(),
                         !pdcBlocks.isEmpty() ? pdcBlocks : resolved.blockedTargets(),
-                        pdcBlockMode != null ? pdcBlockMode : resolved.blockMode()
+                        pdcBlockMode != null ? pdcBlockMode : resolved.blockMode(),
+                        resolved.inlineCosmeticSkin()
                 );
             }
             return resolved;
@@ -133,6 +137,19 @@ public final class WardrobeItemResolver {
             return true;
         }
 
+        // 2b. Multimodal cosmetic skin (cosmetic-variants.yml or inline Wardrobe.Variants:):
+        //     Allows ANY item material (e.g. WHITE_DYE, PAPER, BRUSH) to be placed into its
+        //     allowed ARMOR_COSMETIC slots while preventing paint items from entering ARMOR_REAL!
+        CosmeticVariantConfig variantCfg = config.getCosmeticVariantConfig();
+        if (variantCfg != null && variantCfg.isMultimodalCosmetic(meta.mythicId(), meta.inlineCosmeticSkin())) {
+            if (variantCfg.canPlaceInSlot(meta.mythicId(), meta.inlineCosmeticSkin(), slot)) {
+                return true;
+            }
+            if (slot.kind() == SlotKind.ARMOR_REAL) {
+                return false;
+            }
+        }
+
         // If item is explicitly bound to a 2D SKIN_LAYER slot (e.g. leather chestplate used as 2D jacket),
         // never let it accidentally slip into 3D armor/overlay slots.
         if (meta.hasSlot() && isBoundToSkinLayerSlot(meta)) {
@@ -150,6 +167,30 @@ public final class WardrobeItemResolver {
 
         EquipmentSlot detected = detectEquipmentSlot(item);
         return detected == targetEq;
+    }
+
+    /**
+     * Finds the best cosmetic slot for a multimodal cosmetic item (optionally constrained to a section).
+     * Used by Smart Cursor Equip & right-click quick-equip for paint/camo items like WhiteVestPaint.
+     */
+    public WardrobeSlotDef findMultimodalTargetSlot(ItemStack item, ArmorSection sectionFilter) {
+        if (item == null || item.getType().isAir()) return null;
+        CosmeticVariantConfig variantCfg = config.getCosmeticVariantConfig();
+        if (variantCfg == null || !variantCfg.isEnabled()) return null;
+        ItemWardrobeMeta meta = resolve(item);
+        if (!variantCfg.isMultimodalCosmetic(meta.mythicId(), meta.inlineCosmeticSkin())) {
+            return null;
+        }
+        Collection<WardrobeSlotDef> candidates = sectionFilter != null
+                ? config.getSlotsForSection(sectionFilter)
+                : config.getSlotsById().values();
+        for (WardrobeSlotDef slot : candidates) {
+            if (slot.kind() == SlotKind.ARMOR_COSMETIC
+                    && variantCfg.canPlaceInSlot(meta.mythicId(), meta.inlineCosmeticSkin(), slot)) {
+                return slot;
+            }
+        }
+        return null;
     }
 
     private boolean isBoundToSkinLayerSlot(ItemWardrobeMeta meta) {

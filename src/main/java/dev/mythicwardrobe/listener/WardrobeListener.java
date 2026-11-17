@@ -74,46 +74,53 @@ public final class WardrobeListener implements Listener {
         ItemStack cursor = event.getCursor();
         boolean hasCursor = cursor != null && !cursor.getType().isAir();
 
-        // Smart cursor equip: if holding a clothing/3D item belonging to this section, directly equip it!
+        // Smart cursor equip: if holding a clothing/3D/multimodal cosmetic item belonging to this section, directly equip it!
         if (hasCursor && config.isSmartCursorEquip()) {
             ItemWardrobeMeta meta = resolver.resolve(cursor);
+            WardrobeSlotDef targetSlot = null;
             if (meta.hasSlot()) {
-                WardrobeSlotDef targetSlot = config.getSlot(meta.primarySlotId());
-                if (targetSlot != null && targetSlot.section() == section && resolver.canPlaceInSlot(cursor, targetSlot)) {
-                    event.setCancelled(true);
-                    ItemStack previous = manager.getSlotItem(player, targetSlot);
-                    if (cursor.getAmount() > 1 && previous != null && !previous.getType().isAir()) {
-                        return; // Avoid losing remainder when swapping stacked item
+                WardrobeSlotDef candidate = config.getSlot(meta.primarySlotId());
+                if (candidate != null && candidate.section() == section && resolver.canPlaceInSlot(cursor, candidate)) {
+                    targetSlot = candidate;
+                }
+            }
+            if (targetSlot == null) {
+                targetSlot = resolver.findMultimodalTargetSlot(cursor, section);
+            }
+            if (targetSlot != null && targetSlot.section() == section && resolver.canPlaceInSlot(cursor, targetSlot)) {
+                event.setCancelled(true);
+                ItemStack previous = manager.getSlotItem(player, targetSlot);
+                if (cursor.getAmount() > 1 && previous != null && !previous.getType().isAir()) {
+                    return; // Avoid losing remainder when swapping stacked item
+                }
+                ItemStack toEquip = cursor.clone();
+                toEquip.setAmount(1);
+                WardrobeManager.EquipAttemptResult attempt = manager.prepareAndEquipSlotItem(player, targetSlot, toEquip, false);
+                if (!attempt.allowed()) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.65f, 0.9f);
+                    if (attempt.errorMessage() != null) {
+                        player.sendMessage(TextUtil.parse(attempt.errorMessage()));
                     }
-                    ItemStack toEquip = cursor.clone();
-                    toEquip.setAmount(1);
-                    WardrobeManager.EquipAttemptResult attempt = manager.prepareAndEquipSlotItem(player, targetSlot, toEquip, false);
-                    if (!attempt.allowed()) {
-                        player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 0.65f, 0.9f);
-                        if (attempt.errorMessage() != null) {
-                            player.sendMessage(TextUtil.parse(attempt.errorMessage()));
-                        }
-                        return;
-                    }
-                    if (cursor.getAmount() > 1) {
-                        ItemStack rem = cursor.clone();
-                        rem.setAmount(cursor.getAmount() - 1);
-                        player.setItemOnCursor(rem);
-                    } else {
-                        player.setItemOnCursor(previous);
-                    }
-                    if (attempt.unequippedConflicts() > 0) {
-                        player.sendMessage(TextUtil.parse(config.getPrefixedMessage("equip-auto-unequipped",
-                                        "<yellow>Снято конфликтующих вещей: <white><count></white> <gray>(возвращены в инвентарь).")
-                                .replace("<count>", String.valueOf(attempt.unequippedConflicts()))));
-                    }
-                    player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 0.8f, 1.1f);
-                    player.sendMessage(TextUtil.parse(
-                            config.getPrefixedMessage("quick-equipped", "Экипировано в слот <slot>!"),
-                            Map.of("slot", targetSlot.displayName())
-                    ));
                     return;
                 }
+                if (cursor.getAmount() > 1) {
+                    ItemStack rem = cursor.clone();
+                    rem.setAmount(cursor.getAmount() - 1);
+                    player.setItemOnCursor(rem);
+                } else {
+                    player.setItemOnCursor(previous);
+                }
+                if (attempt.unequippedConflicts() > 0) {
+                    player.sendMessage(TextUtil.parse(config.getPrefixedMessage("equip-auto-unequipped",
+                                    "<yellow>Снято конфликтующих вещей: <white><count></white> <gray>(возвращены в инвентарь).")
+                            .replace("<count>", String.valueOf(attempt.unequippedConflicts()))));
+                }
+                player.playSound(player.getLocation(), Sound.ITEM_ARMOR_EQUIP_GENERIC, 0.8f, 1.1f);
+                player.sendMessage(TextUtil.parse(
+                        config.getPrefixedMessage("quick-equipped", "Экипировано в слот <slot>!"),
+                        Map.of("slot", targetSlot.displayName())
+                ));
+                return;
             }
         }
 
@@ -227,9 +234,17 @@ public final class WardrobeListener implements Listener {
             }
             if (targetSlot == null) return;
         } else {
-            if (!meta.hasSlot()) return;
-            targetSlot = config.getSlot(meta.primarySlotId());
-            if (targetSlot == null || (!targetSlot.isSkinLayer() && !targetSlot.isDisplay3D())) return;
+            if (meta.hasSlot()) {
+                targetSlot = config.getSlot(meta.primarySlotId());
+            }
+            if (targetSlot == null) {
+                targetSlot = resolver.findMultimodalTargetSlot(item, null);
+            }
+            if (targetSlot == null) return;
+            boolean allowCosmeticQuick = targetSlot.kind() == dev.mythicwardrobe.model.SlotKind.ARMOR_COSMETIC
+                    && config.getCosmeticVariantConfig() != null
+                    && config.getCosmeticVariantConfig().isMultimodalCosmetic(meta.mythicId(), meta.inlineCosmeticSkin());
+            if (!targetSlot.isSkinLayer() && !targetSlot.isDisplay3D() && !allowCosmeticQuick) return;
             if (!resolver.canPlaceInSlot(item, targetSlot)) return;
         }
 

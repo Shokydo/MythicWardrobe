@@ -81,3 +81,14 @@ items:
       scale-x: 1.05
       scale-y: 1.05
       scale-z: 1.05
+
+  # Пример мультимодального косметического предмета (v1.10.0) прямо в items.yml
+  # (аналогично можно настроить в cosmetic-variants.yml или в MythicItem -> Wardrobe.Variants:):
+  # WhiteVestPaint:
+  #   slot: chest_cosmetic
+  #   unmatched-mode: KEEP_REAL
+  #   empty-armor-mode: KEEP_EMPTY
+  #   variants:
+  #     LightMilitaryVest: LightMilitaryVest_White
+  #     HeavyMilitaryVest: HeavyMilitaryVest_White
+

@@ -1,0 +1,120 @@
+# ==============================================================================
+# MythicWardrobe v1.10.0 — Мультимодальная косметика (1 предмет -> N моделей)
+# ==============================================================================
+# Позволяет создать ОДИН косметический предмет (например «Белая краска для
+# бронежилета» из WHITE_DYE / PAPER / чего угодно), который работает на разных
+# видах реальной брони и для каждой брони подставляет СВОЮ 3D/2D модель!
+#
+# Как это работает в игре:
+#   1. Игрок кладёт «WhiteVestPaint» в слот косметики (`chest_cosmetic`)
+#      (в GUI гардероба, кликом по броне в инвентаре или ПКМ в руке).
+#   2. Если на игроке надет «LightMilitaryVest» -> отображается «LightMilitaryVest_White».
+#   3. Игрок меняет реальный жилет на «HeavyMilitaryVest» (не трогая косметику!) ->
+#      модель мгновенно меняется на «HeavyMilitaryVest_White»!
+#   4. Если реальная броня снята -> `empty-armor-mode: KEEP_EMPTY` оставляет слот пустым
+#      (краска НЕ надевается на голое тело!).
+#   5. Полностью совместимо с `combo-overrides.yml` (например,
+#      HeavyMilitaryVest_White + TacticalBackpackArmor) и `hair-3d.yml` (для шлемов)!
+#
+# Альтернативно: можно прописать варианты прямо внутри MythicMobs предмета:
+#   WhiteVestPaint:
+#     Id: WHITE_DYE
+#     Display: '&fБелая краска для бронежилета'
+#     Wardrobe:
+#       Slot: chest_cosmetic
+#       UnmatchedMode: KEEP_REAL
+#       EmptyArmorMode: KEEP_EMPTY
+#       Variants:
+#         LightMilitaryVest: LightMilitaryVest_White
+#         HeavyMilitaryVest: HeavyMilitaryVest_White
+# ==============================================================================
+
+enabled: true
+
+skins:
+  # ----------------------------------------------------------------------------
+  # ПРИМЕР 1: 1 предмет «Белая краска для бронежилета» на разные бронежилеты
+  # ----------------------------------------------------------------------------
+  white_vest_paint:
+    # MythicMobs ID самого косметического предмета (поддерживает список и маску *)
+    cosmetic-item: "WhiteVestPaint"
+    # В какие слоты гардероба разрешено класть этот предмет (даже если это WHITE_DYE / PAPER!)
+    allowed-slots:
+      - "chest_cosmetic"
+    # Что делать, если надета реальная броня, для которой нет варианта ниже:
+    #   KEEP_REAL      — оставить реальную броню без изменений (рекомендуется для красок!)
+    #   FALLBACK_MODEL — показать `fallback-mythic-item`
+    #   USE_SELF       — показать сам косметический предмет
+    unmatched-mode: "KEEP_REAL"
+    # Что делать, если реальная броня вообще снята (слот пустой):
+    #   KEEP_EMPTY     — ничего не показывать (рекомендуется для красок!)
+    #   FALLBACK_MODEL — показать `empty-armor-mythic-item` (или `fallback-mythic-item`)
+    #   USE_SELF       — показать сам косметический предмет
+    empty-armor-mode: "KEEP_EMPTY"
+    fallback-mythic-item: ""
+    empty-armor-mythic-item: ""
+
+    # Варианты проверяются сверху вниз; срабатывает первый совпавший!
+    variants:
+      light_military_vest:
+        # Можно указывать несколько ID или маску (например "LightMilitaryVest*")
+        match-armor:
+          - "LightMilitaryVest"
+          - "LightMilitaryVest_Mk2"
+        # Какой MythicMobs / MythicArmors предмет отобразить на игроке
+        result-mythic-item: "LightMilitaryVest_White"
+
+      heavy_military_vest:
+        match-armor:
+          - "HeavyMilitaryVest"
+          - "HeavyMilitaryVest_Mk2"
+        result-mythic-item: "HeavyMilitaryVest_White"
+
+      # Пример для встроенного Тест-пака (перекрашивает Тактический нагрудник в белый):
+      tactical_warden_chest:
+        match-armor:
+          - "TacticalWardenChestplate"
+        dye-color: "#F2F4F8"
+
+      # Пример под ванильную кожаную броню — просто перекрашивает в белый без доп. моделей:
+      vanilla_leather_chest:
+        match-materials:
+          - "LEATHER_CHESTPLATE"
+        dye-color: "#F5F5F5"
+
+  # ----------------------------------------------------------------------------
+  # ПРИМЕР 2: 1 предмет «Универсальный зимний камуфляж» для ВСЕХ 4 слотов брони
+  # Можно положить в Шлем, Нагрудник, Поножи или Ботинки — сам поймёт, что надетo!
+  # ----------------------------------------------------------------------------
+  winter_camo_universal:
+    cosmetic-item: "WinterCamoPaint"
+    allowed-slots:
+      - "helmet_cosmetic"
+      - "chest_cosmetic"
+      - "legs_cosmetic"
+      - "boots_cosmetic"
+    unmatched-mode: "KEEP_REAL"
+    empty-armor-mode: "KEEP_EMPTY"
+    variants:
+      light_helmet:
+        equipment-slot: "HEAD"
+        match-armor: ["LightMilitaryHelmet"]
+        result-mythic-item: "LightMilitaryHelmet_Winter"
+      heavy_helmet:
+        equipment-slot: "HEAD"
+        match-armor: ["HeavyMilitaryHelmet"]
+        result-mythic-item: "HeavyMilitaryHelmet_Winter"
+      light_vest:
+        equipment-slot: "CHEST"
+        match-armor: ["LightMilitaryVest"]
+        result-mythic-item: "LightMilitaryVest_Winter"
+      heavy_vest:
+        equipment-slot: "CHEST"
+        match-armor: ["HeavyMilitaryVest"]
+        result-mythic-item: "HeavyMilitaryVest_Winter"
+      # Вариант с подменой Equippable.Model без создания отдельного MythicMobs предмета:
+      # heavy_legs:
+      #   equipment-slot: "LEGS"
+      #   match-armor: ["HeavyMilitaryLegs"]
+      #   equippable-model: "mythicarmor:heavy_military_legs_winter"
+      #   dye-color: "#EEF3F8"

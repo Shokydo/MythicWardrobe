@@ -96,6 +96,7 @@ public final class WardrobeConfig {
     private final Map<String, ItemWardrobeMeta> configuredItems = new HashMap<>();
     private final List<ComboOverrideRule> comboRules = new ArrayList<>();
     private Hair3DConfig hair3DConfig = Hair3DConfig.empty();
+    private CosmeticVariantConfig cosmeticVariantConfig = CosmeticVariantConfig.empty();
     private MenuConfigLoader.ParsedMenusConfig menusConfig;
     private YamlConfiguration messagesConfig;
     private volatile HeadCompositePackBuilder.Manifest headCompositeManifest;
@@ -113,6 +114,7 @@ public final class WardrobeConfig {
         ensureDefaultFile("items.yml");
         ensureDefaultFile("combo-overrides.yml");
         ensureDefaultFile("hair-3d.yml");
+        ensureDefaultFile("cosmetic-variants.yml");
         ensureDefaultFile("messages.yml");
 
         plugin.reloadConfig();
@@ -176,6 +178,7 @@ public final class WardrobeConfig {
         loadItems();
         loadCombos();
         loadHair3D();
+        loadCosmeticVariants();
         loadMenus();
         reloadHeadCompositeManifest();
         this.messagesConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "messages.yml"));
@@ -192,6 +195,19 @@ public final class WardrobeConfig {
 
     public Hair3DConfig getHair3DConfig() {
         return hair3DConfig;
+    }
+
+    private void loadCosmeticVariants() {
+        File f = new File(plugin.getDataFolder(), "cosmetic-variants.yml");
+        if (f.isFile()) {
+            this.cosmeticVariantConfig = CosmeticVariantConfig.load(YamlConfiguration.loadConfiguration(f));
+        } else {
+            this.cosmeticVariantConfig = CosmeticVariantConfig.empty();
+        }
+    }
+
+    public CosmeticVariantConfig getCosmeticVariantConfig() {
+        return cosmeticVariantConfig;
     }
 
     public void reloadHeadCompositeManifest() {
@@ -428,6 +444,13 @@ public final class WardrobeConfig {
             Set<String> blockedTargets = readBlockedList(sec);
             BlockBehaviorMode blockMode = BlockBehaviorMode.parseOrNull(
                     sec.getString("block-mode", sec.getString("blocking-mode", sec.getString("lock-mode", ""))));
+            CosmeticVariantConfig.CosmeticSkinDef inlineSkin = null;
+            if (sec.isConfigurationSection("variants") || sec.isList("variants")) {
+                CosmeticVariantConfig.CosmeticSkinDef parsed = CosmeticVariantConfig.parseSkinSection(itemId, sec, itemId);
+                if (parsed != null && !parsed.variants().isEmpty()) {
+                    inlineSkin = parsed;
+                }
+            }
             configuredItems.put(itemId.toLowerCase(Locale.ROOT), new ItemWardrobeMeta(
                     slotId.toLowerCase(Locale.ROOT),
                     texture,
@@ -436,7 +459,8 @@ public final class WardrobeConfig {
                     onUnequip,
                     itemId,
                     blockedTargets,
-                    blockMode
+                    blockMode,
+                    inlineSkin
             ));
         }
     }

@@ -156,8 +156,22 @@ public final class ArmorVisualManager {
                 ItemStack cosmeticItem = (cosmeticDef != null && !cosmeticBlocked) ? state.peekSlotItem(cosmeticDef.id()) : null;
                 ItemStack realItem = player.getInventory().getItem(eqSlot);
 
-                ItemStack primaryVisual = (cosmeticItem != null && !cosmeticItem.getType().isAir()) ? cosmeticItem : realItem;
-                String primaryMythicId = primaryVisual != null ? resolver.resolve(primaryVisual).mythicId() : null;
+                // Resolve multimodal cosmetic skins (e.g. 1 paint/camo item adapting to Light vs Heavy armor!)
+                ResolvedCosmetic resolvedCosmetic = resolveCosmeticVisual(cosmeticItem, realItem, eqSlot);
+                ItemStack effectiveCosmetic = resolvedCosmetic.visualItem();
+
+                ItemStack primaryVisual = (effectiveCosmetic != null && !effectiveCosmetic.getType().isAir())
+                        ? effectiveCosmetic
+                        : realItem;
+                String primaryMythicId = null;
+                if (effectiveCosmetic != null && !effectiveCosmetic.getType().isAir()) {
+                    primaryMythicId = resolver.resolve(effectiveCosmetic).mythicId();
+                    if ((primaryMythicId == null || primaryMythicId.isBlank()) && !resolvedCosmetic.resolvedMythicId().isBlank()) {
+                        primaryMythicId = resolvedCosmetic.resolvedMythicId();
+                    }
+                } else if (realItem != null && !realItem.getType().isAir()) {
+                    primaryMythicId = resolver.resolve(realItem).mythicId();
+                }
 
                 ItemStack resolvedOverride = null;
 
@@ -203,9 +217,9 @@ public final class ArmorVisualManager {
                     }
                 }
 
-                // 2. Fallback to cosmetic armor item
-                if (resolvedOverride == null && cosmeticItem != null && !cosmeticItem.getType().isAir()) {
-                    resolvedOverride = cosmeticItem.clone();
+                // 2. Fallback to resolved cosmetic armor item (null when multimodal cosmetic returned KEEP_REAL/KEEP_EMPTY)
+                if (resolvedOverride == null && effectiveCosmetic != null && !effectiveCosmetic.getType().isAir()) {
+                    resolvedOverride = effectiveCosmetic.clone();
                 }
 
                 // 3. Standalone DISPLAY_3D / ARMOR_OVERLAY promotion:
@@ -349,17 +363,25 @@ public final class ArmorVisualManager {
     ) {
         List<Hair3DConfig.HelmetDescriptor> list = new ArrayList<>(3);
 
-        // 1. Cosmetic helmet
+        // 1. Cosmetic helmet (resolved through multimodal cosmetic variants so empty paint never hides 3D hair!)
+        ItemStack real = player.getInventory().getHelmet();
         WardrobeSlotDef cosmeticHead = config.findSlotByKindAndEquipment(SlotKind.ARMOR_COSMETIC, EquipmentSlot.HEAD);
         if (cosmeticHead != null && (blockedSlots == null || !blockedSlots.contains(cosmeticHead.id()))) {
             ItemStack cos = state.peekSlotItem(cosmeticHead.id());
             if (cos != null && !cos.getType().isAir()) {
-                list.add(Hair3DConfig.HelmetDescriptor.armor(resolver.resolve(cos).mythicId(), cos.getType().name()));
+                ResolvedCosmetic res = resolveCosmeticVisual(cos, real, EquipmentSlot.HEAD);
+                ItemStack eff = res.visualItem();
+                if (eff != null && !eff.getType().isAir()) {
+                    String effId = resolver.resolve(eff).mythicId();
+                    if ((effId == null || effId.isBlank()) && !res.resolvedMythicId().isBlank()) {
+                        effId = res.resolvedMythicId();
+                    }
+                    list.add(Hair3DConfig.HelmetDescriptor.armor(effId, eff.getType().name()));
+                }
             }
         }
 
         // 2. Real helmet
-        ItemStack real = player.getInventory().getHelmet();
         if (real != null && !real.getType().isAir()) {
             list.add(Hair3DConfig.HelmetDescriptor.armor(resolver.resolve(real).mythicId(), real.getType().name()));
         }
@@ -371,6 +393,148 @@ public final class ArmorVisualManager {
         }
 
         return list;
+    }
+
+    private record ResolvedCosmetic(ItemStack visualItem, String resolvedMythicId) {
+        static final ResolvedCosmetic NONE = new ResolvedCosmetic(null, "");
+    }
+
+    /**
+     * Resolves a cosmetic slot item against the player's currently worn real armor using
+     * {@link CosmeticVariantConfig} (cosmetic-variants.yml + inline Wardrobe.Variants:).
+     *
+     * For regular cosmetic armor (no multimodal rule), returns the item itself unchanged.
+     * For multimodal paint/camo items (e.g. WhiteVestPaint):
+     *   - Adapts the rendered model to match the worn real armor (LightMilitaryVest -> LightMilitaryVest_White,
+     *     HeavyMilitaryVest -> HeavyMilitaryVest_White, etc.).
+     *   - Returns NONE when the real armor is missing/unmatched under KEEP_EMPTY / KEEP_REAL,
+     *     so non-armor paint items (WHITE_DYE, PAPER) are never visually put on the player's body!
+     */
+    private ResolvedCosmetic resolveCosmeticVisual(ItemStack cosmeticItem, ItemStack realItem, EquipmentSlot eqSlot) {
+        if (cosmeticItem == null || cosmeticItem.getType().isAir()) {
+            return ResolvedCosmetic.NONE;
+        }
+        CosmeticVariantConfig variantCfg = config.getCosmeticVariantConfig();
+        if (variantCfg == null || !variantCfg.isEnabled()) {
+            return new ResolvedCosmetic(cosmeticItem, "");
+        }
+
+        ItemWardrobeMeta cosmeticMeta = resolver.resolve(cosmeticItem);
+        CosmeticVariantConfig.ArmorDescriptor realDesc = describeRealArmor(realItem);
+        CosmeticVariantConfig.ResolutionResult res = variantCfg.resolve(
+                cosmeticMeta.mythicId(),
+                cosmeticMeta.inlineCosmeticSkin(),
+                eqSlot,
+                realDesc
+        );
+
+        return switch (res.action()) {
+            case USE_SELF -> new ResolvedCosmetic(cosmeticItem, cosmeticMeta.mythicId() == null ? "" : cosmeticMeta.mythicId());
+            case KEEP_REAL -> ResolvedCosmetic.NONE;
+            case APPLY_MYTHIC_ITEM -> {
+                if (mythicHook == null || res.mythicItemId().isBlank()) yield ResolvedCosmetic.NONE;
+                ItemStack generated = mythicHook.generateMythicItem(res.mythicItemId());
+                if (generated == null || generated.getType().isAir()) yield ResolvedCosmetic.NONE;
+                yield new ResolvedCosmetic(generated, res.mythicItemId());
+            }
+            case APPLY_VARIANT -> {
+                CosmeticVariantConfig.VariantRule rule = res.matchedVariant();
+                if (rule == null) yield ResolvedCosmetic.NONE;
+                ItemStack visual = null;
+                String resolvedId = "";
+                if (rule.hasResultMythicItem() && mythicHook != null) {
+                    visual = mythicHook.generateMythicItem(rule.resultMythicItem());
+                    resolvedId = rule.resultMythicItem();
+                } else if (realItem != null && !realItem.getType().isAir()) {
+                    // Pure dye/model override directly on a copy of the worn real armor!
+                    visual = realItem.clone();
+                    resolvedId = realDesc.mythicId() != null ? realDesc.mythicId() : "";
+                }
+                if (visual == null || visual.getType().isAir()) {
+                    yield ResolvedCosmetic.NONE;
+                }
+                applyVariantVisualMutations(visual, rule, eqSlot);
+                yield new ResolvedCosmetic(visual, resolvedId);
+            }
+        };
+    }
+
+    private CosmeticVariantConfig.ArmorDescriptor describeRealArmor(ItemStack realItem) {
+        if (realItem == null || realItem.getType().isAir()) {
+            return CosmeticVariantConfig.ArmorDescriptor.EMPTY;
+        }
+        String mythicId = resolver.resolve(realItem).mythicId();
+        String matName = realItem.getType().name();
+        Integer cmd = null;
+        try {
+            ItemMeta meta = realItem.getItemMeta();
+            if (meta != null && meta.hasCustomModelData()) {
+                cmd = meta.getCustomModelData();
+            }
+        } catch (Throwable ignored) {
+        }
+        if (cmd == null) {
+            try {
+                CustomModelData data = realItem.getData(DataComponentTypes.CUSTOM_MODEL_DATA);
+                if (data != null && !data.floats().isEmpty()) {
+                    cmd = Math.round(data.floats().get(0));
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        String itemModelKey = extractItemModelKey(realItem);
+        String equippableModelKey = extractEquippableModelKey(realItem);
+        return new CosmeticVariantConfig.ArmorDescriptor(mythicId, matName, cmd, itemModelKey, equippableModelKey);
+    }
+
+    private static String extractEquippableModelKey(ItemStack item) {
+        if (item == null || item.getType().isAir()) return null;
+        try {
+            Equippable eq = item.getData(DataComponentTypes.EQUIPPABLE);
+            if (eq != null && eq.assetId() != null) {
+                return eq.assetId().asString().toLowerCase(Locale.ROOT);
+            }
+        } catch (Throwable ignored) {
+        }
+        return null;
+    }
+
+    private static void applyVariantVisualMutations(ItemStack visual, CosmeticVariantConfig.VariantRule rule, EquipmentSlot eqSlot) {
+        if (visual == null || rule == null) return;
+        if (rule.hasDyeColor()) {
+            Color c = CosmeticVariantConfig.parseColorSpec(rule.dyeColor());
+            if (c != null) {
+                applyOptionalHairColor(visual, c, null);
+            }
+        }
+        if (rule.hasEquippableModel()) {
+            try {
+                NamespacedKey key = NamespacedKey.fromString(rule.equippableModel().toLowerCase(Locale.ROOT));
+                if (key != null) {
+                    EquipmentSlot targetSlot = eqSlot != null ? eqSlot : EquipmentSlot.CHEST;
+                    Equippable.Builder b = Equippable.equippable(targetSlot).assetId(key);
+                    visual.setData(DataComponentTypes.EQUIPPABLE, b.build());
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        if (rule.hasItemModel()) {
+            try {
+                NamespacedKey key = NamespacedKey.fromString(rule.itemModel().toLowerCase(Locale.ROOT));
+                if (key != null) {
+                    visual.setData(DataComponentTypes.ITEM_MODEL, key);
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+        if (rule.hasCustomModelData()) {
+            try {
+                int val = rule.customModelData();
+                visual.setData(DataComponentTypes.CUSTOM_MODEL_DATA,
+                        CustomModelData.customModelData().addFloat((float) val).build());
+            } catch (Throwable ignored) {
+            }
+        }
     }
 
     private static void applyOptionalHairColor(ItemStack item, Color configuredColor, DyedItemColor inheritedDye) {

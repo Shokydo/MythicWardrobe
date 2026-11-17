@@ -3,6 +3,7 @@ package dev.mythicwardrobe.hook;
 import dev.mythicwardrobe.config.WardrobeConfig;
 import dev.mythicwardrobe.manager.WardrobeManager;
 import dev.mythicwardrobe.model.BlockBehaviorMode;
+import dev.mythicwardrobe.model.CosmeticVariantConfig;
 import dev.mythicwardrobe.model.DisplayMountConfig;
 import dev.mythicwardrobe.model.ItemWardrobeMeta;
 import dev.mythicwardrobe.model.WardrobeSlotDef;
@@ -25,6 +26,7 @@ import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -170,6 +172,8 @@ public final class MythicMobsHook implements Listener {
                 }
             }
 
+            CosmeticVariantConfig.CosmeticSkinDef inlineSkin = readInlineCosmeticSkin(mythicId, slot, wCfg);
+
             return Optional.of(new ItemWardrobeMeta(
                     slot == null ? "" : slot.trim().toLowerCase(Locale.ROOT),
                     texture == null ? "" : texture.trim(),
@@ -178,7 +182,8 @@ public final class MythicMobsHook implements Listener {
                     onUnequip == null ? "" : onUnequip.trim(),
                     mythicId,
                     blockedTargets,
-                    blockMode
+                    blockMode,
+                    inlineSkin
             ));
         } catch (Throwable t) {
             if (config.isDebug()) {
@@ -186,6 +191,147 @@ public final class MythicMobsHook implements Listener {
             }
             return Optional.empty();
         }
+    }
+
+    /**
+     * Reads an optional inline multimodal cosmetic block inside a MythicItem's `Wardrobe:` section:
+     *   Wardrobe:
+     *     Slot: chest_cosmetic
+     *     UnmatchedMode: KEEP_REAL
+     *     EmptyArmorMode: KEEP_EMPTY
+     *     Variants:
+     *       LightMilitaryVest: LightMilitaryVest_White
+     *       HeavyMilitaryVest: HeavyMilitaryVest_White
+     */
+    private static CosmeticVariantConfig.CosmeticSkinDef readInlineCosmeticSkin(
+            String mythicId,
+            String slotCsv,
+            MythicConfig wCfg
+    ) {
+        String variantsKey = null;
+        for (String k : new String[]{"Variants", "variants", "CosmeticVariants", "cosmetic-variants", "ArmorVariants", "armor-variants"}) {
+            if (wCfg.isSet(k)) {
+                variantsKey = k;
+                break;
+            }
+        }
+        if (variantsKey == null) return null;
+
+        List<CosmeticVariantConfig.VariantRule> rules = new ArrayList<>();
+        if (wCfg.isConfigurationSection(variantsKey)) {
+            MythicConfig vCfg = wCfg.getNestedConfig(variantsKey);
+            if (vCfg != null) {
+                for (String key : vCfg.getKeys()) {
+                    if (vCfg.isConfigurationSection(key)) {
+                        MythicConfig sub = vCfg.getNestedConfig(key);
+                        if (sub == null) continue;
+                        EquipmentSlot eq = parseEquipSlot(sub.getString(new String[]{"EquipmentSlot", "equipment-slot", "Slot", "slot"}, ""));
+                        List<String> matchArmor = readMythicList(sub, "MatchArmor", "match-armor", "MatchMythicItem", "match-mythic-item", "Armor", "armor");
+                        List<String> matchMats = readMythicList(sub, "MatchMaterials", "match-materials", "MatchMaterial", "match-material", "Material", "material");
+                        List<String> matchModels = readMythicList(sub, "MatchModels", "match-models", "MatchModel", "match-model");
+                        Set<Integer> matchCmds = new java.util.LinkedHashSet<>();
+                        for (String raw : readMythicList(sub, "MatchCustomModelData", "match-custom-model-data", "MatchCmd", "match-cmd")) {
+                            try { matchCmds.add(Integer.parseInt(raw)); } catch (NumberFormatException ignored) {}
+                        }
+                        if (matchArmor.isEmpty() && matchMats.isEmpty() && matchCmds.isEmpty() && matchModels.isEmpty()) {
+                            matchArmor = List.of(key);
+                        }
+                        String resultItem = sub.getString(new String[]{"ResultMythicItem", "result-mythic-item", "ResultItem", "result-item", "MythicItem", "mythic-item", "ModelItem", "model-item"}, "");
+                        String dyeColor = sub.getString(new String[]{"DyeColor", "dye-color", "Color", "color"}, "");
+                        String eqModel = sub.getString(new String[]{"EquippableModel", "equippable-model"}, "");
+                        String itemModel = sub.getString(new String[]{"ItemModel", "item-model"}, "");
+                        Integer cmd = null;
+                        for (String ck : new String[]{"CustomModelData", "custom-model-data"}) {
+                            if (sub.isInt(ck)) {
+                                cmd = sub.getInt(ck, 0);
+                                break;
+                            }
+                        }
+                        CosmeticVariantConfig.VariantRule rule = new CosmeticVariantConfig.VariantRule(
+                                key, eq, matchArmor, matchMats, matchCmds, matchModels,
+                                resultItem, dyeColor, eqModel, itemModel, cmd
+                        );
+                        if (rule.hasAnyVisualEffect()) rules.add(rule);
+                    } else {
+                        String val = vCfg.getString(key, "");
+                        CosmeticVariantConfig.VariantRule rule = CosmeticVariantConfig.parseShorthandVariant(key, val);
+                        if (rule != null && rule.hasAnyVisualEffect()) rules.add(rule);
+                    }
+                }
+            }
+        }
+        if (rules.isEmpty()) return null;
+
+        Set<String> allowedSlots = new java.util.LinkedHashSet<>();
+        if (slotCsv != null && !slotCsv.isBlank()) {
+            for (String s : slotCsv.split("[,;]+")) {
+                if (!s.isBlank()) allowedSlots.add(s.trim().toLowerCase(Locale.ROOT));
+            }
+        }
+        for (String s : readMythicList(wCfg, "AllowedSlots", "allowed-slots", "Slots", "slots")) {
+            allowedSlots.add(s.trim().toLowerCase(Locale.ROOT));
+        }
+
+        CosmeticVariantConfig.UnmatchedMode unmatchedMode = CosmeticVariantConfig.UnmatchedMode.parse(
+                wCfg.getString(new String[]{"UnmatchedMode", "unmatched-mode", "FallbackMode", "fallback-mode"}, "KEEP_REAL"),
+                CosmeticVariantConfig.UnmatchedMode.KEEP_REAL
+        );
+        CosmeticVariantConfig.EmptyArmorMode emptyMode = CosmeticVariantConfig.EmptyArmorMode.parse(
+                wCfg.getString(new String[]{"EmptyArmorMode", "empty-armor-mode", "NoArmorMode", "no-armor-mode"}, "KEEP_EMPTY"),
+                CosmeticVariantConfig.EmptyArmorMode.KEEP_EMPTY
+        );
+        String fallbackItem = wCfg.getString(new String[]{"FallbackMythicItem", "fallback-mythic-item", "FallbackItem", "fallback-item"}, "");
+        String emptyItem = wCfg.getString(new String[]{"EmptyArmorMythicItem", "empty-armor-mythic-item", "EmptyItem", "empty-item"}, "");
+
+        return new CosmeticVariantConfig.CosmeticSkinDef(
+                mythicId,
+                List.of(mythicId),
+                allowedSlots,
+                unmatchedMode,
+                emptyMode,
+                fallbackItem,
+                emptyItem,
+                rules
+        );
+    }
+
+    private static EquipmentSlot parseEquipSlot(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        return switch (raw.trim().toUpperCase(Locale.ROOT)) {
+            case "HEAD", "HELMET" -> EquipmentSlot.HEAD;
+            case "CHEST", "CHESTPLATE", "BODY" -> EquipmentSlot.CHEST;
+            case "LEGS", "LEGGINGS" -> EquipmentSlot.LEGS;
+            case "FEET", "BOOTS" -> EquipmentSlot.FEET;
+            default -> null;
+        };
+    }
+
+    private static List<String> readMythicList(MythicConfig cfg, String... keys) {
+        List<String> out = new ArrayList<>();
+        for (String key : keys) {
+            if (!cfg.isSet(key)) continue;
+            try {
+                List<String> list = cfg.getStringList(key);
+                if (list != null && !list.isEmpty()) {
+                    for (String s : list) {
+                        if (s == null) continue;
+                        for (String tok : s.split("[,;]+")) {
+                            if (!tok.isBlank()) out.add(tok.trim());
+                        }
+                    }
+                    if (!out.isEmpty()) return out;
+                }
+            } catch (Throwable ignored) {
+            }
+            String raw = cfg.getString(key, "");
+            if (raw != null && !raw.isBlank()) {
+                for (String tok : raw.split("[,;]+")) {
+                    if (!tok.isBlank()) out.add(tok.trim());
+                }
+                if (!out.isEmpty()) return out;
+            }
+        }
+        return out;
     }
 
     private static java.util.Set<String> readMythicBlockedTargets(MythicConfig wCfg) {

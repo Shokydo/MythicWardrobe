@@ -10,10 +10,27 @@ public record ItemWardrobeMeta(
         String onUnequipSkill,
         String mythicId,
         Set<String> blockedTargets,
-        BlockBehaviorMode blockMode
+        BlockBehaviorMode blockMode,
+        CosmeticVariantConfig.CosmeticSkinDef inlineCosmeticSkin
 ) {
     public ItemWardrobeMeta {
         blockedTargets = normalizeBlockedTargets(blockedTargets);
+    }
+
+    /**
+     * Backwards-compatible 8-arg constructor without inline multimodal variants.
+     */
+    public ItemWardrobeMeta(
+            String slotId,
+            String texturePath,
+            DisplayMountConfig displayOverride,
+            String onEquipSkill,
+            String onUnequipSkill,
+            String mythicId,
+            Set<String> blockedTargets,
+            BlockBehaviorMode blockMode
+    ) {
+        this(slotId, texturePath, displayOverride, onEquipSkill, onUnequipSkill, mythicId, blockedTargets, blockMode, null);
     }
 
     /**
@@ -27,7 +44,11 @@ public record ItemWardrobeMeta(
             String onUnequipSkill,
             String mythicId
     ) {
-        this(slotId, texturePath, displayOverride, onEquipSkill, onUnequipSkill, mythicId, Set.of(), null);
+        this(slotId, texturePath, displayOverride, onEquipSkill, onUnequipSkill, mythicId, Set.of(), null, null);
+    }
+
+    public boolean hasInlineCosmeticSkin() {
+        return inlineCosmeticSkin != null && !inlineCosmeticSkin.variants().isEmpty();
     }
 
     public boolean hasSlot() {
