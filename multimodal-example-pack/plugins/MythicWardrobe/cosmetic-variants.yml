@@ -1,0 +1,29 @@
+# ==============================================================================
+# MythicWardrobe v1.10.0 — Пример cosmetic-variants.yml (Белая краска на жилеты)
+# Положите в: plugins/MythicWardrobe/cosmetic-variants.yml
+# ==============================================================================
+enabled: true
+
+skins:
+  white_vest_paint:
+    cosmetic-item: "WhiteVestPaint"
+    allowed-slots:
+      - "chest_cosmetic"
+    unmatched-mode: "KEEP_REAL"
+    empty-armor-mode: "KEEP_EMPTY"
+    variants:
+      light_military_vest:
+        match-armor:
+          - "LightMilitaryVest"
+        result-mythic-item: "LightMilitaryVest_White"
+
+      heavy_military_vest:
+        match-armor:
+          - "HeavyMilitaryVest"
+        result-mythic-item: "HeavyMilitaryVest_White"
+
+      # Бонус: на ванильной кожаной броне просто перекрашивает в арктический белый!
+      vanilla_leather_chest:
+        match-materials:
+          - "LEATHER_CHESTPLATE"
+        dye-color: "#F2F5FA"

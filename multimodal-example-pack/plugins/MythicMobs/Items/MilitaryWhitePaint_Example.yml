@@ -1,0 +1,118 @@
+# ==============================================================================
+# MythicWardrobe v1.10.0 — Готовый пример МУЛЬТИМОДАЛЬНОЙ КОСМЕТИКИ
+# ==============================================================================
+# Сценарий:
+#   • Есть 2 разные реальные брони:
+#       1) LightMilitaryVest  — Лёгкий военный бронежилет (компактный плитник)
+#       2) HeavyMilitaryVest  — Тяжёлый военный бронежилет (массивный джаггернаут)
+#   • Есть ОДИН косметический предмет:
+#       3) WhiteVestPaint     — Белая краска для бронежилета (WHITE_DYE!)
+#   • Игрок кладёт ОДНУ краску WhiteVestPaint в слот косметики (`chest_cosmetic`):
+#       - Если надет LightMilitaryVest -> отображается LightMilitaryVest_White!
+#       - Если надет HeavyMilitaryVest -> отображается HeavyMilitaryVest_White!
+#       - Если броня снята             -> ничего лишнего не надевается!
+#
+# Положите этот файл в: plugins/MythicMobs/Items/MilitaryWhitePaint_Example.yml
+# 4 файла .bbmodel в:   plugins/MythicArmors/models/
+# cosmetic-variants.yml в: plugins/MythicWardrobe/cosmetic-variants.yml
+# Затем выполните: /ma reload -> /mm reload -> /wardrobe reload
+# ==============================================================================
+
+# 1. РЕАЛЬНАЯ БРОНЯ #1 — ЛЁГКИЙ ВОЕННЫЙ БРОНЕЖИЛЕТ
+LightMilitaryVest:
+  Material: LEATHER_CHESTPLATE
+  Display: '&aЛёгкий военный бронежилет &7[Класс III]'
+  Lore:
+    - '&7Компактный тактический плитник с рацией'
+    - '&8Защита: &f+6 брони &8· &aЛёгкий и манёвренный'
+    - '&fСовместим с «Белой краской для бронежилета»!'
+  Equippable:
+    Model: mythicarmor:light_military_vest_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_iron'
+  Options:
+    ItemModel: mythicarmor:light_military_vest_chest_piece
+    Unbreakable: true
+    HideFlags: true
+  Attributes:
+    Chest:
+      Armor: 6
+      ArmorToughness: 1
+      MovementSpeed: 0.02 ADDITIVE
+
+# 2. РЕАЛЬНАЯ БРОНЯ #2 — ТЯЖЁЛЫЙ ВОЕННЫЙ БРОНЕЖИЛЕТ
+HeavyMilitaryVest:
+  Material: LEATHER_CHESTPLATE
+  Display: '&6Тяжёлый военный бронежилет &7[Класс VI]'
+  Lore:
+    - '&7Штурмовой бронежилет с воротником и наплечниками'
+    - '&8Защита: &f+10 брони, +4 прочности, +20% стойкости'
+    - '&fСовместим с «Белой краской для бронежилета»!'
+  Equippable:
+    Model: mythicarmor:heavy_military_vest_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:heavy_military_vest_chest_piece
+    Unbreakable: true
+    HideFlags: true
+  Attributes:
+    Chest:
+      Armor: 10
+      ArmorToughness: 4
+      KnockbackResistance: 0.2
+
+# 3. ОДИН КОСМЕТИЧЕСКИЙ ПРЕДМЕТ — БЕЛАЯ КРАСКА ДЛЯ БРОНЕЖИЛЕТА
+#    Обратите внимание: это обычный WHITE_DYE (НЕ броня!), который свободно
+#    кладётся в слот `chest_cosmetic` и меняет модель под надетый бронежилет!
+WhiteVestPaint:
+  Material: WHITE_DYE
+  Display: '&f&lБелая краска для бронежилета &7[Мульти-скин]'
+  Lore:
+    - '&7Универсальный арктический камуфляж (1 предмет на всё!)'
+    - '&8Положите в слот &fКосметики Нагрудника &8(или ПКМ в руке):'
+    - '&f• На Лёгком бронежилете  &7→ &fБелый лёгкий плитник'
+    - '&f• На Тяжёлом бронежилете &7→ &fБелый тяжёлый джаггернаут'
+    - '&f• На Кожаной броне       &7→ &fПерекраска в белый'
+    - '&8Если жилет снят — краска не отображается.'
+  Options:
+    Glow: true
+    HideFlags: true
+  # Работает И через cosmetic-variants.yml, И напрямую через этот блок Wardrobe.Variants:
+  Wardrobe:
+    Slot: chest_cosmetic
+    UnmatchedMode: KEEP_REAL
+    EmptyArmorMode: KEEP_EMPTY
+    Variants:
+      LightMilitaryVest: LightMilitaryVest_White
+      HeavyMilitaryVest: HeavyMilitaryVest_White
+
+# 4. ВИЗУАЛЬНАЯ МОДЕЛЬ #1 — ЛЁГКИЙ ВОЕННЫЙ БРОНЕЖИЛЕТ (БЕЛЫЙ)
+LightMilitaryVest_White:
+  Material: LEATHER_CHESTPLATE
+  Display: '&fЛёгкий военный бронежилет &b[Арктика]'
+  Lore:
+    - '&73D-вариант для мультимодальной косметики WhiteVestPaint'
+  Equippable:
+    Model: mythicarmor:light_military_vest_white_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_iron'
+  Options:
+    ItemModel: mythicarmor:light_military_vest_white_chest_piece
+    Unbreakable: true
+    HideFlags: true
+
+# 5. ВИЗУАЛЬНАЯ МОДЕЛЬ #2 — ТЯЖЁЛЫЙ ВОЕННЫЙ БРОНЕЖИЛЕТ (БЕЛЫЙ)
+HeavyMilitaryVest_White:
+  Material: LEATHER_CHESTPLATE
+  Display: '&fТяжёлый военный бронежилет &b[Арктика]'
+  Lore:
+    - '&73D-вариант для мультимодальной косметики WhiteVestPaint'
+  Equippable:
+    Model: mythicarmor:heavy_military_vest_white_chest_piece
+    Slot: CHEST
+    EquipSound: 'item.armor.equip_netherite'
+  Options:
+    ItemModel: mythicarmor:heavy_military_vest_white_chest_piece
+    Unbreakable: true
+    HideFlags: true
