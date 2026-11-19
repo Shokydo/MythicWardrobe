@@ -96,6 +96,7 @@ public final class WardrobeConfig {
     private List<SkinLayerDef> skinLayersOrdered = List.of();
     private final Map<String, ItemWardrobeMeta> configuredItems = new HashMap<>();
     private final List<ComboOverrideRule> comboRules = new ArrayList<>();
+    private final List<BodyTypeOverrideRule> bodyTypeRules = new ArrayList<>();
     private Hair3DConfig hair3DConfig = Hair3DConfig.empty();
     private CosmeticVariantConfig cosmeticVariantConfig = CosmeticVariantConfig.empty();
     private MenuConfigLoader.ParsedMenusConfig menusConfig;
@@ -114,6 +115,7 @@ public final class WardrobeConfig {
         ensureDefaultFile("menus.yml");
         ensureDefaultFile("items.yml");
         ensureDefaultFile("combo-overrides.yml");
+        ensureDefaultFile("bodytype-overrides.yml");
         ensureDefaultFile("hair-3d.yml");
         ensureDefaultFile("cosmetic-variants.yml");
         ensureDefaultFile("messages.yml");
@@ -179,6 +181,7 @@ public final class WardrobeConfig {
         loadSkinLayers();
         loadItems();
         loadCombos();
+        loadBodyTypeOverrides();
         loadHair3D();
         loadCosmeticVariants();
         loadMenus();
@@ -523,6 +526,24 @@ public final class WardrobeConfig {
         }
     }
 
+    private void loadBodyTypeOverrides() {
+        bodyTypeRules.clear();
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "bodytype-overrides.yml"));
+        ConfigurationSection root = yaml.getConfigurationSection("rules");
+        if (root == null) return;
+
+        for (String id : root.getKeys(false)) {
+            ConfigurationSection sec = root.getConfigurationSection(id);
+            if (sec == null) continue;
+            String source = sec.getString("source", "");
+            String slim = sec.getString("slim", "");
+            String wide = sec.getString("wide", "");
+            if (!source.isBlank() && (!slim.isBlank() || !wide.isBlank())) {
+                bodyTypeRules.add(new BodyTypeOverrideRule(id, source, slim, wide));
+            }
+        }
+    }
+
     public static DisplayMountConfig parseDisplayConfig(ConfigurationSection sec, DisplayMountConfig defaults) {
         if (sec == null) return defaults;
         DisplayMountConfig.MountPoint mount = parseEnum(sec.getString("mount", defaults.mountPoint().name()), defaults.mountPoint());
@@ -777,6 +798,10 @@ public final class WardrobeConfig {
 
     public List<ComboOverrideRule> getComboRules() {
         return Collections.unmodifiableList(comboRules);
+    }
+
+    public List<BodyTypeOverrideRule> getBodyTypeRules() {
+        return Collections.unmodifiableList(bodyTypeRules);
     }
 
     public MenuConfigLoader.ParsedMenusConfig getMenusConfig() {

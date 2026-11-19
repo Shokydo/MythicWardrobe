@@ -86,6 +86,7 @@ public final class WardrobeManager {
 
         this.armorVisualManager = new ArmorVisualManager(plugin, config, itemResolver, mythicHook, states);
         this.armorVisualManager.setBlockedSlotsProvider(p -> getActiveBlockedMap(p).keySet());
+        this.armorVisualManager.setBodyTypeProvider(this::getEffectiveBodyType);
         this.displayAccessoryManager = new DisplayAccessoryManager(plugin, config, itemResolver, armorVisualManager, states);
 
         skinBackend.setBaseSkinChangeListener(this::onExternalBaseSkinChanged);
@@ -719,6 +720,9 @@ public final class WardrobeManager {
         UUID uuid = player.getUniqueId();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> database.saveBodyType(uuid, variant));
         scheduleSkinRebuild(player, immediate);
+        if (armorVisualManager != null) {
+            armorVisualManager.refreshPlayerArmorVisuals(player);
+        }
     }
 
     public SkinModelVariant getEffectiveBodyType(Player player) {

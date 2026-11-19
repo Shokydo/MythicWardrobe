@@ -70,6 +70,7 @@ public final class ArmorVisualManager {
     private final Map<UUID, Set<String>> comboHiddenSlots = new ConcurrentHashMap<>();
     private final Set<UUID> openWardrobeGuis = ConcurrentHashMap.newKeySet();
     private volatile Function<Player, Set<String>> blockedSlotsProvider = p -> Set.of();
+    private volatile Function<Player, SkinModelVariant> bodyTypeProvider = p -> SkinModelVariant.CLASSIC;
 
     // Thread-safe snapshots read from Netty threads by PacketEventsArmorBridge
     private final Map<UUID, PlayerVisualSnapshot> snapshotByUuid = new ConcurrentHashMap<>();
@@ -133,6 +134,56 @@ public final class ArmorVisualManager {
 
     public void setBlockedSlotsProvider(Function<Player, Set<String>> provider) {
         this.blockedSlotsProvider = provider != null ? provider : (p -> Set.of());
+    }
+
+    public void setBodyTypeProvider(Function<Player, SkinModelVariant> provider) {
+        this.bodyTypeProvider = provider != null ? provider : (p -> SkinModelVariant.CLASSIC);
+    }
+
+    /**
+     * Applies bodytype-overrides.yml (3px slim vs 4px wide) to an armor/cosmetic ItemStack.
+     * Returns a modified clone if a rule matched and changed the visual model/item, or null if unchanged.
+     */
+    @SuppressWarnings("UnstableApiUsage")
+    private ItemStack applyBodyTypeOverride(Player player, ItemStack item) {
+        if (player == null || item == null || item.getType().isAir()) return null;
+        List<BodyTypeOverrideRule> rules = config.getBodyTypeRules();
+        if (rules.isEmpty()) return null;
+
+        String mythicId = resolver.resolve(item).mythicId();
+        Equippable eq = item.getData(DataComponentTypes.EQUIPPABLE);
+        String eqModelKey = (eq != null && eq.assetId() != null) ? eq.assetId().asString() : null;
+
+        SkinModelVariant variant = bodyTypeProvider.apply(player);
+        boolean isSlim = variant == SkinModelVariant.SLIM;
+
+        for (BodyTypeOverrideRule rule : rules) {
+            if (!rule.matches(mythicId, eqModelKey)) continue;
+            String target = rule.targetFor(isSlim);
+            if (target == null) return null;
+
+            if (BodyTypeOverrideRule.isModelKey(target)) {
+                Key targetKey = Key.key(target);
+                if (eqModelKey != null && eqModelKey.equalsIgnoreCase(targetKey.asString())) {
+                    return null;
+                }
+                ItemStack clone = item.clone();
+                Equippable baseEq = clone.getData(DataComponentTypes.EQUIPPABLE);
+                EquipmentSlot slot = baseEq != null ? baseEq.slot() : resolver.detectEquipmentSlot(clone);
+                if (slot == null) slot = EquipmentSlot.CHEST;
+                Equippable.Builder builder = baseEq != null ? baseEq.toBuilder() : Equippable.equippable(slot);
+                builder.assetId(targetKey);
+                clone.setData(DataComponentTypes.EQUIPPABLE, builder.build());
+                return clone;
+            } else if (mythicHook != null) {
+                ItemStack replacement = mythicHook.generateMythicItem(target);
+                if (replacement != null && !replacement.getType().isAir()) {
+                    return replacement;
+                }
+            }
+            return null;
+        }
+        return null;
     }
 
     public boolean isDisplayHiddenByCombo(UUID playerId, String secondarySlotId) {
@@ -257,7 +308,13 @@ public final class ArmorVisualManager {
                 }
 
                 if (resolvedOverride != null) {
-                    overrides.put(eqSlot, resolvedOverride);
+                    ItemStack adjusted = applyBodyTypeOverride(player, resolvedOverride);
+                    overrides.put(eqSlot, adjusted != null ? adjusted : resolvedOverride);
+                } else if (primaryVisual != null && !primaryVisual.getType().isAir()) {
+                    ItemStack adjustedReal = applyBodyTypeOverride(player, primaryVisual);
+                    if (adjustedReal != null) {
+                        overrides.put(eqSlot, adjustedReal);
+                    }
                 }
             }
         }

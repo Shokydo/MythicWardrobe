@@ -6676,6 +6676,30 @@ input[type="range"] {
       );
     }
 
+    // 4b. bodytype-overrides.yml (3px Slim / 4px Wide auto-selection)
+    const bodyTypeRulesBlocks = [];
+    for (const m of (payload.models || [])) {
+      const slim = String(m.bodyTypeSlim || "").trim();
+      const wide = String(m.bodyTypeWide || "").trim();
+      if (!slim && !wide) continue;
+      const src = sanitizeId(m.itemId || m.id || "item");
+      const rid = sanitizeId(`${m.id || src}_bodytype`);
+      const lines = [
+        `  ${rid}:`,
+        `    source: "${src}"`,
+      ];
+      if (slim) lines.push(`    slim: "${slim}"`);
+      if (wide) lines.push(`    wide: "${wide}"`);
+      bodyTypeRulesBlocks.push(lines.join("\n"));
+    }
+    if (bodyTypeRulesBlocks.length) {
+      zip.addText(
+        "plugins/MythicWardrobe/bodytype-overrides.yml",
+        `# MythicWardrobe v1.11.2 - Авто-подбор 3D-модели под тип тела (3px Slim / 4px Wide)\nrules:\n` +
+        bodyTypeRulesBlocks.join("\n\n") + "\n"
+      );
+    }
+
     // 5. Optional 2D Skin Overlays + Blocks + priority.yml
     const skinBundle = payload.skinBundle;
     if (skinBundle && skinBundle.include) {
